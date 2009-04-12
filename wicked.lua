@@ -59,14 +59,6 @@ local cpu_usage = {}
 
 ---- {{{ Helper functions
 
-----{{{ Log
-function helper.log(var)
-	local log = io.open("/home/fhuizing/rc.log", "a")
-	log:write(os.date("%c\t")..tostring(var).."\n")
-	log:close()
-end
-----}}}
-
 ----{{{ Max width
 function helper.max_width(str, width)
     l = str:len()
@@ -259,17 +251,22 @@ function widgets.mocp(format, max_width)
 		local album = info:read()
 		album = album.gsub(album, 'Album: ', '')
 		
-		if (artist:len() == 0) then
+		-- Try artist - (song)title
+		if (artist:len() > 0) then
+			playing = artist .. ' - ' .. (songtitle ~= '' and songtitle or title)
+			
+		-- Else try title or songtitle
+		elseif (artist:len() == 0 and (title:len() > 0 or songtitle:len() > 0)) then
+			playing = (title ~= '' and title or songtitle)
+
+		-- Else use the filename
+		else
 			file = string.reverse(file)
 			i = string.find(file, '/')
 			if (i ~= nil) then
 				file = string.sub(file, 0, i-1)
 			end
 			playing = string.reverse(file)
-		elseif (songtitle:len() == 0) then
-			playing = artist .. ' - ' .. title
-		else
-			playing = artist .. ' - ' .. songtitle
 		end
 	else
 		playing = state
@@ -461,7 +458,7 @@ end
 
 ---- {{{ Filesystem widget type
 function widgets.fs(format, padding)
-    local f = io.popen('df -h')
+    local f = io.popen('df -hP')
     local args = {}
 
     for line in f:lines() do
@@ -570,8 +567,8 @@ function widgets.net(format, padding)
                 args['{'..name..' down_b}'] = math.floor(down*10)/10
                 args['{'..name..' up_b}'] = math.floor(up*10)/10
 
-                args['{'..name..' down_kb}'] = math.floor(down/1024)
-                args['{'..name..' up_kb}'] = math.floor(up/1024)
+                args['{'..name..' down_kb}'] = math.floor(down/1024*10)/10
+                args['{'..name..' up_kb}'] = math.floor(up/1024*10)/10
 
                 args['{'..name..' down_mb}'] = math.floor(down/1024/1024*10)/10
                 args['{'..name..' up_mb}'] = math.floor(up/1024/1024*10)/10
@@ -610,6 +607,12 @@ function register(widget, wtype, format, timer, field, padd)
     reg.timer = timer
     reg.field = field
     reg.padd = padd
+    reg.widget = widget
+
+    -- Update function
+    reg.update = function ()
+        update(widget, reg)
+    end
 
     -- Default to timer=1
     if reg.timer == nil then
@@ -621,17 +624,108 @@ function register(widget, wtype, format, timer, field, padd)
         reg.type = widgets[reg.type]
     end
 
-    -- Put widget in table
-    if registered[widget] == nil then
-        registered[widget] = {}
+    -- Register reg object
+    regregister(reg)
+
+    -- Return reg object for reuse
+    return reg
+end
+-- }}}
+
+-- {{{ Register from reg object
+function regregister(reg)
+    if not reg.running then
+        -- Put widget in table
+        if registered[reg.widget] == nil then
+            registered[reg.widget] = {}
+            table.insert(registered[reg.widget], reg)
+        else
+            already = false
+
+            for w, i in pairs(registered) do
+                if w == reg.widget then
+                    for k,v in pairs(i) do
+                        if v == reg then
+                            already = true
+                            break
+                        end
+                    end
+
+                    if already then
+                        break
+                    end
+                end
+            end
+
+            if not already then
+                table.insert(registered[reg.widget], reg)
+            end
+        end
+
+        -- Start timer
+        awful.hooks.timer.register(reg.timer, reg.update)
+
+        -- Initial update
+        reg.update()
+
+        -- Set running
+        reg.running = true
+    end
+end
+-- }}}
+
+-- {{{ Unregister widget
+function unregister(widget, keep, reg)
+    if reg == nil then
+        for w, i in pairs(registered) do
+            if w == widget then
+                for k,v in pairs(i) do
+                    reg = unregister(w, keep, v)
+                end
+            end
+        end
+
+        return reg
     end
 
-    table.insert(registered[widget], reg)
+    if not keep then
+        for w, i in pairs(registered) do
+            if w == widget then
+                for k,v in pairs(i) do
+                    if v == reg then
+                        table.remove(registered[w], k)
+                    end
+                end
+            end
+        end
+    end
 
-    -- Start timer
-    awful.hooks.timer.register(reg.timer, function ()
-        update(widget, reg)
-    end)
+    awful.hooks.timer.unregister(reg.update)
+
+    reg.running = false
+    return reg
+end
+-- }}}
+
+-- {{{ Suspend wicked, halt all widget updates
+function suspend()
+    for w, i in pairs(registered) do
+        for k,v in pairs(i) do
+            unregister(w, true, v)
+        end
+    end
+end
+-- }}}
+
+-- {{{ Activate wicked, restart all widget updates
+function activate(widget)
+    for w, i in pairs(registered) do
+        if widget == nil or w == widget then
+            for k,v in pairs(i) do
+                regregister(v)
+            end
+        end
+    end
 end
 -- }}}
 
