@@ -144,7 +144,10 @@ naughty.config.font = 'Monospace 7.5'
 naughty.config.icon_size = 32
 naughty.config.width = 300
 naughty.config.position = "top_right"
-
+naughty.config.spacing = 3
+naughty.config.padding = 5
+naughty.config.margin = 5
+naughty.config.presets.normal.height = 16
 --naughty.config.timeout = 0
 --naughty.config.hover_timeout = 0.2
 naughty.config.screen = LCD
@@ -154,7 +157,7 @@ naughty.config.screen = LCD
 config.widgets = {}
 config.widgets.watchmount = { "/dev/sda2", "/media/", "/mnt/" }
 config.widgets.space = "   "
-config.wifi = "wlan1"
+config.widgets.wifi = "wlan1"
 --}}}
 
 --}}}
@@ -323,7 +326,7 @@ function terminal(args)
 	if args then
 		awful.util.spawn(config.terminal .. ' ' .. args)
 	else
-		awful.util.spawn(config.terminal .. ' -title "booo:~"')
+		awful.util.spawn(config.terminal .. ' -title "ba:~"')
 	end
 end
 --}}}
@@ -378,11 +381,24 @@ function ti()
 end
 --}}}
 
+--{{{ functions / clientinfo FIXME-unfinished
+function ci()
+	local v = ""
+	local c = client.focus
+	local i = 1
+
+  
+
+	  for op, val in pairs(awful.tag.getdata(t)) do
+	          v =  v .. "\n" .. i .. ": " .. op .. " = " .. tostring(val)
+		  i = i + 1
+	end
+
+	naughty.notify{ text = "<span font_desc=\"Verdana Bold 20\">&lt; " .. t.name .. " &gt;</span>\n"..tostring(t).."\nclients: " .. #t:clients() .. "\n" .. v, timeout = 0, width = "230"}
+end
 --}}}
 
---{{{ widgets 
-
---{{{ widgettext
+--{{{ functions / widgettext
 -- format widget output
 function widgettext(label, value, labelcolor, valuecolor)
 	local lc = labelcolor or beautiful.widget_label
@@ -390,6 +406,24 @@ function widgettext(label, value, labelcolor, valuecolor)
 	return 	'<span color="' .. lc .. '">' .. label .. ' </span><span color="' .. vc .. '">'  .. value .. '</span>' .. config.widgets.space
 end
 --}}}
+
+--{{{ functions / islidclosed
+function islidclosed()
+	local f = io.open("/proc/acpi/button/lid/LID/state")
+	state = f:read()
+	f:close()
+	if state:find("closed") then
+		return true
+	else
+		return false
+	end
+end
+lidclosed = islidclosed()
+--}}}
+
+--}}}
+
+--{{{ widgets
 
 --{{{ widgets / wifi
 wifiwidget = widget({
@@ -411,7 +445,7 @@ end
 wifiwidget:buttons({
 	button({}, 1, function ()      run_or_raise("wicd-client -n", { class = "Wicd-client.py" } )  end),
 	button({}, 2,  function () naughty.notify({text = get_autoap(), timeout = 2}) end),
-	button({}, 3, function () terminal("-name iwconfig -e watch -n1 /sbin/iwconfig "..config.wifi) end)
+	button({}, 3, function () terminal("-name iwconfig -e watch -n1 /sbin/iwconfig "..config.widgets.wifi) end)
 })
 
 function dump_autoap()
@@ -443,7 +477,7 @@ end
 
 local function get_wifi()
 	local v = ''
-	local a = io.open('/sys/class/net/'..config.wifi..'/wireless/link')
+	local a = io.open('/sys/class/net/'..config.widgets.wifi..'/wireless/link')
 	v = a:read() 
 	a:close()
 	if v == "0" then 
@@ -846,7 +880,7 @@ for s = 1, screen.count() do
 end
 --}}}
 
---{{{ widgets / handy
+--{{{ widgets / initialize separators, widget tables
 
 -- separator widgets
 sep_l = widget({
@@ -892,22 +926,10 @@ widgets_right={
 }
 --}}}
 
---{{{ widgets / hooks
+--{{{ widgets / hook functions
 function hook_001s()
   scrollclient()
 end
-
-function islidclosed()
-	local f = io.open("/proc/acpi/button/lid/LID/state")
-	state = f:read()
-	f:close()
-	if state:find("closed") then 
-		return true
-	else 
-		return false
-	end
-end
-lidclosed = islidclosed()
 
 function hook_1s()
 	local color,color2=''
@@ -924,10 +946,10 @@ function hook_1s()
 	wifiwidget.text		= widgettext('WIFI', get_wifi())
 
 	local b = wicked.widgets.net()
-	if b['{'..config.wifi.. ' down_kb}'] > 0 then color = beautiful.widget_value; color = beautiful.widget_value else color = '#333333' end
-	if b['{'..config.wifi.. ' up_kb}'] > 0 then color2 = beautiful.widget_value else color2 = '#333333' end
+	if b['{'..config.widgets.wifi.. ' down_kb}'] > 0 then color = beautiful.widget_value; color = beautiful.widget_value else color = '#333333' end
+	if b['{'..config.widgets.wifi.. ' up_kb}'] > 0 then color2 = beautiful.widget_value else color2 = '#333333' end
 	if netup then
-		netwidget.text = widgettext('NET', string.format('%3s <span color="#333333">/</span> %-3s', b['{'..config.wifi..' down_kb}'], b['{'..config.wifi.. ' up_kb}']), nil, color2)
+		netwidget.text = widgettext('NET', string.format('%3s <span color="#333333">/</span> %-3s', b['{'..config.widgets.wifi..' down_kb}'], b['{'..config.widgets.wifi.. ' up_kb}']), nil, color2)
 	else 
 		netwidget.text = ''
 	end
