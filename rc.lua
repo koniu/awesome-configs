@@ -1076,32 +1076,247 @@ end
 -- {{{ bindings 
 
 -- {{{ bindings / global
-globalkeys = {}
+globalkeys = {
 
 -- {{{ bindings / global / spawns
-table.insert(globalkeys, key({ modkey 		}, "grave", 		function () terminal() end))
-table.insert(globalkeys, key({ modkey }, "x", function () awful.util.spawn("xkill") end))
-table.insert(globalkeys, key({ modkey, "Mod1"	}, "grave", 		function () terminal("-name dupa -fg '#1A1914'  -font 6x10 -g 80x24-10-10") end))
-table.insert(globalkeys, key({ modkey, "Control"	}, "grave", 		function () terminal("-name tail -title log/awesome -e tail -fn0 ~/log/awesome") end))
-table.insert(globalkeys, key({ 			}, "Print", 		function () awful.util.spawn("~/bin/shot") end))
+  key({ modkey 		        }, "grave",       function () terminal() end),
+  key({ modkey            }, "x",           function () awful.util.spawn("xkill") end),
+  key({ modkey, "Mod1"	  }, "grave",       function () terminal("-name dupa -fg '#1A1914'  -font 6x10 -g 80x24-10-10") end),
+  key({ modkey, "Control"	}, "grave",       function () terminal("-name tail -title log/awesome -e tail -fn0 ~/log/awesome") end),
+  key({ 			            }, "Print",       function () awful.util.spawn("~/bin/shot") end),
 -- }}}
 
 -- {{{ bindings / global / tag manipulation
-table.insert(globalkeys, key({                    }, "XF86Back",    awful.tag.viewprev))
-table.insert(globalkeys, key({                    }, "XF86Forward", awful.tag.viewnext))
+  key({                   }, "XF86Back",    awful.tag.viewprev),
+  key({                   }, "XF86Forward", awful.tag.viewnext),
 
-table.insert(globalkeys, key({  modkey 		        }, "XF86Forward", shifty.shift_next))
-table.insert(globalkeys, key({  modkey 		        }, "XF86Back", 		shifty.shift_prev))
-table.insert(globalkeys, key({  "Shift" 		      }, "XF86Forward", shifty.send_next))
-table.insert(globalkeys, key({  "Shift" 		      }, "XF86Back", 		shifty.send_prev))
+  key({  modkey 		      }, "XF86Forward", shifty.shift_next),
+  key({  modkey 		      }, "XF86Back", 		shifty.shift_prev),
+  key({  "Shift" 		      }, "XF86Forward", shifty.send_next),
+  key({  "Shift" 		      }, "XF86Back", 		shifty.send_prev),
 
-table.insert(globalkeys, key({ modkey		          }, "t", 		      function() shifty.add({ rel_index = 1 }) end))
-table.insert(globalkeys, key({ modkey, "Control"  }, "t", 		      function() shifty.add({ rel_index = 1, nopopup = true }) end))
-table.insert(globalkeys, key({ modkey 		        }, "r", 		      shifty.rename))
-table.insert(globalkeys, key({ modkey	 	          }, "w", 		      shifty.del))
+  key({ modkey		        }, "t", 		      function() shifty.add({ rel_index = 1 }) end),
+  key({ modkey, "Control" }, "t", 		      function() shifty.add({ rel_index = 1, nopopup = true }) end),
+  key({ modkey 		        }, "r", 		      shifty.rename),
+  key({ modkey	 	        }, "w", 		      shifty.del),
 
-table.insert(globalkeys, key({modkey}, 'i', ti))
+  key({ modkey            }, 'i', ti),
 -- }}}
+
+-- {{{ bindings / global / client manipulation
+  key({ "Control"		      }, "XF86Back", 		function () awful.client.focus.byidx(-1);  if client.focus then client.focus:raise() end end),
+  key({ "Control"		      }, "XF86Forward", function () awful.client.focus.byidx(1);  if client.focus then client.focus:raise() end end ),
+  key({ modkey, "Shift"   }, "XF86Forward", function () awful.client.swap.byidx(1) end),
+  key({ modkey, "Shift"   }, "XF86Back",    function () awful.client.swap.byidx(-1) end),
+-- }}}
+
+-- {{{ bindings / global / mm keys
+  key({ 			          }, "XF86AudioPlay", function () awful.util.spawn("fb /playpause") end),
+  key({ 			          }, "XF86AudioStop",	function () awful.util.spawn("fb /stop") end),
+  key({ 			          }, "XF86AudioPrev",	function () awful.util.spawn("fb /prev") end),
+  key({ 			          }, "XF86AudioNext",	function () awful.util.spawn("fb /next") end),
+-- }}}
+
+-- {{{ bindings / global / default rc.lua keys
+
+  key({ modkey            }, "Escape",      awful.tag.history.restore),
+
+  key({ modkey, "Control" }, "j",           function () awful.screen.focus(1) end),
+  key({ modkey, "Control" }, "k",           function () awful.screen.focus(-1) end),
+
+  key({ modkey            }, "Tab",         function () awful.client.focus.history.previous(); if client.focus then client.focus:raise() end end),
+
+  key({ modkey            }, "u",           awful.client.urgent.jumpto),
+
+-- Standard program
+
+  key({ modkey, "Control" }, "r",           function () mypromptbox.text = awful.util.escape(awful.util.restart()) end),
+  key({ modkey, "Shift"   }, "q",           awesome.quit),
+
+-- Layout manipulation
+  key({ modkey            }, "l",           function () awful.tag.incmwfact(0.05) end),
+  key({ modkey            }, "h",           function () awful.tag.incmwfact(-0.05) end),
+  key({ modkey, "Shift"   }, "h",           function () awful.tag.incnmaster(1) end),
+  key({ modkey, "Shift"   }, "l",           function () awful.tag.incnmaster(-1) end),
+  key({ modkey, "Control" }, "h",           function () awful.tag.incncol(1) end),
+  key({ modkey, "Control" }, "l",           function () awful.tag.incncol(-1) end),
+  key({ modkey            }, "space",       function () awful.layout.inc(layouts, 1) end),
+  key({ modkey, "Shift"   }, "space",       function () awful.layout.inc(layouts, -1) end),
+--}}}
+
+-- {{{ bindings / global / prompts
+
+-- {{{ bindings / global / prompts / run
+  key({ "Mod1" 	          }, "F2",
+  function ()
+		info = true
+	  awful.prompt.run({
+      fg_cursor = "orange", bg_cursor=beautiful.bg_normal, ul_cursor = "single",
+      prompt = "<span color='orange'>Run:</span> " 
+    },
+    mypromptbox,
+    awful.util.spawn,
+    awful.completion.shell,
+    os.getenv("HOME") .. "/.cache/awesome/history") 
+  end),
+-- }}}
+
+-- {{{ bindings / global / prompts / lua
+  key({ "Mod1"	          }, "F1",
+  function ()
+		info = true
+    awful.prompt.run({
+      fg_cursor="#D1FF00", bg_cursor=beautiful.bg_normal, ul_cursor = "single",
+      prompt = "<span color = '#D1FF00'>Lua:</span> "
+    },
+    mypromptbox,
+    awful.util.eval,
+    lua_completion,
+    os.getenv("HOME") .. "/.cache/awesome/history_eval") 
+  end),
+-- }}}
+
+-- {{{ bindings / global / prompts / calc
+  key({ modkey            }, "c",
+  function ()
+    info = true
+    awful.prompt.run({ 
+      text = val and tostring(val), selectall = true, 
+      fg_cursor = "#00A5AB", bg_cursor=beautiful.bg_normal, ul_cursor = "single",
+      prompt = "<span color='#00A5AB'>Calc:</span> " 
+    }, 
+    mypromptbox,
+	  function(expr)
+      val = awful.util.eval(expr)
+		  naughty.notify({ 
+        text = expr .. ' = <span color="white">' .. val .. "</span>", 
+        timeout = 0, run = function() io.popen("echo ".. val .. " | xsel -i"):close() end, 
+      })
+	  end,
+	  nil, awful.util.getdir("cache") .. "/calc") 
+end),
+-- }}}
+
+-- {{{ bindings / global / prompts / dict
+  key({ modkey            }, "d", 
+  function ()
+	  info = true
+    local g = io.popen("xsel -o")
+    local paste = g:read()
+    g:close()
+    color = '#008DFA'
+	  awful.prompt.run({ 
+      fg_cursor = color, bg_cursor=beautiful.bg_normal, ul_cursor = "single", 
+      text = paste, selectall = true, 
+      prompt = "<span color='"..color.."'>Dict:</span> " 
+    }, 
+    mypromptbox,
+	  function(word)
+		  local f = io.popen("dict -d wn " .. word .. " 2>&1")
+		  local fr = ""
+		  for line in f:lines() do
+		    fr = fr .. line .. '\n'
+		  end
+		  f:close()
+		  naughty.notify({ text = '<span font_desc="Sans 7">'..fr..'</span>', timeout = 0, width = 400 })
+	  end,
+	  nil, awful.util.getdir("cache") .. "/dict") 
+end),
+-- }}}
+
+-- {{{ bindings / global / prompts / kill
+  key({ modkey              }, "k",
+  function ()
+	  info = true
+	  awful.prompt.run({ 
+      fg_cursor = "#FF4F4F", bg_cursor = beautiful.bg_normal, ul_cursor="single", 
+      text = paste, selectall = true, prompt = "<span color='#FF4F4F'>Kill:</span> " 
+    }, 
+    mypromptbox,
+	  function(line)
+      local name,pid = line:match("(%a+) (%d+)")
+      awful.util.spawn("kill " .. pid) 
+	  end,
+    function (cmd, cur_pos, ncomp)
+        local ps = {}
+        local g = io.popen("ps hxuc") -- | awk '{print $11 \" \" $2}'")
+        for line in g:lines() do
+              local out = splitbywhitespace(line)
+            table.insert(ps, out[11] .. " " .. out[2])
+
+        end
+        g:close()
+    if cur_pos ~= #cmd + 1 and cmd:sub(cur_pos, cur_pos) ~= " " then
+        return cmd, cur_pos
+    end
+               local matches = {}
+            for i, j in ipairs(ps) do
+                if ps[i]:find("^" .. cmd:sub(1, cur_pos)) then
+                        table.insert(matches, ps[i])
+                end
+            end
+        if #matches == 0 then return cmd, cur_pos end
+ while ncomp > #matches do ncomp = ncomp - #matches end
+
+    -- return match and position
+    return matches[ncomp], cur_pos
+
+ 
+        end
+        
+        , awful.util.getdir("cache") .. "/kill") 
+end),
+-- }}}
+
+-- {{{ bindings / global / prompts / client infobox
+  key({ modkey, "Ctrl"    }, "i", 
+  function ()
+	  if mypromptbox.text then
+		  info = nil
+		  mypromptbox.text = nil
+		  get_mounts()
+		  --get_apt()
+		  get_mail()
+	    widgetbar[LCD].widgets = jointables(widgets_left, widgets_right)
+	  else
+		  info = true
+	    widgetbar[LCD].widgets = {mypromptbox, clockwidget}
+		  aptwidget.text = ''
+		  mailwidget.text = ''
+
+		  local c = client.focus
+		  local cc = c:geometry()
+		  mypromptbox.text = nil
+		  local tmp = " "
+		  local format = "<span color='#ffffff'>%s</span> <span color='orange'>%s</span>" .. config.widgets.space
+	
+		  if c.class then
+			  tmp = tmp .. string.format(format,'class', client.focus.class) end
+		  if c.instance then
+			  tmp = tmp .. string.format(format,'inst', client.focus.instance) end
+		  if c.role then
+			  tmp = tmp .. string.format(format,'role', client.focus.role) end
+		  if c.pid then
+			  tmp = tmp .. string.format(format,'pid', client.focus.pid) end
+		
+  		local signx = '+'
+	  	if cc.x < 0 then signx = '' end
+  		local signy = '+'
+  		if cc.y < 0 then signy = '' end
+	  	tmp = tmp .. string.format(format,'geom', cc.width .. 'x' .. cc.height .. signx .. cc.x .. signy .. cc.y)
+		
+  		if c.type then
+	  		tmp = tmp .. string.format(format,'type', client.focus.type)
+  		end
+
+	  	mypromptbox.text = tmp
+    end
+  end),
+-- }}}
+
+-- }}}
+
+}
 
 -- {{{ bindings / global / shifty.getpos
 for i=1, ( shifty.config.maxtags or 9 ) do
@@ -1132,213 +1347,21 @@ for i=1, ( shifty.config.maxtags or 9 ) do
 end
 -- }}}
 
--- {{{ bindings / global / client manipulation
-table.insert(globalkeys, key({ "Control"		}, "XF86Back", 		function () awful.client.focus.byidx(-1);  if client.focus then client.focus:raise() end end))
-table.insert(globalkeys, key({ "Control"		}, "XF86Forward", 	function () awful.client.focus.byidx(1);  if client.focus then client.focus:raise() end end ))
-table.insert(globalkeys, key({ modkey, "Shift" }, "XF86Forward", function () awful.client.swap.byidx(1) end))
-table.insert(globalkeys, key({ modkey, "Shift" }, "XF86Back", function () awful.client.swap.byidx(-1) end))
--- }}}
-
--- {{{ bindings / global / mm keys
-table.insert(globalkeys, key({ 			}, "XF86AudioPlay", 	function () awful.util.spawn("fb /playpause") end))
-table.insert(globalkeys, key({ 			}, "XF86AudioStop",	function () awful.util.spawn("fb /stop") end))
-table.insert(globalkeys, key({ 			}, "XF86AudioPrev",	function () awful.util.spawn("fb /prev") end))
-table.insert(globalkeys, key({ 			}, "XF86AudioNext",	function () awful.util.spawn("fb /next") end))
--- }}}
-
--- {{{ bindings / global / prompts
-
--- {{{ bindings / global / prompts /run
-table.insert(globalkeys, key({ "Mod1" 	}, "F2", function ()
-		info = true
-	awful.prompt.run({ fg_cursor = "orange",bg_cursor=beautiful.bg_normal, ul_cursor = "single", prompt = "<span color='orange'>Run:</span> " }, mypromptbox, awful.util.spawn, awful.completion.shell, os.getenv("HOME") .. "/.cache/awesome/history") 
-end))
--- }}}
-
--- {{{ bindings / global / prompts /lua
-table.insert(globalkeys, key({ "Mod1"	}, "F1", function ()
-		info = true
-                awful.prompt.run({ fg_cursor="#D1FF00", bg_cursor=beautiful.bg_normal, ul_cursor = "single", prompt = "<span color = '#D1FF00'>Lua:</span> " }, mypromptbox, awful.util.eval, lua_completion,
-os.getenv("HOME") .. "/.cache/awesome/history_eval") end))
--- }}}
-
--- {{{ bindings / global / prompts /run
-table.insert(globalkeys, key({ modkey}, "c", function ()
-    info = true
-    awful.prompt.run({  text = val and tostring(val), 
-                        selectall = true, 
-                        fg_cursor = "#00A5AB",bg_cursor=beautiful.bg_normal, ul_cursor = "single",
-                        prompt = "<span color='#00A5AB'>Calc:</span> " }, mypromptbox,
-	                function(expr)
-                            val = awful.util.eval(expr)
-		            naughty.notify({    text = expr .. ' = <span color="white">' .. val .. "</span>", 
-                                                timeout = 0,
-                                                run = function() io.popen("echo ".. val .. " | xsel -i"):close() end, })
-	                end,
-	                nil, awful.util.getdir("cache") .. "/calc") 
-end))
--- }}}
-
--- {{{ bindings / global / prompts /dict
-table.insert(globalkeys, key({ modkey}, "d", function ()
-	info = true
-        local g = io.popen("xsel -o")
-        local paste = g:read()
-        g:close()
-        color = '#008DFA'
-	awful.prompt.run({ fg_cursor = color, bg_cursor=beautiful.bg_normal, ul_cursor = "single", text = paste, selectall = true, prompt = "<span color='"..color.."'>Dict:</span> " }, mypromptbox,
-	function(word)
-		local f = io.popen("dict -d wn " .. word .. " 2>&1")
-		local fr = ""
-		for line in f:lines() do
-		fr = fr .. line .. '\n'
-		end
-		f:close()
-		naughty.notify({ text = '<span font_desc="Sans 7">'..fr..'</span>', timeout = 0, width = 400 })
-	end,
-	nil, awful.util.getdir("cache") .. "/dict") 
-end))
--- }}}
-
--- {{{ bindings / global / prompts /kill
-table.insert(globalkeys, key({ modkey}, "k", function ()
-	info = true
-	awful.prompt.run({ fg_cursor = "#FF4F4F", bg_cursor = beautiful.bg_normal, ul_cursor="single", text = paste, selectall = true, prompt = "<span color='#FF4F4F'>Kill:</span> " }, mypromptbox,
-	function(line)
-                local name,pid  = line:match("(%a+) (%d+)")
-                          awful.util.spawn("kill " .. pid) 
-	end,
-        function (cmd, cur_pos, ncomp)
-        local ps = {}
-        local g = io.popen("ps hxuc") -- | awk '{print $11 \" \" $2}'")
-        for line in g:lines() do
-              local out = splitbywhitespace(line)
---            table.insert(ps, a .. b})
-            table.insert(ps, out[11] .. " " .. out[2])
-
-   --             end
-        end
-        g:close()
-    if cur_pos ~= #cmd + 1 and cmd:sub(cur_pos, cur_pos) ~= " " then
-        return cmd, cur_pos
-    end
-               local matches = {}
-            for i, j in ipairs(ps) do
-                if ps[i]:find("^" .. cmd:sub(1, cur_pos)) then
-                        table.insert(matches, ps[i])
-                end
-            end
-        if #matches == 0 then return cmd, cur_pos end
- while ncomp > #matches do ncomp = ncomp - #matches end
-
-    -- return match and position
-    return matches[ncomp], cur_pos
-
- 
-        end
-        
-        , awful.util.getdir("cache") .. "/kill") 
-end))
--- }}}
-
--- {{{ bindings / global / prompts /client infobox
-table.insert(globalkeys, key({ modkey, "Ctrl" }, "i", function ()
-	if mypromptbox.text then
-		info = nil
-		mypromptbox.text = nil
-		get_mounts()
-		--get_apt()
-		get_mail()
-	        widgetbar[LCD].widgets = jointables(widgets_left, widgets_right)
-
-	else
-		info = true
-	        widgetbar[LCD].widgets = {mypromptbox, clockwidget}
-		aptwidget.text = ''
-		mailwidget.text = ''
-
-		local c = client.focus
-		local cc = c:geometry()
-		mypromptbox.text = nil
-		local tmp = " "
-		local format = "<span color='#ffffff'>%s</span> <span color='orange'>%s</span>" .. config.widgets.space
-	
-		if c.class then
-			tmp = tmp .. string.format(format,'class', client.focus.class)
-		end
-		if c.instance then
-			tmp = tmp .. string.format(format,'inst', client.focus.instance)
-		end
-		if c.role then
-			tmp = tmp .. string.format(format,'role', client.focus.role)
-		end
-		if c.pid then
-			tmp = tmp .. string.format(format,'pid', client.focus.pid)
-		end
-		
-		local signx = '+'
-		if cc.x < 0 then signx = '' end
-		local signy = '+'
-		if cc.y < 0 then signy = '' end
-		tmp = tmp .. string.format(format,'geom', cc.width .. 'x' .. cc.height .. signx .. cc.x .. signy .. cc.y)
-		
-		if c.type then
-			tmp = tmp .. string.format(format,'type', client.focus.type)
-		end
-
-		mypromptbox.text = tmp
-
-	end
-end))
--- }}}
-
--- }}}
-
--- {{{ bindings / global / default rc.lua keys
-
-table.insert(globalkeys, key({ modkey }, "Escape", awful.tag.history.restore))
-
-
-table.insert(globalkeys, key({ modkey, "Control" }, "j", function () awful.screen.focus(1) end))
-table.insert(globalkeys, key({ modkey, "Control" }, "k", function () awful.screen.focus(-1) end))
-
-table.insert(globalkeys, key({ modkey }, "Tab", function () awful.client.focus.history.previous(); if client.focus then client.focus:raise() end end))
-
-table.insert(globalkeys, key({ modkey }, "u", awful.client.urgent.jumpto))
-
--- Standard program
-
-table.insert(globalkeys, key({ modkey, "Control" }, "r", function ()
-                                                             mypromptbox.text =
-                                                                 awful.util.escape(awful.util.restart())
-                                                          end))
-table.insert(globalkeys, key({ modkey, "Shift" }, "q", awesome.quit))
-
--- Layout manipulation
-table.insert(globalkeys, key({ modkey }, "l", function () awful.tag.incmwfact(0.05) end))
-table.insert(globalkeys, key({ modkey }, "h", function () awful.tag.incmwfact(-0.05) end))
-table.insert(globalkeys, key({ modkey, "Shift" }, "h", function () awful.tag.incnmaster(1) end))
-table.insert(globalkeys, key({ modkey, "Shift" }, "l", function () awful.tag.incnmaster(-1) end))
-table.insert(globalkeys, key({ modkey, "Control" }, "h", function () awful.tag.incncol(1) end))
-table.insert(globalkeys, key({ modkey, "Control" }, "l", function () awful.tag.incncol(-1) end))
-table.insert(globalkeys, key({ modkey }, "space", function () awful.layout.inc(layouts, 1) end))
-table.insert(globalkeys, key({ modkey, "Shift" }, "space", function () awful.layout.inc(layouts, -1) end))
---}}}
 
 -- }}}
 
 --{{{ bindings / client
-clientkeys = {}
-table.insert(clientkeys, key({ modkey }, "m", function (c) c.maximized_horizontal = not c.maximized_horizontal
-                                                           c.maximized_vertical = not c.maximized_vertical end))
-table.insert(clientkeys, key({ modkey }, "f", function (c) c.fullscreen = not c.fullscreen end))
-table.insert(clientkeys, key({ modkey, "Control" }, "space", awful.client.floating.toggle))
-table.insert(clientkeys, key({ modkey, "Control" }, "Return", function (c) c:swap(awful.client.getmaster()) end))
-table.insert(clientkeys, key({ modkey }, "o", awful.client.movetoscreen))
-table.insert(clientkeys, key({ modkey, "Shift" }, "r", function (c) c:redraw() end))
-
-table.insert(clientkeys, key({ "Mod1", }, "F4", function (c) c:kill() end))
-table.insert(clientkeys, key({ "Mod1", "Mod4" }, "i", ci))
+clientkeys = {
+  key({ modkey            }, "m",       function (c) c.maximized_horizontal = not c.maximized_horizontal
+                                                     c.maximized_vertical = not c.maximized_vertical end),
+  key({ modkey            }, "f",       function (c) c.fullscreen = not c.fullscreen end),
+  key({ modkey, "Control" }, "space",   awful.client.floating.toggle),
+  key({ modkey, "Control" }, "Return",  function (c) c:swap(awful.client.getmaster()) end),
+  key({ modkey            }, "o",       awful.client.movetoscreen),
+  key({ modkey, "Shift"   }, "r",       function (c) c:redraw() end),
+  key({ "Mod1",           }, "F4",      function (c) c:kill() end),
+  key({ "Mod1", "Mod4"    }, "i",       ci),
+}
 table.insert(globalkeys, key({ "Shift", }, "F5", function (c) root.fake_input("key_press",23); end)) --root.fake_input("key_release",23); dbg{'aaa'} end))
 --}}}
 
