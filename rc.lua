@@ -381,20 +381,21 @@ function ti()
 end
 --}}}
 
---{{{ functions / clientinfo FIXME-unfinished
+--{{{ functions / clientinfo
 function ci()
 	local v = ""
 	local c = client.focus
-	local i = 1
+  local inf = {
+    "id", "group_id", "leader_id", "name", "icon_name", "skip_taskbar", "type", "class", "role", "instance", "pid", "machine", "icon_name", "screen",
+    "hide", "minimize", "size_hints_honor", "titlebar", "urgent", "focus", "opacity", "ontop", "above", "below",
+    "fullscreen", "transient_for",
+   }
 
-  
+  for i = 1, #inf do
+    v =  v .. "\n" .. i .. ": " .. inf[i] .. " = " .. tostring(c[inf[i]])
+  end
 
-	  for op, val in pairs(awful.tag.getdata(t)) do
-	          v =  v .. "\n" .. i .. ": " .. op .. " = " .. tostring(val)
-		  i = i + 1
-	end
-
-	naughty.notify{ text = "<span font_desc=\"Verdana Bold 20\">&lt; " .. t.name .. " &gt;</span>\n"..tostring(t).."\nclients: " .. #t:clients() .. "\n" .. v, timeout = 0, width = "230"}
+	naughty.notify{ text = v, timeout = 0, width = 230}
 end
 --}}}
 
@@ -1337,6 +1338,7 @@ table.insert(clientkeys, key({ modkey }, "o", awful.client.movetoscreen))
 table.insert(clientkeys, key({ modkey, "Shift" }, "r", function (c) c:redraw() end))
 
 table.insert(clientkeys, key({ "Mod1", }, "F4", function (c) c:kill() end))
+table.insert(clientkeys, key({ "Mod1", "Mod4" }, "i", ci))
 table.insert(globalkeys, key({ "Shift", }, "F5", function (c) root.fake_input("key_press",23); end)) --root.fake_input("key_release",23); dbg{'aaa'} end))
 --}}}
 
