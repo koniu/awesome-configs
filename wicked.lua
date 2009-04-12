@@ -519,17 +519,17 @@ function widgets.net(format, padding)
                 args['{'..name..' tx}'] = helper.bytes_to_string(line[9])
             end
 
-            args['{'..name..' rx_b}'] = math.floor(line[1]*10)/10
-            args['{'..name..' tx_b}'] = math.floor(line[9]*10)/10
+            args['{'..name..' rx_b}'] = math.floor(line[1])
+            args['{'..name..' tx_b}'] = math.floor(line[9])
             
-            args['{'..name..' rx_kb}'] = math.floor(line[1]/1024*10)/10
-            args['{'..name..' tx_kb}'] = math.floor(line[9]/1024*10)/10
+            args['{'..name..' rx_kb}'] = math.floor(line[1]/1024)
+            args['{'..name..' tx_kb}'] = math.floor(line[9]/1024)
 
-            args['{'..name..' rx_mb}'] = math.floor(line[1]/1024/1024*10)/10
-            args['{'..name..' tx_mb}'] = math.floor(line[9]/1024/1024*10)/10
+            args['{'..name..' rx_mb}'] = math.floor(line[1]/1024/1024)
+            args['{'..name..' tx_mb}'] = math.floor(line[9]/1024/1024)
 
-            args['{'..name..' rx_gb}'] = math.floor(line[1]/1024/1024/1024*10)/10
-            args['{'..name..' tx_gb}'] = math.floor(line[9]/1024/1024/1024*10)/10
+            args['{'..name..' rx_gb}'] = math.floor(line[1]/1024/1024/1024)
+            args['{'..name..' tx_gb}'] = math.floor(line[9]/1024/1024/1024)
 
             if nets[name] == nil then 
                 nets[name] = {}
@@ -564,17 +564,17 @@ function widgets.net(format, padding)
                     args['{'..name..' up}'] = helper.bytes_to_string(up, true)
                 end
 
-                args['{'..name..' down_b}'] = math.floor(down*10)/10
-                args['{'..name..' up_b}'] = math.floor(up*10)/10
+                args['{'..name..' down_b}'] = math.floor(down)
+                args['{'..name..' up_b}'] = math.floor(up)
 
-                args['{'..name..' down_kb}'] = math.floor(down/1024*10)/10
-                args['{'..name..' up_kb}'] = math.floor(up/1024*10)/10
+                args['{'..name..' down_kb}'] = math.floor(down/1024)
+                args['{'..name..' up_kb}'] = math.floor(up/1024)
 
-                args['{'..name..' down_mb}'] = math.floor(down/1024/1024*10)/10
-                args['{'..name..' up_mb}'] = math.floor(up/1024/1024*10)/10
+                args['{'..name..' down_mb}'] = math.floor(down/1024/1024)
+                args['{'..name..' up_mb}'] = math.floor(up/1024/1024)
 
-                args['{'..name..' down_gb}'] = math.floor(down/1024/1024/1024*10)/10
-                args['{'..name..' up_gb}'] = math.floor(up/1024/1024/1024*10)/10
+                args['{'..name..' down_gb}'] = math.floor(down/1024/1024/1024)
+                args['{'..name..' up_gb}'] = math.floor(up/1024/1024/1024)
             end
 
             nets[name][1] = line[1]
