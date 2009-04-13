@@ -84,9 +84,7 @@ shifty.config.apps = {
 
     -- tag matches
     { match = { "tail", "^top", "fping", "mtr", "htop", "iwconfig", "Wicd", "apt" 
-                                                    },  tag = "sys",	nopopup = nil                   },
-    { match = { "Informat.*CK Audio Connection Kit" }, 	kill = true, 					                        },
-    { match = { "jackctl"	 		                      },	tag = "jack",		                              },
+                                                    },  tag = "sys",	                                },
     { match = { "Iceweasel.*", "Firefox.*"	        },	tag = "www",		                              },
     { match = { "urxvt"                             },	tag = "term",                                 },
     { match = { "mc"				                        },	tag = "dir",                   
@@ -105,6 +103,12 @@ shifty.config.apps = {
     { match = { "Deluge", "nicotine"                },	tag = "dl",					                          },
     { match = { "Gimp",                             },	tag = "gimp",					                        },
     { match = { "Mplayer",                          },	tag = "mplayer",				                      },
+
+    -- qjackctl tweaks
+    { match = { "jackctl"                           },  tag = "jack",                                 },
+    { match = { "Informat.*CK Audio Connection Kit" },  kill = true,                                  },
+    { match = { "qjackctlMessagesForm",
+                "Error.*Connection Kit"             },  nopopup = true,                               },
 
     -- slaves
     { match = { "gimp-image-window","xmag","^Download$", "ufraw", "qjackctl",
