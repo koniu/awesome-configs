@@ -73,7 +73,7 @@ shifty.config.tags = {
 ["www"]     = { position = 3, exclusive = true,  screen = LCD,                                          },
 ["fb"]      = { position = 9, exclusive = true,                                                         },
 ["dir"]     = { rel_index = 1, exclusive = false,                                                       },
-["gqview"]  = { position = 5, spawn = 'gqview',                                                         },
+["gqview"]  = { position = 5, spawn = 'gqview', icon_only = true, icon="/usr/share/pixmaps/gqview.png"  },
 ["gimp"]    = { spawn = "gimp", mwfact = 0.18, icon = "/usr/share/icons/hicolor/16x16/apps/gimp.png",
                 layout = awful.layout.suit.tile, icon_only = true,                                      },
 ["xev"]     = { position = 0, spawn = "urxvtc -name xev -e xev", layout = awful.layout.suit.tile,       },
