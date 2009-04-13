@@ -65,17 +65,18 @@ config.scroll_offset = 2
 shifty.config.tags = {
 
 ["sys"]     = { position = 1, exclusive = true, mwfact = 0.75307, screen = LCD,
-                layout = awful.layout.suit.tile.bottom,                				                          },
-["jack"]    = { position = 1, exclusive = true, mwfact = 0.25307, nmaster = 2, screen = LCD,
-                layout = awful.layout.suit.floating,              				                              },
-["term"]    = { position = 2, exclusive = true,  screen = LCD, 					                                },
-["www"]     = { position = 3, exclusive = true,  screen = LCD, 					                                },
-["fb"]      = { position = 9, exclusive = true, 							                                          },
-["dir"]     = { rel_index = 1, exclusive = false, 							                                        },
+                layout = awful.layout.suit.tile.bottom,                                                 },
+["jack"]    = { position = 0, exclusive = true, mwfact = 0.25307, nmaster = 2, screen = LCD,
+                icon_only = true, icon = "/home/koniu/.config/awesome/icons/audio-x-generic.png",
+                layout = awful.layout.suit.floating,                                                    },
+["term"]    = { position = 2, exclusive = true,  screen = LCD,                                          },
+["www"]     = { position = 3, exclusive = true,  screen = LCD,                                          },
+["fb"]      = { position = 9, exclusive = true,                                                         },
+["dir"]     = { rel_index = 1, exclusive = false,                                                       },
 ["gqview"]  = { position = 5, spawn = 'gqview',                                                         },
 ["gimp"]    = { spawn = "gimp", mwfact = 0.18, icon = "/usr/share/icons/hicolor/16x16/apps/gimp.png",
-                layout = awful.layout.suit.tile,                                                        },
-["xev"]     = { position = 0, spawn = "urxvtc -name xev -e xev", layout = awful.layout.suit.tile,	      },
+                layout = awful.layout.suit.tile, icon_only = true,                                      },
+["xev"]     = { position = 0, spawn = "urxvtc -name xev -e xev", layout = awful.layout.suit.tile,       },
 ["live"]    = { icon = "/home/koniu/live.png", layout = awful.layout.suit.floating,                     },
 
 }
@@ -111,8 +112,9 @@ shifty.config.apps = {
                 "Error.*Connection Kit"             },  nopopup = true,                               },
 
     -- slaves
-    { match = { "gimp-image-window","xmag","^Download$", "ufraw", "qjackctl",
+    { match = { "gimp-image-window","xmag","^Downloads$", "ufraw", "qjackctl",
 							                                      },  slave = true,			                            },
+
     -- floats
     { match = { "recordMyDesktop", "Skype", "QQQjackctl", "dupa", "MPlayer", "xmag", "gcolor2"
                                                     },  float = true,                                 },
