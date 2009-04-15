@@ -70,14 +70,14 @@ shifty.config.tags = {
                 icon_only = true, icon = "/home/koniu/.config/awesome/icons/audio-x-generic.png",
                 layout = awful.layout.suit.floating,                                                    },
 ["term"]    = { position = 2, exclusive = true,  screen = LCD,                                          },
-["www"]     = { position = 3, exclusive = true,  screen = LCD,                                          },
+["www"]     = { position = 3, exclusive = true,  screen = LCD, sweep_delay = 1,                         },
 ["fb"]      = { position = 9, exclusive = true,                                                         },
 ["dir"]     = { rel_index = 1, exclusive = false,                                                       },
 ["gqview"]  = { position = 5, spawn = 'gqview', icon_only = true, icon="/usr/share/pixmaps/gqview.png"  },
 ["gimp"]    = { spawn = "gimp", mwfact = 0.18, icon = "/usr/share/icons/hicolor/16x16/apps/gimp.png",
-                layout = awful.layout.suit.tile, icon_only = true,                                      },
+                layout = awful.layout.suit.tile, icon_only = true, sweep_delay = 1,                     },
 ["xev"]     = { position = 0, spawn = "urxvtc -name xev -e xev", layout = awful.layout.suit.tile,       },
-["live"]    = { icon = "/home/koniu/live.png", layout = awful.layout.suit.floating,                     },
+["live"]    = { icon = "/home/koniu/live.png", layout = awful.layout.suit.floating, sweep_delay = 1     },
 
 }
 
@@ -94,16 +94,17 @@ shifty.config.apps = {
                                                                     dbg{'aaa'}
                                                                     c:kill() 
                                                                   end) },                             }, 
-    { match = { "Wine"				                      },	tag = "wine",                                 },
-    { match = { "Ardour.*", "Jamin",                },	tag = "ardour",					                      },
+    { match = { "Wine"                              },  tag = "wine",                                 },
+    { match = { "Ardour.*", "Jamin",                },  tag = "ardour",                               },
 
     { match = { "Live",                             }, 	tag = "live", nopopup = true, 
-    							                                      geometry = { 0, 34, 1400, 1000 },		          },
+                                                        geometry = { 0, 34, 1400, 1000 },             },
 
-    { match = { "foobar2000.exe",	                  },  tag = "fb", nopopup = true,                   },
-    { match = { "Deluge", "nicotine"                },	tag = "dl",					                          },
-    { match = { "Gimp",                             },	tag = "gimp",					                        },
-    { match = { "Mplayer",                          },	tag = "mplayer",				                      },
+    { match = { "foobar2000.exe",                   },  tag = "fb", nopopup = true,                   },
+    { match = { "Deluge", "nicotine"                },  tag = "dl",                                   },
+    { match = { "Gimp",                             },  tag = "gimp",                                 },
+    { match = { "Mplayer",                          },  tag = "mplayer",                              },
+    { match = { "^Acroread.*"                       },  tag = "pdf",                                  },
 
     -- qjackctl tweaks
     { match = { "jackctl"                           },  tag = "jack",                                 },
@@ -112,7 +113,7 @@ shifty.config.apps = {
                 "Error.*Connection Kit"             },  nopopup = true,                               },
 
     -- slaves
-    { match = { "gimp-image-window","xmag","^Downloads$", "ufraw", "qjackctl",
+    { match = { "gimp-image-window","xmag","^Downloads$", "ufraw", "qjackctl", "fping",
 							                                      },  slave = true,			                            },
 
     -- floats
@@ -120,13 +121,13 @@ shifty.config.apps = {
                                                     },  float = true,                                 },
     -- intruders
     { match = { "^dialog$", "xmag", "gcolor2", "dupa", "^Download$", 
-                                                    },  intrusive = true, 				                    },
+                                                    },  intrusive = true,                             },
     -- all
     { match = { "",                                 },  honorsizehints = false,  
-    							                                      buttons = {
-    								                                        button({ }, 1, function (c) client.focus = c; c:raise() end),
-                                            								button({ "Mod1" }, 1, function (c) awful.mouse.client.move() end),
-                                            								button({ "Mod1" }, 3, awful.mouse.client.resize ),
+                                                        buttons = {
+                                                            button({ }, 1, function (c) client.focus = c; c:raise() end),
+                                                            button({ "Mod1" }, 1, function (c) awful.mouse.client.move() end),
+                                                            button({ "Mod1" }, 3, awful.mouse.client.resize ),
                                                         },                                            },
 
 }
@@ -136,9 +137,9 @@ shifty.config.defaults = {
     leave_kills = false,
     --run = function(tag) naughty.notify({ text = tag.name }) end,
     --run = function(tag) naughty.notify({ text = "Shifty Created: "    ..(awful.tag.getproperty(tag,"position") or shifty.tag2index(mouse.screen,tag)).. " : "..tag.name }) end
-    
 }
 
+shifty.config.default_name = "?"
 shifty.init()
 --}}}
 
@@ -163,7 +164,7 @@ naughty.config.screen = LCD
 config.widgets = {}
 config.widgets.watchmount = { "/dev/sda2", "/media/", "/mnt/" }
 config.widgets.space = "   "
-config.widgets.wifi = "wlan1"
+config.widgets.wifi = "wlan0"
 --}}}
 
 --}}}
