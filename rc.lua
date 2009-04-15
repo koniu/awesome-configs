@@ -934,10 +934,6 @@ widgets_right={
 --}}}
 
 --{{{ widgets / hook functions
-function hook_001s()
-  scrollclient()
-end
-
 function hook_1s()
 	local color,color2=''
 	if lidclosed then return end
@@ -1387,17 +1383,27 @@ shifty.config.clientkeys = clientkeys
 
 -- {{{ hooks / focus
 awful.hooks.focus.register(function (c)
-    if not awful.client.ismarked(c) then
-        c.border_color = beautiful.border_focus
-    end
+  -- see if the client needs scrolling
+  local ws = screen[c.screen].workarea
+  local geom = c:geometry()
+  if geom.width > ws.width or geom.height > ws.height then
+    awful.hooks.timer.register(0.01, scrollclient)
+  end
+  -- change border color
+  if not awful.client.ismarked(c) then
+    c.border_color = beautiful.border_focus
+  end
 end)
 -- }}}
 
 -- {{{ hooks / unfocus
 awful.hooks.unfocus.register(function (c)
-    if not awful.client.ismarked(c) then
-        c.border_color = beautiful.border_normal
-    end
+  -- kill scrolling timer
+  awful.hooks.timer.unregister(scrollclient)
+  -- change border color
+  if not awful.client.ismarked(c) then
+    c.border_color = beautiful.border_normal
+  end
 end)
 -- }}}
 
@@ -1491,7 +1497,6 @@ end)
 --{{{ hooks / timers
 awful.hooks.timer.register(1, hook_1s)
 awful.hooks.timer.register(30, hook_1m)
-awful.hooks.timer.register(0.01, hook_001s)
 awful.hooks.timer.register(3, hook_3s)
 awful.hooks.timer.register(5, hook_5s)
 awful.hooks.timer.register(600, hook_10m)
