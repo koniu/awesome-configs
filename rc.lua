@@ -139,17 +139,19 @@ shifty.config.apps = {
 --}}}
 
 --{{{ vars / shifty / gittags(tm)
+
 local gittags = {
   [ "awsm" ] = { push = "", main = "zsh", dir = "~/awesome", commit = "-a -s",
                  url = "http://git.naquadah.org/?p=awesome.git;a=shortlog;h=refs/heads/master" },
   [ "shft" ] = { push = "push mg +shifty-master", main = "vim lib/shifty.lua.in", dir = "~/shifty", commit = "-a -s",
                  url = "http://git.mercenariesguild.net/?p=awesome.git;a=shortlog;h=refs/heads/shifty-master" },
   [ "cfg" ]  = { push = "push origin +config-master:master", main = "vim rc.lua", dir = "~/awesome/.config", commit = "-a",
-                 url = "http://github.com/koniu/awesome-configs/tree/master" },
+                 url = "http://github.com/koniu/awesome-configs/commits/master/rc.lua" },
 }
 
 for n, v in pairs(gittags) do
-  -- functions
+
+  --{{{ vars / shifty / gittags(tm) / commands
   local spawn = "urxvt -name "..n.."main -hold -title '"..v.main.."' -cd "..v.dir.." -e "..v.main
   local cmds = {
     log = function() terminal("-name "..n.."pop -hold -title '"..n.." git log' -cd "..v.dir.." -e git -p log") end,
@@ -159,9 +161,11 @@ for n, v in pairs(gittags) do
     commit = function() terminal("-name "..n.."cmd -hold -title '"..n.." git commit' -cd "..v.dir.." -e git commit "..v.commit) end,
     gitweb = function() awful.util.spawn("firefox '"..v.url.."'"); awful.tag.viewonly(shifty.name2tag("www")) end,
   }
-  -- tag settings
+  --}}}
+
+  --{{{ vars / shifty / gittags(tm) / tag settings + bindings
   shifty.config.tags[n] = {
-    position = 1, exclusive = true,  screen = LCD, layout = awful.layout.suit.tile.bottom,
+    position = 1, exclusive = true,  screen = LCD, layout = awful.layout.suit.tile.bottom, spawn = spawn,
     keys  = { key({ modkey }, "l", cmds.log),
               key({ modkey }, "d", cmds.diff),
               key({ modkey }, ".", cmds.push),
@@ -170,20 +174,29 @@ for n, v in pairs(gittags) do
               key({ modkey }, "w", cmds.gitweb),
             },
   }
-  -- client settings
+  --}}}
+
+  --{{{ vars / shifty / gittags(tm) / client settings + bindings
+  -- match to tags
   table.insert(shifty.config.apps,
                { match = { n.."main$", n.."cmd$", n.."pop$" }, tag = n })
+  -- slave popups and commandline
   table.insert(shifty.config.apps,
                { match = { n.."cmd$", n.."pop$" }, slave = true })
+  -- popups die on 'q'
   table.insert(shifty.config.apps,
                { match = { n.."pop$" }, keys = { key({}, "q", function(c) c:kill() end) }, })
+  -- reload main window with mod+alt+l
   table.insert(shifty.config.apps,
-               { match = { n.."main$"}, keys = { key({"Mod1", "Control"}, "l", function(c) c:kill(); awful.util.spawn(spawn) end) }, })
+               { match = { n.."main$"}, keys = { key({"Mod1", modkey}, "l", function(c) c:kill(); awful.util.spawn(spawn) end) }, })
+  -- reload commands on mod+alt+l
   for m, f in pairs(cmds) do
     table.insert(shifty.config.apps,
               { match = { n.." git "..m },
-                keys = { key({"Mod1", "Control"}, "l", function(c) c:kill(); f() end) }, })
+                keys = { key({"Mod1", modkey}, "l", function(c) c:kill(); f() end) }, })
   end
+  --}}}
+
 end
 --}}}
 
