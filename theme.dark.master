@@ -68,8 +68,8 @@ menu_width    = 100
 #bg_widget    = #cc0000
 
 # Define the image to load
-titlebar_close_button_normal = /usr/share/awesome/themes/default/titlebar/close.png
-titlebar_close_button_focus = /usr/share/awesome/themes/default/titlebar/closer.png
+#titlebar_close_button_normal = /usr/share/awesome/themes/default/titlebar/close.png
+#titlebar_close_button_focus = /usr/share/awesome/themes/default/titlebar/closer.png
 
 # You can use your own command to set your wallpaper
 #wallpaper_cmd = awsetbg /usr/share/awesome/themes/default/background.png

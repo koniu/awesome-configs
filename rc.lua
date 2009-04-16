@@ -72,14 +72,14 @@ shifty.config.tags = {
                 icon_only = true, icon = "/home/koniu/.config/awesome/icons/audio-x-generic.png",
                 layout = awful.layout.suit.floating,                                                    },
 ["term"]    = { position = 2, exclusive = true,  screen = LCD,                                          },
-["www"]     = { position = 3, exclusive = true,  screen = LCD, sweep_delay = 1,                         },
+["www"]     = { position = 3, exclusive = true,  screen = LCD, sweep_delay = 2,                         },
 ["fb"]      = { position = 9, exclusive = true,                                                         },
 ["dir"]     = { rel_index = 1, exclusive = false,                                                       },
 ["gqview"]  = { position = 5, spawn = 'gqview', icon_only = true, icon="/usr/share/pixmaps/gqview.png"  },
 ["gimp"]    = { spawn = "gimp", mwfact = 0.18, icon = "/usr/share/icons/hicolor/16x16/apps/gimp.png",
-                layout = awful.layout.suit.tile, icon_only = true, sweep_delay = 1,                     },
+                layout = awful.layout.suit.tile, icon_only = true, sweep_delay = 2,                     },
 ["xev"]     = { position = 0, spawn = "urxvtc -name xev -e xev", layout = awful.layout.suit.tile,       },
-["live"]    = { icon = "/home/koniu/live.png", layout = awful.layout.suit.floating, sweep_delay = 1     },
+["live"]    = { icon = "/home/koniu/live.png", layout = awful.layout.suit.floating, sweep_delay = 2     },
 
 }
 --}}}
@@ -146,19 +146,20 @@ local gittags = {
   [ "shft" ] = { push = "push mg +shifty-master", main = "vim lib/shifty.lua.in", dir = "~/shifty", commit = "-a -s",
                  url = "http://git.mercenariesguild.net/?p=awesome.git;a=shortlog;h=refs/heads/shifty-master" },
   [ "cfg" ]  = { push = "push origin +config-master:master", main = "vim rc.lua", dir = "~/awesome/.config", commit = "-a",
-                 url = "http://github.com/koniu/awesome-configs/commits/master/rc.lua", },
+                 url = "http://github.com/koniu/awesome-configs/commits/master/rc.lua" },
 }
 
 for n, v in pairs(gittags) do
 
   --{{{ vars / shifty / gittags(tm) / commands
-  local spawn = "urxvt -name "..n.."main -hold -title '"..v.main.."' -cd "..v.dir.." -e "..v.main
+  local spawn = "urxvt -name "..n.."main -title '"..v.main.."' -cd "..v.dir.." -e "..v.main
   local see_www = function() awful.tag.viewonly(shifty.name2tag("www")) end
   local cmds = {
     log = function() terminal("-name "..n.."pop -hold -title '"..n.." git log' -cd "..v.dir.." -e git -p log") end,
     diff = function() terminal("-name "..n.."pop -hold -title '"..n.." git diff' -cd "..v.dir.." -e git -p diff") end,
     push = function() terminal("-name "..n.."pop -hold -title '"..n.." git push' -cd "..v.dir.." -e git "..v.push) end,
     pull = function() terminal("-name "..n.."pop -hold -title '"..n.." git pull' -cd "..v.dir.." -e git pull") end,
+    status = function() terminal("-name "..n.."pop -hold -title '"..n.." git status' -cd "..v.dir.." -e git status") end,
     prompt = function() terminal("-name "..n.."cmd -title '"..n.." git prompt' -cd "..v.dir.." -e zsh") end,
     commit = function() terminal("-name "..n.."cmd -hold -title '"..n.." git commit' -cd "..v.dir.." -e git commit "..v.commit) end,
     gitweb = function() awful.util.spawn("firefox '"..v.url.."'"); see_www(); end,
@@ -175,6 +176,7 @@ for n, v in pairs(gittags) do
               key({ modkey }, ",", cmds.pull),
               key({ modkey }, "grave", cmds.prompt),
               key({ modkey }, "c", cmds.commit),
+              key({ modkey }, "s", cmds.status),
               key({ modkey }, "w", cmds.gitweb),
               key({ modkey }, "a", cmds.apidoc),
             },
