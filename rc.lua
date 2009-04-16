@@ -413,16 +413,6 @@ function terminal(args)
 end
 --}}}
 
---{{{ functions / jointables
--- join two tables 
-function jointables(t1,t2)
-	local tmp={}
-	for i,v in pairs(t1) do	table.insert(tmp,v) end
-	for i,v in pairs(t2) do	table.insert(tmp,v) end
-	return tmp
-end
---}}}
-
 --{{{ functions / splitbywhitespace
 function splitbywhitespace(str)
     values = {}
@@ -1073,7 +1063,7 @@ for s = LCD, screen.count() do
     widgetbar[s] = wibox({ position = "top", name = "widgetbar" .. s,
                                  fg = beautiful.fg_normal, bg = beautiful.bg_normal, height = 16 })
     -- Add widgets to the statusbar - order matters
-    widgetbar[s].widgets = jointables(widgets_left,widgets_right)
+    widgetbar[s].widgets = awful.util.table.join(widgets_left,widgets_right)
     widgetbar[s].screen = s
 --widgetbar[s].ontop = true
 end
@@ -1355,7 +1345,7 @@ end),
 		  get_mounts()
 		  --get_apt()
 		  get_mail()
-	    widgetbar[LCD].widgets = jointables(widgets_left, widgets_right)
+	    widgetbar[LCD].widgets = awful.util.table.join(widgets_left, widgets_right)
 	  else
 		  info = true
 	    widgetbar[LCD].widgets = {mypromptbox, clockwidget}
