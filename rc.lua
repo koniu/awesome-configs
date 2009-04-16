@@ -146,13 +146,14 @@ local gittags = {
   [ "shft" ] = { push = "push mg +shifty-master", main = "vim lib/shifty.lua.in", dir = "~/shifty", commit = "-a -s",
                  url = "http://git.mercenariesguild.net/?p=awesome.git;a=shortlog;h=refs/heads/shifty-master" },
   [ "cfg" ]  = { push = "push origin +config-master:master", main = "vim rc.lua", dir = "~/awesome/.config", commit = "-a",
-                 url = "http://github.com/koniu/awesome-configs/commits/master/rc.lua" },
+                 url = "http://github.com/koniu/awesome-configs/commits/master/rc.lua", },
 }
 
 for n, v in pairs(gittags) do
 
   --{{{ vars / shifty / gittags(tm) / commands
   local spawn = "urxvt -name "..n.."main -hold -title '"..v.main.."' -cd "..v.dir.." -e "..v.main
+  local see_www = function() awful.tag.viewonly(shifty.name2tag("www")) end
   local cmds = {
     log = function() terminal("-name "..n.."pop -hold -title '"..n.." git log' -cd "..v.dir.." -e git -p log") end,
     diff = function() terminal("-name "..n.."pop -hold -title '"..n.." git diff' -cd "..v.dir.." -e git -p diff") end,
@@ -160,7 +161,8 @@ for n, v in pairs(gittags) do
     pull = function() terminal("-name "..n.."pop -hold -title '"..n.." git pull' -cd "..v.dir.." -e git pull") end,
     prompt = function() terminal("-name "..n.."cmd -title '"..n.." git prompt' -cd "..v.dir.." -e zsh") end,
     commit = function() terminal("-name "..n.."cmd -hold -title '"..n.." git commit' -cd "..v.dir.." -e git commit "..v.commit) end,
-    gitweb = function() awful.util.spawn("firefox '"..v.url.."'"); awful.tag.viewonly(shifty.name2tag("www")) end,
+    gitweb = function() awful.util.spawn("firefox '"..v.url.."'"); see_www(); end,
+    apidoc = function() awful.util.spawn("firefox http://awesome.naquadah.org/apidoc/modules/capi.html"); see_www(); end,
   }
   --}}}
 
@@ -174,6 +176,7 @@ for n, v in pairs(gittags) do
               key({ modkey }, "grave", cmds.prompt),
               key({ modkey }, "c", cmds.commit),
               key({ modkey }, "w", cmds.gitweb),
+              key({ modkey }, "a", cmds.apidoc),
             },
   }
   --}}}
