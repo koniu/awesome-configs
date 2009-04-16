@@ -246,21 +246,6 @@ config.widgets.wifi = "wlan0"
 
 --{{{ functions
 
---{{{ functions / run
-function run(command, class)
-	for a,b in ipairs(awful.client.visible(1)) do
-		print(b)
-		if b.class then if b.class:match(class) then
-			b.focus()
-		else
-			awful.util.spawn(command)
-		end
-		end
-	end
-
-end
---}}}
-
 --{{{ functions / run_or_raise
 --- wikipaste ---
 --- Spawns cmd if no client can be found matching properties
@@ -503,17 +488,6 @@ wifiwidget = widget({
 	type = 'textbox',
 	name = 'wifiwdget'
 })
---[[wifiwidget.mouse_enter = function () 
-	local f = io.popen("fortune")
-	local fr = ""
-	for line in f:lines() do
-	print(line)
-	fr = fr .. line .. '\n'
-	end
-	f:close()
-	naughty.notify({ text = fr, timeout = 0 })
-end
-]]
 
 wifiwidget:buttons({
 	button({}, 1, function ()      run_or_raise("wicd-client -n", { class = "Wicd-client.py" } )  end),
