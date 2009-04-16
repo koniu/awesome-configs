@@ -1153,10 +1153,14 @@ globalkeys = {
 -- }}}
 
 -- {{{ bindings / global / mm keys
-  key({ 			          }, "XF86AudioPlay", function () awful.util.spawn("fb /playpause") end),
-  key({ 			          }, "XF86AudioStop",	function () awful.util.spawn("fb /stop") end),
-  key({ 			          }, "XF86AudioPrev",	function () awful.util.spawn("fb /prev") end),
-  key({ 			          }, "XF86AudioNext",	function () awful.util.spawn("fb /next") end),
+  key({ 			          }, "XF86AudioPlay", function () awful.util.spawn("mpc toggle") end),
+  key({ 			          }, "XF86AudioStop",	function () awful.util.spawn("mpc stop") end),
+  key({ 			          }, "XF86AudioPrev",	function () awful.util.spawn("mpc prev") end),
+  key({ 			          }, "XF86AudioNext",	function () awful.util.spawn("mpc next") end),
+  key({ "Control"       }, "XF86AudioPrev",	function () awful.util.spawn("mpc seek -10") end),
+  key({ "Control"       }, "XF86AudioNext",	function () awful.util.spawn("mpc seek +10") end),
+  key({ "Control"       }, "XF86AudioPlay",	function () awful.util.spawn("mpc volume -10") end),
+  key({ "Control"       }, "XF86AudioStop", function () awful.util.spawn("mpc volume +10") end),
 -- }}}
 
 -- {{{ bindings / global / default rc.lua keys
