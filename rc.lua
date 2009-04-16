@@ -79,11 +79,39 @@ shifty.config.tags = {
 ["xev"]     = { position = 0, spawn = "urxvtc -name xev -e xev", layout = awful.layout.suit.tile,       },
 ["live"]    = { icon = "/home/koniu/live.png", layout = awful.layout.suit.floating, sweep_delay = 1     },
 
+["dev"]     = { position = 1, exclusive = true,  screen = LCD, layout = awful.layout.suit.tile.bottom,
+                spawn = "urxvt -name devvim -hold -title 'vim shifty.lua' -cd ~/awesome/ -e vim lib/shifty.lua.in",
+                keys = { key({ modkey }, "l", function() terminal("-name devpop -hold -title 'git log' -cd ~/awesome -e git -p log") end),
+                         key({ modkey }, "d", function() terminal("-name devpop -hold -title 'git diff' -cd ~/awesome -e git -p diff") end),
+                         key({ modkey }, ".", function() terminal("-name devpop -hold -title 'git push' -cd ~/awesome/.config -e git push mg +shifty") end),
+                         key({ modkey }, "grave", function() terminal("-name devcmd -title 'git prompt' -cd ~/awesome/ -e zsh") end),
+                         key({ modkey }, "c", function() terminal("-name devcmd -hold -title 'git commit' -cd ~/awesome -e git commit -a -s") end),
+                },
+              },
+
+["conf"]    = { position = 1, exclusive = true,  screen = LCD, layout = awful.layout.suit.tile.bottom,
+                spawn = "urxvt -name cfgvim -hold -title 'vim rc.lua' -cd ~/awesome/.config -e vim rc.lua",
+                keys = { key({ modkey }, "l", function() terminal("-name cfgpop -hold -title 'git log' -cd ~/awesome/.config -e git -p log") end),
+                         key({ modkey }, "d", function() terminal("-name cfgpop -hold -title 'git diff' -cd ~/awesome/.config -e git -p diff") end),
+                         key({ modkey }, ".", function() terminal("-name cfgpop -hold -title 'git push' -cd ~/awesome/.config -e git push origin +config-master:master") end),
+                         key({ modkey }, "grave", function() terminal("-name cfgcmd -title 'git prompt' -cd ~/awesome/.config -e zsh") end),
+                         key({ modkey }, "c", function() terminal("-name cfgcmd -hold -title 'git commit' -cd ~/awesome/.config -e git commit -a") end),
+                },
+              },
+
 }
 
 shifty.config.apps = {
 
     -- tag matches
+    { match = { "^devvim$", "^devcmd$", "^devpop$"  },  tag = "dev",                                  },
+    { match = { "^devpop$", "^devcmd$"              },  slave = true,                                 },
+    { match = { "^devpop$",                         },  keys={key({}, "q", function(c) c:kill() end)} },
+
+    { match = { "^cfgvim$", "^cfgcmd$", "^cfgpop$"  },  tag = "conf",                                 },
+    { match = { "^cfgpop$","^cfgcmd$"               },  slave = true,                                 },
+    { match = { "^cfgpop$",                         },  keys={key({}, "q", function(c) c:kill() end)} },
+
     { match = { "tail", "^top", "fping", "mtr", "htop", "iwconfig", "Wicd", "apt" 
                                                     },  tag = "sys",	                                },
     { match = { "Iceweasel.*", "Firefox.*"	        },	tag = "www",		                              },
@@ -114,7 +142,7 @@ shifty.config.apps = {
 
     -- slaves
     { match = { "gimp-image-window","xmag","^Downloads$", "ufraw", "qjackctl", "fping",
-							                                      },  slave = true,			                            },
+                                                    },  slave = true,                                 },
 
     -- floats
     { match = { "recordMyDesktop", "Skype", "QQQjackctl", "dupa", "MPlayer", "xmag", "gcolor2"
@@ -1362,7 +1390,7 @@ clientkeys = {
   key({ modkey, "Control" }, "Return",  function (c) c:swap(awful.client.getmaster()) end),
   key({ modkey            }, "o",       awful.client.movetoscreen),
   key({ modkey, "Shift"   }, "r",       function (c) c:redraw() end),
-  key({ "Mod1",           }, "F4",      function (c) c:kill() end),
+  key({ modkey,           }, "q",       function (c) c:kill() end),
   key({ "Mod1", "Mod4"    }, "i",       ci),
 }
 table.insert(globalkeys, key({ "Shift", }, "F5", function (c) root.fake_input("key_press",23); end)) --root.fake_input("key_release",23); dbg{'aaa'} end))
@@ -1376,6 +1404,7 @@ root.buttons({
 })
 root.keys(globalkeys)
 shifty.config.clientkeys = clientkeys
+shifty.config.globalkeys = globalkeys
 -- }}}
 
 -- }}}
