@@ -62,9 +62,11 @@ config.scroll_offset = 2
 --}}}
 
 --{{{ vars / shifty
+
+--{{{ vars / shifty / config.tags
 shifty.config.tags = {
 
-["sys"]     = { position = 1, exclusive = true, mwfact = 0.75307, screen = LCD,
+["sys"]     = { position = 0, exclusive = true, mwfact = 0.75307, screen = LCD,
                 layout = awful.layout.suit.tile.bottom,                                                 },
 ["jack"]    = { position = 0, exclusive = true, mwfact = 0.25307, nmaster = 2, screen = LCD,
                 icon_only = true, icon = "/home/koniu/.config/awesome/icons/audio-x-generic.png",
@@ -79,28 +81,10 @@ shifty.config.tags = {
 ["xev"]     = { position = 0, spawn = "urxvtc -name xev -e xev", layout = awful.layout.suit.tile,       },
 ["live"]    = { icon = "/home/koniu/live.png", layout = awful.layout.suit.floating, sweep_delay = 1     },
 
-["dev"]     = { position = 1, exclusive = true,  screen = LCD, layout = awful.layout.suit.tile.bottom,
-                spawn = "urxvt -name devvim -hold -title 'vim shifty.lua' -cd ~/awesome/ -e vim lib/shifty.lua.in",
-                keys = { key({ modkey }, "l", function() terminal("-name gitpop -hold -title 'git log' -cd ~/awesome -e git -p log") end),
-                         key({ modkey }, "d", function() terminal("-name gitpop -hold -title 'git diff' -cd ~/awesome -e git -p diff") end),
-                         key({ modkey }, ".", function() terminal("-name gitpop -hold -title 'git push' -cd ~/awesome/.config -e git push mg +shifty") end),
-                         key({ modkey }, "grave", function() terminal("-name devcmd -title 'git prompt' -cd ~/awesome/ -e zsh") end),
-                         key({ modkey }, "c", function() terminal("-name devcmd -hold -title 'git commit' -cd ~/awesome -e git commit -a -s") end),
-                },
-              },
-
-["conf"]    = { position = 1, exclusive = true,  screen = LCD, layout = awful.layout.suit.tile.bottom,
-                spawn = "urxvt -name cfgvim -hold -title 'vim rc.lua' -cd ~/awesome/.config -e vim rc.lua",
-                keys = { key({ modkey }, "l", function() terminal("-name gitpop -hold -title 'git log' -cd ~/awesome/.config -e git -p log") end),
-                         key({ modkey }, "d", function() terminal("-name gitpop -hold -title 'git diff' -cd ~/awesome/.config -e git -p diff") end),
-                         key({ modkey }, ".", function() terminal("-name gitpop -hold -title 'git push' -cd ~/awesome/.config -e git push origin +config-master:master") end),
-                         key({ modkey }, "grave", function() terminal("-name cfgcmd -title 'git prompt' -cd ~/awesome/.config -e zsh") end),
-                         key({ modkey }, "c", function() terminal("-name cfgcmd -hold -title 'git commit' -cd ~/awesome/.config -e git commit -a") end),
-                },
-              },
-
 }
+--}}}
 
+--{{{ vars / shifty / config.apps
 shifty.config.apps = {
 
     -- tag matches
@@ -132,12 +116,6 @@ shifty.config.apps = {
     { match = { "qjackctlMessagesForm",
                 "Error.*Connection Kit"             },  nopopup = true,                               },
 
-    -- git tags
-    { match = { "^devvim$", "^devcmd$", "^devpop$"  },  tag = "dev",                                  },
-    { match = { "^cfgvim$", "^cfgcmd$", "^cfgpop$"  },  tag = "conf",                                 },
-    { match = { "^gitpop$", "^devcmd$", "^cfgcmd"   },  slave = true,                                 },
-    { match = { "^gitpop$",                         },  keys={key({}, "q", function(c) c:kill() end)} },
-
 
     -- slaves
     { match = { "gimp-image-window","xmag","^Downloads$", "ufraw", "qjackctl", "fping",
@@ -158,6 +136,35 @@ shifty.config.apps = {
                                                         },                                            },
 
 }
+--}}}
+
+--{{{ vars / shifty / gittags
+local gittags = {
+  [ "cfg" ]  = { push = "origin +config-master master", main = "vim rc.lua", dir = "~/awesome/.config", commit = "-a" },
+  [ "dev" ]  = { push = "mg +shifty", main = "vim lib/shifty.lua.in", dir = "~/awesome", commit = "-a -s" },
+}
+
+for n, v in pairs(gittags) do
+  -- tag settings
+  shifty.config.tags[n] = {
+    position = 1, exclusive = true,  screen = LCD, layout = awful.layout.suit.tile.bottom,
+    spawn = "urxvt -name "..n.."main -hold -title '"..v.main.."' -cd "..v.dir.." -e "..v.main,
+    keys  = { key({ modkey }, "l", function() terminal("-name "..n.."pop -hold -title 'git log' -cd "..v.dir.." -e git -p log") end),
+              key({ modkey }, "d", function() terminal("-name "..n.."pop -hold -title 'git diff' -cd "..v.dir.." -e git -p diff") end),
+              key({ modkey }, ".", function() terminal("-name "..n.."pop -hold -title 'git push' -cd "..v.dir.." -e git push "..v.push) end),
+              key({ modkey }, "grave", function() terminal("-name "..n.."cmd -title 'git prompt' -cd "..v.dir.." -e zsh") end),
+              key({ modkey }, "c", function() terminal("-name "..n.."cmd -hold -title 'git commit' -cd "..v.dir.." -e git commit "..v.commit) end),
+            },
+  }
+  -- client settings
+  table.insert(shifty.config.apps,
+               { match = { n.."main$", n.."cmd$", n.."pop$" }, tag = n })
+  table.insert(shifty.config.apps,
+               { match = { n.."cmd$", n.."pop$" }, slave = true })
+  table.insert(shifty.config.apps,
+               { match = { n.."pop$" }, keys  = { key({}, "q", function(c) c:kill() end) }, })
+end
+--}}}
 
 shifty.config.defaults = { 
     layout = awful.layout.suit.max,
