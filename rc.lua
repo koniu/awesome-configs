@@ -140,9 +140,12 @@ shifty.config.apps = {
 
 --{{{ vars / shifty / gittags(tm)
 local gittags = {
-  [ "awsm" ] = { push = "", main = "zsh", dir = "~/awesome", commit = "-a -s" },
-  [ "shft" ] = { push = "push mg +shifty-master", main = "vim lib/shifty.lua.in", dir = "~/shifty", commit = "-a -s" },
-  [ "cfg" ]  = { push = "push origin +config-master:master", main = "vim rc.lua", dir = "~/awesome/.config", commit = "-a" },
+  [ "awsm" ] = { push = "", main = "zsh", dir = "~/awesome", commit = "-a -s",
+                 url = "http://git.naquadah.org/?p=awesome.git;a=shortlog;h=refs/heads/master" },
+  [ "shft" ] = { push = "push mg +shifty-master", main = "vim lib/shifty.lua.in", dir = "~/shifty", commit = "-a -s",
+                 url = "http://git.mercenariesguild.net/?p=awesome.git;a=shortlog;h=refs/heads/shifty-master" },
+  [ "cfg" ]  = { push = "push origin +config-master:master", main = "vim rc.lua", dir = "~/awesome/.config", commit = "-a",
+                 url = "http://github.com/koniu/awesome-configs/tree/master" },
 }
 
 for n, v in pairs(gittags) do
@@ -154,6 +157,7 @@ for n, v in pairs(gittags) do
     push = function() terminal("-name "..n.."pop -hold -title '"..n.." git push' -cd "..v.dir.." -e git "..v.push) end,
     prompt = function() terminal("-name "..n.."cmd -title '"..n.." git prompt' -cd "..v.dir.." -e zsh") end,
     commit = function() terminal("-name "..n.."cmd -hold -title '"..n.." git commit' -cd "..v.dir.." -e git commit "..v.commit) end,
+    gitweb = function() awful.util.spawn("firefox '"..v.url.."'"); awful.tag.viewonly(shifty.name2tag("www")) end,
   }
   -- tag settings
   shifty.config.tags[n] = {
@@ -163,6 +167,7 @@ for n, v in pairs(gittags) do
               key({ modkey }, ".", cmds.push),
               key({ modkey }, "grave", cmds.prompt),
               key({ modkey }, "c", cmds.commit),
+              key({ modkey }, "w", cmds.gitweb),
             },
   }
   -- client settings
