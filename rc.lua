@@ -157,6 +157,7 @@ for n, v in pairs(gittags) do
     log = function() terminal("-name "..n.."pop -hold -title '"..n.." git log' -cd "..v.dir.." -e git -p log") end,
     diff = function() terminal("-name "..n.."pop -hold -title '"..n.." git diff' -cd "..v.dir.." -e git -p diff") end,
     push = function() terminal("-name "..n.."pop -hold -title '"..n.." git push' -cd "..v.dir.." -e git "..v.push) end,
+    pull = function() terminal("-name "..n.."pop -hold -title '"..n.." git pull' -cd "..v.dir.." -e git pull") end,
     prompt = function() terminal("-name "..n.."cmd -title '"..n.." git prompt' -cd "..v.dir.." -e zsh") end,
     commit = function() terminal("-name "..n.."cmd -hold -title '"..n.." git commit' -cd "..v.dir.." -e git commit "..v.commit) end,
     gitweb = function() awful.util.spawn("firefox '"..v.url.."'"); awful.tag.viewonly(shifty.name2tag("www")) end,
@@ -169,6 +170,7 @@ for n, v in pairs(gittags) do
     keys  = { key({ modkey }, "l", cmds.log),
               key({ modkey }, "d", cmds.diff),
               key({ modkey }, ".", cmds.push),
+              key({ modkey }, ",", cmds.pull),
               key({ modkey }, "grave", cmds.prompt),
               key({ modkey }, "c", cmds.commit),
               key({ modkey }, "w", cmds.gitweb),
@@ -182,7 +184,7 @@ for n, v in pairs(gittags) do
                { match = { n.."main$", n.."cmd$", n.."pop$" }, tag = n })
   -- slave popups and commandline
   table.insert(shifty.config.apps,
-               { match = { n.."cmd$", n.."pop$" }, slave = true })
+               { match = { n.."cmd$", n.."pop$" }, slave = true, titlebar = true })
   -- popups die on 'q'
   table.insert(shifty.config.apps,
                { match = { n.."pop$" }, keys = { key({}, "q", function(c) c:kill() end) }, })
