@@ -138,7 +138,7 @@ shifty.config.apps = {
 }
 --}}}
 
---{{{ vars / shifty / gittags
+--{{{ vars / shifty / gittags(tm)
 local gittags = {
   [ "awsm" ] = { push = "", main = "zsh", dir = "~/awesome", commit = "-a -s" },
   [ "shft" ] = { push = "push mg +shifty-master", main = "vim lib/shifty.lua.in", dir = "~/shifty", commit = "-a -s" },
@@ -147,23 +147,22 @@ local gittags = {
 
 for n, v in pairs(gittags) do
   -- functions
-  local functs = {
-    log = function() terminal("-name "..n.."pop -hold -title 'git log' -cd "..v.dir.." -e git -p log") end,
-    diff = function() terminal("-name "..n.."pop -hold -title 'git diff' -cd "..v.dir.." -e git -p diff") end,
-    push = function() terminal("-name "..n.."pop -hold -title 'git push' -cd "..v.dir.." -e git "..v.push) end,
-    prompt = function() terminal("-name "..n.."cmd -title 'git prompt' -cd "..v.dir.." -e zsh") end,
-    commit = function() terminal("-name "..n.."cmd -hold -title 'git commit' -cd "..v.dir.." -e git commit "..v.commit) end,
+  local spawn = "urxvt -name "..n.."main -hold -title '"..v.main.."' -cd "..v.dir.." -e "..v.main
+  local cmds = {
+    log = function() terminal("-name "..n.."pop -hold -title '"..n.." git log' -cd "..v.dir.." -e git -p log") end,
+    diff = function() terminal("-name "..n.."pop -hold -title '"..n.." git diff' -cd "..v.dir.." -e git -p diff") end,
+    push = function() terminal("-name "..n.."pop -hold -title '"..n.." git push' -cd "..v.dir.." -e git "..v.push) end,
+    prompt = function() terminal("-name "..n.."cmd -title '"..n.." git prompt' -cd "..v.dir.." -e zsh") end,
+    commit = function() terminal("-name "..n.."cmd -hold -title '"..n.." git commit' -cd "..v.dir.." -e git commit "..v.commit) end,
   }
-
   -- tag settings
   shifty.config.tags[n] = {
     position = 1, exclusive = true,  screen = LCD, layout = awful.layout.suit.tile.bottom,
-    spawn = "urxvt -name "..n.."main -hold -title '"..v.main.."' -cd "..v.dir.." -e "..v.main,
-    keys  = { key({ modkey }, "l", functs.log),
-              key({ modkey }, "d", functs.diff),
-              key({ modkey }, ".", functs.push),
-              key({ modkey }, "grave", functs.prompt),
-              key({ modkey }, "c", functs.commit),
+    keys  = { key({ modkey }, "l", cmds.log),
+              key({ modkey }, "d", cmds.diff),
+              key({ modkey }, ".", cmds.push),
+              key({ modkey }, "grave", cmds.prompt),
+              key({ modkey }, "c", cmds.commit),
             },
   }
   -- client settings
@@ -172,7 +171,14 @@ for n, v in pairs(gittags) do
   table.insert(shifty.config.apps,
                { match = { n.."cmd$", n.."pop$" }, slave = true })
   table.insert(shifty.config.apps,
-               { match = { n.."pop$" }, keys  = { key({}, "q", function(c) c:kill() end) }, })
+               { match = { n.."pop$" }, keys = { key({}, "q", function(c) c:kill() end) }, })
+  table.insert(shifty.config.apps,
+               { match = { n.."main$"}, keys = { key({"Mod1", "Control"}, "l", function(c) c:kill(); awful.util.spawn(spawn) end) }, })
+  for m, f in pairs(cmds) do
+    table.insert(shifty.config.apps,
+              { match = { n.." git "..m },
+                keys = { key({"Mod1", "Control"}, "l", function(c) c:kill(); f() end) }, })
+  end
 end
 --}}}
 
