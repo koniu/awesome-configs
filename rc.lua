@@ -152,7 +152,7 @@ local gittags = {
 for n, v in pairs(gittags) do
 
   --{{{ vars / shifty / gittags(tm) / commands
-  local spawn = "urxvt -name "..n.."main -title '"..v.main.."' -cd "..v.dir.." -e "..v.main
+  local spawn = "urxvtc -name "..n.."main -title '"..v.main.."' -cd "..v.dir.." -e "..v.main
   local see_www = function() awful.tag.viewonly(shifty.name2tag("www")) end
   local cmds = {
     log = function() terminal("-name "..n.."pop -hold -title '"..n.." git log' -cd "..v.dir.." -e git -p log") end,
