@@ -81,9 +81,9 @@ shifty.config.tags = {
 
 ["dev"]     = { position = 1, exclusive = true,  screen = LCD, layout = awful.layout.suit.tile.bottom,
                 spawn = "urxvt -name devvim -hold -title 'vim shifty.lua' -cd ~/awesome/ -e vim lib/shifty.lua.in",
-                keys = { key({ modkey }, "l", function() terminal("-name devpop -hold -title 'git log' -cd ~/awesome -e git -p log") end),
-                         key({ modkey }, "d", function() terminal("-name devpop -hold -title 'git diff' -cd ~/awesome -e git -p diff") end),
-                         key({ modkey }, ".", function() terminal("-name devpop -hold -title 'git push' -cd ~/awesome/.config -e git push mg +shifty") end),
+                keys = { key({ modkey }, "l", function() terminal("-name gitpop -hold -title 'git log' -cd ~/awesome -e git -p log") end),
+                         key({ modkey }, "d", function() terminal("-name gitpop -hold -title 'git diff' -cd ~/awesome -e git -p diff") end),
+                         key({ modkey }, ".", function() terminal("-name gitpop -hold -title 'git push' -cd ~/awesome/.config -e git push mg +shifty") end),
                          key({ modkey }, "grave", function() terminal("-name devcmd -title 'git prompt' -cd ~/awesome/ -e zsh") end),
                          key({ modkey }, "c", function() terminal("-name devcmd -hold -title 'git commit' -cd ~/awesome -e git commit -a -s") end),
                 },
@@ -91,9 +91,9 @@ shifty.config.tags = {
 
 ["conf"]    = { position = 1, exclusive = true,  screen = LCD, layout = awful.layout.suit.tile.bottom,
                 spawn = "urxvt -name cfgvim -hold -title 'vim rc.lua' -cd ~/awesome/.config -e vim rc.lua",
-                keys = { key({ modkey }, "l", function() terminal("-name cfgpop -hold -title 'git log' -cd ~/awesome/.config -e git -p log") end),
-                         key({ modkey }, "d", function() terminal("-name cfgpop -hold -title 'git diff' -cd ~/awesome/.config -e git -p diff") end),
-                         key({ modkey }, ".", function() terminal("-name cfgpop -hold -title 'git push' -cd ~/awesome/.config -e git push origin +config-master:master") end),
+                keys = { key({ modkey }, "l", function() terminal("-name gitpop -hold -title 'git log' -cd ~/awesome/.config -e git -p log") end),
+                         key({ modkey }, "d", function() terminal("-name gitpop -hold -title 'git diff' -cd ~/awesome/.config -e git -p diff") end),
+                         key({ modkey }, ".", function() terminal("-name gitpop -hold -title 'git push' -cd ~/awesome/.config -e git push origin +config-master:master") end),
                          key({ modkey }, "grave", function() terminal("-name cfgcmd -title 'git prompt' -cd ~/awesome/.config -e zsh") end),
                          key({ modkey }, "c", function() terminal("-name cfgcmd -hold -title 'git commit' -cd ~/awesome/.config -e git commit -a") end),
                 },
@@ -104,14 +104,6 @@ shifty.config.tags = {
 shifty.config.apps = {
 
     -- tag matches
-    { match = { "^devvim$", "^devcmd$", "^devpop$"  },  tag = "dev",                                  },
-    { match = { "^devpop$", "^devcmd$"              },  slave = true,                                 },
-    { match = { "^devpop$",                         },  keys={key({}, "q", function(c) c:kill() end)} },
-
-    { match = { "^cfgvim$", "^cfgcmd$", "^cfgpop$"  },  tag = "conf",                                 },
-    { match = { "^cfgpop$","^cfgcmd$"               },  slave = true,                                 },
-    { match = { "^cfgpop$",                         },  keys={key({}, "q", function(c) c:kill() end)} },
-
     { match = { "tail", "^top", "fping", "mtr", "htop", "iwconfig", "Wicd", "apt" 
                                                     },  tag = "sys",	                                },
     { match = { "Iceweasel.*", "Firefox.*"	        },	tag = "www",		                              },
@@ -139,6 +131,13 @@ shifty.config.apps = {
     { match = { "Informat.*CK Audio Connection Kit" },  kill = true,                                  },
     { match = { "qjackctlMessagesForm",
                 "Error.*Connection Kit"             },  nopopup = true,                               },
+
+    -- git tags
+    { match = { "^devvim$", "^devcmd$", "^devpop$"  },  tag = "dev",                                  },
+    { match = { "^cfgvim$", "^cfgcmd$", "^cfgpop$"  },  tag = "conf",                                 },
+    { match = { "^gitpop$", "^devcmd$", "^cfgcmd"   },  slave = true,                                 },
+    { match = { "^gitpop$",                         },  keys={key({}, "q", function(c) c:kill() end)} },
+
 
     -- slaves
     { match = { "gimp-image-window","xmag","^Downloads$", "ufraw", "qjackctl", "fping",
