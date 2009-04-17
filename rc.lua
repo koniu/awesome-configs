@@ -595,10 +595,12 @@ local function get_bat()
 	local a = io.open('/sys/class/power_supply/BAT0/status')
 	local status = a:read()
 	a:close()
-
-	if 	status == "Full" 	then v = ''; 
+	local b = io.open('/sys/class/power_supply/BAT0/current_now')
+	local current = b:read()
+	b:close()
+	if status == "Full" or tonumber(current) == 0 then 
+    v = ''
 	else
-	
 		local a = io.open('/sys/class/power_supply/BAT0/energy_full')
 		local full = a:read()
 		a:close()
@@ -619,9 +621,7 @@ local function get_bat()
 		v = widgettext('BAT', bat .. '%',nil,color)
 	end
 
-
 	return v 
- 
 end
 --}}}
 
@@ -964,7 +964,7 @@ widgets_left={
 widgets_right={
 --	sep_r,
 	mountwidget,
-	sep_r,
+--	sep_r,
 	batterywidget,
 	aptwidget,
 	mailwidget,
@@ -1233,7 +1233,7 @@ globalkeys = {
     }, 
     mypromptbox,
 	  function(expr)
-      val = awful.util.eval(expr)
+      val = awful.util.eval("return " .. expr)
 		  naughty.notify({ 
         text = expr .. ' = <span color="white">' .. val .. "</span>", 
         timeout = 0, run = function() io.popen("echo ".. val .. " | xsel -i"):close() end, 
