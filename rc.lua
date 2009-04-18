@@ -833,28 +833,21 @@ aptwidget:buttons({
 })
 
 function get_apt()
-   if info then return end
-   local f = io.open('/tmp/.awesome.apt')
-   if not f then return end
-   local counts = {}
-   for line in f:lines() do
-   	table.insert(counts, line)
-   end
-   f:close()
---   if not counts[1] or not counts[2] then return end
-   if not counts[1] then return end
---   if tonumber(counts[1]) > 0 or tonumber(counts[2]) > 0 then
-   if tonumber(counts[1]) > 0 then
-   	--aptwidget.text  = widgettext('APT', counts[1] .."<span color='#524E41'>/</span><span color='#6B6655'>"..counts[2]..'</span>' , nil, '#99C399' )
-   	aptwidget.text  = widgettext('APT', counts[1]  , nil, '#99C399' )
+  if info then return end
+  local f = io.open('/tmp/.awesome.apt')
+  if not f then return end
+  local apt = f:read()
+  f:close()
+  if not apt then return end
+  if tonumber(apt) > 0 then
+    aptwidget.text  = widgettext('APT', apt  , nil, '#99C399' )
   else 
-  	aptwidget.text = ''
+    aptwidget.text = ''
   end
 end
 
 function dump_apt()
-	--os.execute("sudo apt-get upgrade -s | tail -n1 | awk '{ print $1 \"\\n\" $10}' > /tmp/.awesome.apt &")
-	os.execute("sudo apt-get upgrade -s | tail -n1 | awk '{ print $1 }' > /tmp/.awesome.apt &")
+	os.execute("sudo apt-get upgrade -s | grep upgraded | tail -n1 | awk '{ print $1 }' > /tmp/.awesome.apt &")
 end
 --}}}
 
@@ -1004,14 +997,13 @@ function hook_3s ()
 --	if lidclosed then return end
 	dump_mounts()
 	get_mounts()
-
 end
 
 function hook_5s ()
 	if lidclosed then return end
 	batterywidget.text = get_bat()
 	get_mail()
---	get_apt()
+	get_apt()
 	dump_autoap()
 	get_autoap()
 end
