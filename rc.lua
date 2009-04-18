@@ -100,6 +100,7 @@ shifty.config.apps = {
                                                                   end) },                             }, 
     { match = { "Wine"                              },  tag = "wine",                                 },
     { match = { "Ardour.*", "Jamin",                },  tag = "ardour",                               },
+    { match = { "Gmpc",                             },  tag = "mpd",                                  },
 
     { match = { "Live",                             }, 	tag = "live", nopopup = true, 
                                                         geometry = { 0, 34, 1400, 1000 },             },
@@ -169,7 +170,7 @@ for n, v in pairs(gittags) do
 
   --{{{ vars / shifty / gittags(tm) / tag settings + bindings
   shifty.config.tags[n] = {
-    position = 1, exclusive = true,  screen = LCD, layout = awful.layout.suit.tile.bottom, spawn = spawn,
+    position = 9, exclusive = true,  screen = LCD, layout = awful.layout.suit.tile.bottom, spawn = spawn,
     keys  = { key({ modkey }, "l", cmds.log),
               key({ modkey }, "d", cmds.diff),
               key({ modkey }, ".", cmds.push),
