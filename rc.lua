@@ -26,6 +26,11 @@ end
 require("shifty")
 require("wicked")
 
+
+function kfmt(bind, desc)
+  return string.format("<span color='#E1A816'>%-19s</span> %s", bind, desc)
+end
+
 --{{{ vars 
 
 --{{{ vars / common
@@ -58,6 +63,10 @@ config.step = 15
 
 -- screen offset it scrolls within
 config.scroll_offset = 2
+
+-- some shortcuts
+join = awful.util.table.join
+doc = awful.doc
 
 --}}}
 
@@ -142,13 +151,14 @@ shifty.config.apps = {
 --{{{ vars / shifty / gittags(tm)
 
 local gittags = {
-  [ "awsm" ] = { push = "", main = "zsh", dir = "~/awesome", commit = "-a -s",
+  [ "dev:awsm" ] = { push = "", main = "zsh", dir = "~/awesome", commit = "-a -s",
                  url = "http://git.naquadah.org/?p=awesome.git;a=shortlog;h=refs/heads/master" },
-  [ "shft" ] = { push = "push mg +shifty-master", main = "vim lib/shifty.lua.in", dir = "~/shifty", commit = "-a -s",
+[ "dev:shifty" ] = { push = "push mg +shifty-master", main = "vim lib/shifty.lua.in", dir = "~/shifty", commit = "-a -s",
                  url = "http://git.mercenariesguild.net/?p=awesome.git;a=shortlog;h=refs/heads/shifty-master" },
-  [ "cfg" ]  = { push = "push origin +config-master:master", main = "vim rc.lua", dir = "~/awesome/.config", commit = "-a",
+  [ "dev:conf" ]  = { push = "push origin +config-master:master", main = "vim rc.lua", dir = "~/awesome/.config", commit = "-a",
                  url = "http://github.com/koniu/awesome-configs/commits/master/rc.lua" },
 }
+
 
 for n, v in pairs(gittags) do
 
@@ -169,22 +179,25 @@ for n, v in pairs(gittags) do
   --}}}
 
   --{{{ vars / shifty / gittags(tm) / tag settings + bindings
+  awful.doc.set_default({ class = "gittags(tm)" })
   shifty.config.tags[n] = {
     position = 9, exclusive = true,  screen = LCD, layout = awful.layout.suit.tile.bottom, spawn = spawn,
-    keys  = { key({ modkey }, "l", cmds.log),
-              key({ modkey }, "d", cmds.diff),
-              key({ modkey }, ".", cmds.push),
-              key({ modkey }, ",", cmds.pull),
-              key({ modkey }, "grave", cmds.prompt),
-              key({ modkey }, "c", cmds.commit),
-              key({ modkey }, "s", cmds.status),
-              key({ modkey }, "w", cmds.gitweb),
-              key({ modkey }, "a", cmds.apidoc),
-            },
+    keys  = awful.util.table.join(
+              awful.key({ modkey }, "l", cmds.log, kfmt("mod + l", "git log" )),
+              awful.key({ modkey }, "d", cmds.diff, kfmt("mod + d", "git diff")),
+              awful.key({ modkey }, ".", cmds.push, kfmt("mod + .", "git push")),
+              awful.key({ modkey }, ",", cmds.pull, kfmt("mod + ,", "git pull")),
+              awful.key({ modkey }, "c", cmds.commit, kfmt("mod + c", "git commit")),
+              awful.key({ modkey }, "s", cmds.status, kfmt("mod + s", "git status")),
+              awful.key({ modkey }, "w", cmds.gitweb, kfmt("mod + w", "gitweb")),
+              awful.key({ modkey }, "a", cmds.apidoc, kfmt("mod + a", "api reference")),
+              awful.key({ modkey }, "grave", cmds.prompt, kfmt("mod + `", "cmdline"))
+            ),
   }
   --}}}
 
   --{{{ vars / shifty / gittags(tm) / client settings + bindings
+  awful.doc.set_default({ class = "gittags(tm) / client" })
   -- match to tags
   table.insert(shifty.config.apps,
                { match = { n.."main$", n.."cmd$", n.."pop$" }, tag = n })
@@ -193,15 +206,15 @@ for n, v in pairs(gittags) do
                { match = { n.."cmd$", n.."pop$" }, slave = true, titlebar = true })
   -- popups die on 'q'
   table.insert(shifty.config.apps,
-               { match = { n.."pop$" }, keys = { key({}, "q", function(c) c:kill() end) }, })
+               { match = { n.."pop$" }, keys = join(awful.key({}, "q", function(c) c:kill() end, kfmt("q", "quit"))), })
   -- reload main window with mod+alt+l
   table.insert(shifty.config.apps,
-               { match = { n.."main$"}, keys = { key({"Mod1", modkey}, "l", function(c) c:kill(); awful.util.spawn(spawn) end) }, })
+               { match = { n.."main$" }, keys = join(awful.key({"Mod1", modkey}, "l", function(c) c:kill(); awful.util.spawn(spawn) end, kfmt("mod + alt + l", "reload client"))), })
   -- reload commands on mod+alt+l
   for m, f in pairs(cmds) do
     table.insert(shifty.config.apps,
-              { match = { n.." git "..m },
-                keys = { key({"Mod1", modkey}, "l", function(c) c:kill(); f() end) }, })
+               { match = { n.." git "..m },
+                 keys = join(awful.key({"Mod1", modkey}, "l", function(c) c:kill(); f() end, kfmt("mod + alt + l", "reload client"))), })
   end
   --}}}
 
@@ -230,7 +243,7 @@ naughty.config.position = "top_right"
 naughty.config.spacing = 3
 naughty.config.padding = 5
 naughty.config.margin = 5
-naughty.config.presets.normal.height = 16
+naughty.config.presets.normal.height = 12
 --naughty.config.timeout = 0
 --naughty.config.hover_timeout = 0.2
 naughty.config.screen = LCD
@@ -478,6 +491,44 @@ function islidclosed()
 	end
 end
 lidclosed = islidclosed()
+--}}}
+
+--{{{ functions / help
+function help(c)
+  local ignore_cls = { "default", }
+  local tmp = {}
+  local order = {}
+  local v = ""
+  for i,j in ipairs(join(root.keys(), c:keys())) do
+    local docu = doc.get(j)
+    local ignored
+    if docu then
+      for n,l in ipairs(ignore_cls) do
+        if docu.class == l then ignored = true end
+      end
+      if not ignored then
+        if not tmp[docu.class] then tmp[docu.class] = {} end
+        table.insert(tmp[docu.class], docu.desc)
+      end
+    end
+  end
+
+  -- sort classes alphabetically
+  for i,j in pairs(tmp) do table.insert(order, i) end
+  table.sort(order, function(a,b) return a < b end)
+
+  -- go through classes and format the output
+  for i,cls in ipairs(order) do
+    local descs = tmp[cls]
+    v = v .. "<span color='#FF7DA6'>"..cls.."</span>\n"
+    table.sort(descs, function(a,b) return a < b end)
+    for i,desc in ipairs(descs) do
+      v = v .. "\n  " .. desc
+    end
+    v = v .. "\n\n"
+  end
+  naughty.notify{ text = v, timeout = 0, width = 210, font="Monospace 6.5", height = 10 }
+end
 --}}}
 
 --}}}
@@ -1111,82 +1162,84 @@ end
 -- {{{ bindings 
 
 -- {{{ bindings / global
-globalkeys = {
+globalkeys = join(
 
 -- {{{ bindings / global / spawns
-  key({ modkey 		        }, "grave",       function () terminal() end),
-  key({ modkey            }, "x",           function () awful.util.spawn("xkill") end),
-  key({ modkey, "Mod1"	  }, "grave",       function () terminal("-name dupa -fg '#1A1914'  -font 6x10 -g 80x24-10-10") end),
-  key({ modkey, "Control"	}, "grave",       function () terminal("-name tail -title log/awesome -e tail -fn0 ~/log/awesome") end),
-  key({ 			            }, "Print",       function () awful.util.spawn("~/bin/shot") end),
+  awful.doc.set_default({ class = "1. global actions" }),
+  awful.key({ modkey            }, "grave",       function () terminal() end, kfmt("mod + `", "terminal")),
+  awful.key({ modkey            }, "x",           function () awful.util.spawn("xkill") end, kfmt("mod + x", "xkill")),
+  awful.key({ modkey, "Mod1"    }, "grave",       function () terminal("-name dupa -fg '#1A1914'  -font 6x10 -g 80x24-10-10") end, kfmt("mod + alt + `", "popup terminal")),
+  awful.key({ modkey, "Control" }, "grave",       function () terminal("-name tail -title log/awesome -e tail -fn0 ~/log/awesome") end, kfmt("mod + ctrl + `", "awesome log")),
+  awful.key({                   }, "Print",       function () awful.util.spawn("~/bin/shot") end, kfmt("prtscr","screenshot")),
 -- }}}
 
 -- {{{ bindings / global / tag manipulation
-  key({                   }, "XF86Back",    awful.tag.viewprev),
-  key({                   }, "XF86Forward", awful.tag.viewnext),
+  awful.doc.set_default({ class = "2. tag manipulation" }),
+  awful.key({                   }, "XF86Back",    awful.tag.viewprev, kfmt("back", "previous tag")),
+  awful.key({                   }, "XF86Forward", awful.tag.viewnext, kfmt("forward", "next tag")),
+  awful.key({  modkey           }, "XF86Back",    shifty.shift_prev, kfmt("mod + back", "move tag left" )),
+  awful.key({  modkey           }, "XF86Forward", shifty.shift_next, kfmt("mod + forward", "move tag right")),
 
-  key({  modkey 		      }, "XF86Forward", shifty.shift_next),
-  key({  modkey 		      }, "XF86Back", 		shifty.shift_prev),
-  key({  "Shift" 		      }, "XF86Forward", shifty.send_next),
-  key({  "Shift" 		      }, "XF86Back", 		shifty.send_prev),
+  awful.key({ modkey            }, "t",           function() shifty.add({ rel_index = 1 }) end, kfmt("mod + t", "new tag")),
+  awful.key({ modkey, "Control" }, "t",           function() shifty.add({ rel_index = 1, nopopup = true }) end, kfmt("mod + t", "new tag in bg")),
+  awful.key({ modkey            }, "r",           shifty.rename, kfmt("mod + r", "tag rename")),
+  awful.key({ modkey            }, "w",           shifty.del, kfmt("mod + w", "tag delete")),
 
-  key({ modkey		        }, "t", 		      function() shifty.add({ rel_index = 1 }) end),
-  key({ modkey, "Control" }, "t", 		      function() shifty.add({ rel_index = 1, nopopup = true }) end),
-  key({ modkey 		        }, "r", 		      shifty.rename),
-  key({ modkey	 	        }, "w", 		      shifty.del),
-
-  key({ modkey            }, 'i', ti),
+  awful.key({ modkey            }, 'i',           ti, kfmt("mod + i", "tag info")),
 -- }}}
 
 -- {{{ bindings / global / client manipulation
-  key({ "Control"		      }, "XF86Back", 		function () awful.client.focus.byidx(-1);  if client.focus then client.focus:raise() end end),
-  key({ "Control"		      }, "XF86Forward", function () awful.client.focus.byidx(1);  if client.focus then client.focus:raise() end end ),
-  key({ modkey, "Shift"   }, "XF86Forward", function () awful.client.swap.byidx(1) end),
-  key({ modkey, "Shift"   }, "XF86Back",    function () awful.client.swap.byidx(-1) end),
+  awful.doc.set_default({ class = "3. client manipulation" }),
+  awful.key({ "Shift"           }, "XF86Back",    shifty.send_prev, kfmt("shift + back", "move to prev tag")),
+  awful.key({ "Shift"           }, "XF86Forward", shifty.send_next, kfmt("shift + forward", "move to next tag")),
+  awful.key({ "Control"         }, "XF86Back",    function () awful.client.focus.byidx(-1);  if client.focus then client.focus:raise() end end, kfmt("ctrl + back", "focus previous")),
+  awful.key({ "Control"         }, "XF86Forward", function () awful.client.focus.byidx(1);  if client.focus then client.focus:raise() end end, kfmt("ctrl + forward", "focus next") ),
+  awful.key({ modkey, "Shift"   }, "XF86Back",    function () awful.client.swap.byidx(-1) end, kfmt("mod + shift + back", "swap with prev")),
+  awful.key({ modkey, "Shift"   }, "XF86Forward", function () awful.client.swap.byidx(1) end, kfmt("mod + shift + fwd", "swap with next")),
 -- }}}
 
--- {{{ bindings / global / mm keys
-  key({ 			          }, "XF86AudioPlay", function () awful.util.spawn("mpc toggle") end),
-  key({ 			          }, "XF86AudioStop",	function () awful.util.spawn("mpc stop") end),
-  key({ 			          }, "XF86AudioPrev",	function () awful.util.spawn("mpc prev") end),
-  key({ 			          }, "XF86AudioNext",	function () awful.util.spawn("mpc next") end),
-  key({ "Control"       }, "XF86AudioPrev",	function () awful.util.spawn("mpc seek -10") end),
-  key({ "Control"       }, "XF86AudioNext",	function () awful.util.spawn("mpc seek +10") end),
-  key({ "Control"       }, "XF86AudioPlay",	function () awful.util.spawn("mpc volume -10") end),
-  key({ "Control"       }, "XF86AudioStop", function () awful.util.spawn("mpc volume +10") end),
+-- {{{ bindings / global / mm awful.keys
+  awful.key({                 }, "XF86AudioPlay",  function () awful.util.spawn("mpc toggle") end),
+  awful.key({                 }, "XF86AudioStop",  function () awful.util.spawn("mpc stop") end),
+  awful.key({                 }, "XF86AudioPrev",  function () awful.util.spawn("mpc prev") end),
+  awful.key({                 }, "XF86AudioNext",  function () awful.util.spawn("mpc next") end),
+  awful.key({ "Control"       }, "XF86AudioPrev",  function () awful.util.spawn("mpc seek -10") end),
+  awful.key({ "Control"       }, "XF86AudioNext",  function () awful.util.spawn("mpc seek +10") end),
+  awful.key({ "Control"       }, "XF86AudioPlay",  function () awful.util.spawn("mpc volume -5") end),
+  awful.key({ "Control"       }, "XF86AudioStop",  function () awful.util.spawn("mpc volume +5") end),
 -- }}}
 
 -- {{{ bindings / global / default rc.lua keys
 
-  key({ modkey            }, "Escape",      awful.tag.history.restore),
-
-  key({ modkey, "Control" }, "j",           function () awful.screen.focus(1) end),
-  key({ modkey, "Control" }, "k",           function () awful.screen.focus(-1) end),
-
-  key({ modkey            }, "Tab",         function () awful.client.focus.history.previous(); if client.focus then client.focus:raise() end end),
-
-  key({ modkey            }, "u",           awful.client.urgent.jumpto),
+  awful.doc.set_default({ class = "default" }),
+  awful.key({ modkey            }, "Escape",      awful.tag.history.restore, kfmt("mod + esc", "prev selected tags")),
+  awful.key({ modkey, "Control" }, "j",           function () awful.screen.focus(1) end, kfmt("mod + ctrl+j", "next screen")),
+  awful.key({ modkey, "Control" }, "k",           function () awful.screen.focus(-1) end, kfmt("mod + ctrl+k", "prev screen")),
+  awful.key({ modkey            }, "Tab",         function () awful.client.focus.history.previous(); if client.focus then client.focus:raise() end end, kfmt("mod + tab", "prev foused client")),
+  awful.key({ modkey            }, "u",           awful.client.urgent.jumpto, kfmt("mod + u", "jump to urgent")),
 
 -- Standard program
 
-  key({ modkey, "Control" }, "r",           function () mypromptbox.text = awful.util.escape(awful.util.restart()) end),
-  key({ modkey, "Shift"   }, "q",           awesome.quit),
+  awful.key({ modkey, "Control" }, "r",           function () mypromptbox.text = awful.util.escape(awful.util.restart()) end, kfmt("mod + ctrl+r", "restart awesome")),
+  awful.key({ modkey, "Shift"   }, "q",           awesome.quit, kfmt("mod + shift+q", "quit awesome")),
 
 -- Layout manipulation
-  key({ modkey            }, "l",           function () awful.tag.incmwfact(0.05) end),
-  key({ modkey            }, "h",           function () awful.tag.incmwfact(-0.05) end),
-  key({ modkey, "Shift"   }, "h",           function () awful.tag.incnmaster(1) end),
-  key({ modkey, "Shift"   }, "l",           function () awful.tag.incnmaster(-1) end),
-  key({ modkey, "Control" }, "h",           function () awful.tag.incncol(1) end),
-  key({ modkey, "Control" }, "l",           function () awful.tag.incncol(-1) end),
-  key({ modkey            }, "space",       function () awful.layout.inc(layouts, 1) end),
-  key({ modkey, "Shift"   }, "space",       function () awful.layout.inc(layouts, -1) end),
+  awful.key({ modkey            }, "l",           function () awful.tag.incmwfact(0.05) end),
+  awful.key({ modkey            }, "h",           function () awful.tag.incmwfact(-0.05) end),
+  awful.key({ modkey, "Shift"   }, "h",           function () awful.tag.incnmaster(1) end),
+  awful.key({ modkey, "Shift"   }, "l",           function () awful.tag.incnmaster(-1) end),
+  awful.key({ modkey, "Control" }, "h",           function () awful.tag.incncol(1) end),
+  awful.key({ modkey, "Control" }, "l",           function () awful.tag.incncol(-1) end),
+  awful.key({ modkey            }, "space",       function () awful.layout.inc(layouts, 1) end),
+  awful.key({ modkey, "Shift"   }, "space",       function () awful.layout.inc(layouts, -1) end),
 --}}}
 
 -- {{{ bindings / global / prompts
 
+awful.doc.set_default({ class = "9. prompts" }),
+
 -- {{{ bindings / global / prompts / run
-  key({ "Mod1" 	          }, "F2",
+  awful.key({ "Mod1" }, "F2",
   function ()
 		info = true
 	  awful.prompt.run({
@@ -1197,11 +1250,11 @@ globalkeys = {
     awful.util.spawn,
     awful.completion.shell,
     os.getenv("HOME") .. "/.cache/awesome/history") 
-  end),
+  end, kfmt("alt + f2", "run")),
 -- }}}
 
 -- {{{ bindings / global / prompts / lua
-  key({ "Mod1"	          }, "F1",
+  awful.key({ "Mod1" }, "F1",
   function ()
 		info = true
     awful.prompt.run({
@@ -1212,11 +1265,11 @@ globalkeys = {
     awful.util.eval,
     lua_completion,
     os.getenv("HOME") .. "/.cache/awesome/history_eval") 
-  end),
+  end, kfmt("alt + f1", "lua")),
 -- }}}
 
 -- {{{ bindings / global / prompts / calc
-  key({ modkey            }, "c",
+  awful.key({ modkey }, "c",
   function ()
     info = true
     awful.prompt.run({ 
@@ -1233,11 +1286,11 @@ globalkeys = {
       })
 	  end,
 	  nil, awful.util.getdir("cache") .. "/calc") 
-end),
+  end, kfmt("mod + c", "calculator")),
 -- }}}
 
 -- {{{ bindings / global / prompts / dict
-  key({ modkey            }, "d", 
+  awful.key({ modkey }, "d",
   function ()
 	  info = true
     local g = io.popen("xsel -o")
@@ -1260,11 +1313,11 @@ end),
 		  naughty.notify({ text = '<span font_desc="Sans 7">'..fr..'</span>', timeout = 0, width = 400 })
 	  end,
 	  nil, awful.util.getdir("cache") .. "/dict") 
-end),
+  end, kfmt("mod + d", "dictionary")),
 -- }}}
 
 -- {{{ bindings / global / prompts / kill
-  key({ modkey              }, "k",
+  awful.key({ modkey }, "k",
   function ()
 	  info = true
 	  awful.prompt.run({ 
@@ -1304,11 +1357,11 @@ end),
         end
         
         , awful.util.getdir("cache") .. "/kill") 
-end),
+  end, kfmt("mod + k", "kill")),
 -- }}}
 
 -- {{{ bindings / global / prompts / client infobox
-  key({ modkey, "Ctrl"    }, "i", 
+  awful.key({ modkey, "Ctrl" }, "i",
   function ()
 	  if mypromptbox.text then
 		  info = nil
@@ -1350,12 +1403,12 @@ end),
 
 	  	mypromptbox.text = tmp
     end
-  end),
+  end)
 -- }}}
 
 -- }}}
 
-}
+)
 
 -- {{{ bindings / global / shifty.getpos
 for i=1, ( shifty.config.maxtags or 9 ) do
@@ -1390,18 +1443,20 @@ end
 -- }}}
 
 --{{{ bindings / client
-clientkeys = {
-  key({ modkey            }, "m",       function (c) c.maximized_horizontal = not c.maximized_horizontal
-                                                     c.maximized_vertical = not c.maximized_vertical end),
-  key({ modkey            }, "f",       function (c) c.fullscreen = not c.fullscreen end),
-  key({ modkey, "Control" }, "space",   awful.client.floating.toggle),
-  key({ modkey, "Control" }, "Return",  function (c) c:swap(awful.client.getmaster()) end),
-  key({ modkey            }, "o",       awful.client.movetoscreen),
-  key({ modkey, "Shift"   }, "r",       function (c) c:redraw() end),
-  key({ modkey,           }, "q",       function (c) c:kill() end),
-  key({ "Mod1", "Mod4"    }, "i",       ci),
-}
-table.insert(globalkeys, key({ "Shift", }, "F5", function (c) root.fake_input("key_press",23); end)) --root.fake_input("key_release",23); dbg{'aaa'} end))
+clientkeys = join(
+  awful.doc.set_default({ class = "3. client manipulation" }),
+  awful.key({ modkey            }, "F1",      help, kfmt("mod + f1", "this help")),
+  awful.key({ modkey            }, "m",       function (c) c.maximized_horizontal = not c.maximized_horizontal
+                                                     c.maximized_vertical = not c.maximized_vertical end, kfmt("mod + m", "maximize")),
+  awful.key({ modkey            }, "f",       function (c) c.fullscreen = not c.fullscreen end, kfmt("mod + f", "fullscreen")),
+  awful.key({ modkey, "Control" }, "space",   awful.client.floating.toggle, kfmt("mod^ + space", "set floating")),
+  awful.key({ modkey, "Control" }, "Return",  function (c) c:swap(awful.client.getmaster()) end, kfmt("mod^ + return", "swap with master")),
+  awful.key({ modkey            }, "o",       awful.client.movetoscreen, kfmt("mod + o", "move to screen")),
+  awful.key({ modkey, "Shift"   }, "r",       function (c) c:redraw() end, kfmt("mod + shift + r", "redraw")),
+  awful.key({ modkey,           }, "q",       function (c) c:kill() end, kfmt("mod + q", "kill client")),
+  awful.key({ "Mod1", "Mod4"    }, "i",       ci)
+)
+--table.insert(globalkeys, key({ "Shift", }, "F5", function (c) root.fake_input("key_press",23); end)) --root.fake_input("key_release",23); dbg{'aaa'} end))
 --}}}
 
 -- {{{ bindings / set keys and buttons
