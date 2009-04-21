@@ -183,8 +183,14 @@ for n, v in pairs(gittags) do
                 mypromptbox,
 	              function(line)
                   local g = io.popen("cd "..v.dir.."; git checkout "..line.." 2>&1")
-                  naughty.notify{text=g:read()}
-                  g:close()
+                  local txt = g:read(); g:close()
+                  local clr = "white"
+                  if txt:find("^error") then
+                    clr = "red"
+                  elseif txt:find("^Switched") then
+                    clr = "green"
+                  end
+                  naughty.notify{ text="<span color='"..clr.."'>"..txt.."</span>" }
 	              end,
 
                 function (cmd, cur_pos, ncomp)
@@ -526,7 +532,7 @@ lidclosed = islidclosed()
 
 --{{{ functions / help
 function help(c)
-  local ignore_cls = { "default", }
+  local ignore_cls = { "default", "1. global actions"}
   local tmp = {}
   local order = {}
   local v = ""
