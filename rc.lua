@@ -151,12 +151,12 @@ shifty.config.apps = {
 --{{{ vars / shifty / gittags(tm)
 
 local gittags = {
-  [ "dev:awsm" ] = { push = "", main = "zsh", dir = "~/awesome", commit = "-a -s",
-                 url = "http://git.naquadah.org/?p=awesome.git;a=shortlog;h=refs/heads/master" },
-[ "dev:shifty" ] = { push = "push mg +shifty-master", main = "vim lib/shifty.lua.in", dir = "~/shifty", commit = "-a -s",
-                 url = "http://git.mercenariesguild.net/?p=awesome.git;a=shortlog;h=refs/heads/shifty-master" },
-  [ "dev:conf" ]  = { push = "push origin +config-master:master", main = "vim rc.lua", dir = "~/awesome/.config", commit = "-a",
-                 url = "http://github.com/koniu/awesome-configs/commits/master/rc.lua" },
+  [ "d:awsm" ] = { push = "", main = "zsh", dir = "~/awesome", commit = "-a -s",
+                   url = "http://git.naquadah.org/?p=awesome.git;a=shortlog;h=refs/heads/master" },
+[ "d:shifty" ] = { push = "push mg +shifty-master", main = "vim lib/shifty.lua.in", dir = "~/shifty", commit = "-a -s",
+                   url = "http://git.mercenariesguild.net/?p=awesome.git;a=shortlog;h=refs/heads/shifty-master" },
+  [ "d:conf" ] = { push = "push origin +config-master:master", main = "vim rc.lua", dir = "~/awesome/.config", commit = "-a",
+                   url = "http://github.com/koniu/awesome-configs/commits/master/rc.lua" },
 }
 
 
@@ -531,6 +531,16 @@ function help(c)
 end
 --}}}
 
+--{{{ functions / helpmouse
+function helpmouse()
+  local w = awful.mouse.widget_under_pointer()
+  local d = awful.doc.get(w)
+  if d then
+    naughty.notify{ text = d.desc }
+  end
+end
+--}}}
+
 --}}}
 
 --{{{ widgets
@@ -626,11 +636,13 @@ cpugraphwidget.grow = 'right'
 
 cpugraphwidget:plot_properties_set('cpu', {
 --    fg = '#6E6958',
-    fg = '#202020',
+    fg = '#252020',
 --    fg_center = '#285577',
 --    fg_end = '#634141',
     vertical_gradient = true
 })
+
+awful.doc.set(cpugraphwidget, "cpugraph")
 --}}}
 
 --{{{ widgets / battery 
@@ -695,18 +707,14 @@ memgraphwidget.border_color = '#000000'
 memgraphwidget.grow = 'right'
 
 memgraphwidget:plot_properties_set('cache', {
---    fg = '#uu6958',
---    fg = '#1F2613',
     fg = '#000000',
---   fg_center = '#285577',
---    fg_end = '#14170B',
     vertical_gradient = false
 })
 
 
 memgraphwidget:plot_properties_set('used', {
 --    fg = '#6E6958',
-    fg = '#202020',
+    fg = '#202520',
 --    fg_center = '#285577',
 --    fg_end = '#285577',
     vertical_gradient = false
@@ -1166,6 +1174,7 @@ globalkeys = join(
 
 -- {{{ bindings / global / spawns
   awful.doc.set_default({ class = "1. global actions" }),
+  awful.key({ modkey, "Control" }, "F1",          helpmouse, kfmt("mod + ctrl + f1", "'whats this'")),
   awful.key({ modkey            }, "grave",       function () terminal() end, kfmt("mod + `", "terminal")),
   awful.key({ modkey            }, "x",           function () awful.util.spawn("xkill") end, kfmt("mod + x", "xkill")),
   awful.key({ modkey, "Mod1"    }, "grave",       function () terminal("-name dupa -fg '#1A1914'  -font 6x10 -g 80x24-10-10") end, kfmt("mod + alt + `", "popup terminal")),
@@ -1236,7 +1245,7 @@ globalkeys = join(
 
 -- {{{ bindings / global / prompts
 
-awful.doc.set_default({ class = "9. prompts" }),
+  awful.doc.set_default({ class = "9. prompts" }),
 
 -- {{{ bindings / global / prompts / run
   awful.key({ "Mod1" }, "F2",
