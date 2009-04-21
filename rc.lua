@@ -175,6 +175,36 @@ for n, v in pairs(gittags) do
     commit = function() terminal("-name "..n.."cmd -hold -title '"..n.." git commit' -cd "..v.dir.." -e git commit "..v.commit) end,
     gitweb = function() awful.util.spawn("firefox '"..v.url.."'"); see_www(); end,
     apidoc = function() awful.util.spawn("firefox http://awesome.naquadah.org/apidoc/modules/capi.html"); see_www(); end,
+    branch = function()
+                awful.prompt.run({
+                  fg_cursor = "#FF1CA9", bg_cursor = beautiful.bg_normal, ul_cursor="single",
+                  text = paste, selectall = true, prompt = "<span color='#FF1CA9'>Branch:</span> "
+                },
+                mypromptbox,
+	              function(line)
+                  local g = io.popen("cd "..v.dir.."; git checkout "..line.." 2>&1")
+                  naughty.notify{text=g:read()}
+                  g:close()
+	              end,
+
+                function (cmd, cur_pos, ncomp)
+                  local branches = {}
+                  local matches = {}
+                  local g = io.popen("cd "..v.dir.."; git branch")
+                  for line in g:lines() do table.insert(branches, line:sub(3, #line)) end
+                  g:close()
+                  if cur_pos ~= #cmd + 1 and cmd:sub(cur_pos, cur_pos) ~= " " then return cmd, cur_pos end
+                  for i, j in ipairs(branches) do
+                    if branches[i]:find("^" .. cmd:sub(1, cur_pos)) then
+                      table.insert(matches, branches[i])
+                    end
+                  end
+                  if #matches == 0 then return cmd, cur_pos end
+                  while ncomp > #matches do ncomp = ncomp - #matches end
+
+                  return matches[ncomp], cur_pos
+                end)
+            end
   }
   --}}}
 
@@ -191,6 +221,7 @@ for n, v in pairs(gittags) do
               awful.key({ modkey }, "s", cmds.status, kfmt("mod + s", "git status")),
               awful.key({ modkey }, "w", cmds.gitweb, kfmt("mod + w", "gitweb")),
               awful.key({ modkey }, "a", cmds.apidoc, kfmt("mod + a", "api reference")),
+              awful.key({ modkey }, "b", cmds.branch, kfmt("mod + b", "git checkout")),
               awful.key({ modkey }, "grave", cmds.prompt, kfmt("mod + `", "cmdline"))
             ),
   }
