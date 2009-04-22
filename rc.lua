@@ -86,9 +86,10 @@ shifty.config.tags = {
 ["dir"]     = { rel_index = 1, exclusive = false,                                                       },
 ["gqview"]  = { position = 5, spawn = 'gqview', icon_only = true, icon="/usr/share/pixmaps/gqview.png"  },
 ["gimp"]    = { spawn = "gimp", mwfact = 0.18, icon = "/usr/share/icons/hicolor/16x16/apps/gimp.png",
-                layout = awful.layout.suit.tile, icon_only = true, sweep_delay = 2,                     },
+                layout = awful.layout.suit.tile, icon_only = true, sweep_delay = 2, exclusive = true,   },
 ["xev"]     = { position = 0, spawn = "urxvtc -name xev -e xev", layout = awful.layout.suit.tile,       },
 ["live"]    = { icon = "/home/koniu/live.png", layout = awful.layout.suit.floating, sweep_delay = 2     },
+["sql"]     = { layout = awful.layout.suit.tile.left                                                    },
 
 }
 --}}}
@@ -126,6 +127,8 @@ shifty.config.apps = {
     { match = { "qjackctlMessagesForm",
                 "Error.*Connection Kit"             },  nopopup = true,                               },
 
+    -- various tweaks
+    { match = { "sqlitebrowser"                     },  slave = true, float = false, tag = "sql"      },
 
     -- slaves
     { match = { "gimp-image-window","xmag","^Downloads$", "ufraw", "qjackctl", "fping",
@@ -139,11 +142,11 @@ shifty.config.apps = {
                                                     },  intrusive = true,                             },
     -- all
     { match = { "",                                 },  honorsizehints = false,  
-                                                        buttons = {
-                                                            button({ }, 1, function (c) client.focus = c; c:raise() end),
-                                                            button({ "Mod1" }, 1, function (c) awful.mouse.client.move() end),
-                                                            button({ "Mod1" }, 3, awful.mouse.client.resize ),
-                                                        },                                            },
+                                                        buttons = join(
+                                                            awful.button({ }, 1, function (c) client.focus = c; c:raise() end),
+                                                            awful.button({ "Mod1" }, 1, function (c) awful.mouse.client.move() end),
+                                                            awful.button({ "Mod1" }, 3, awful.mouse.client.resize )
+                                                        ),                                            },
 
 }
 --}}}
@@ -545,7 +548,7 @@ function help(c)
       end
       if not ignored then
         if not tmp[docu.class] then tmp[docu.class] = {} end
-        table.insert(tmp[docu.class], docu.desc)
+        table.insert(tmp[docu.class], docu.text)
       end
     end
   end
@@ -588,11 +591,11 @@ wifiwidget = widget({
 	name = 'wifiwdget'
 })
 
-wifiwidget:buttons({
-	button({}, 1, function ()      run_or_raise("wicd-client -n", { class = "Wicd-client.py" } )  end),
-	button({}, 2,  function () naughty.notify({text = get_autoap(), timeout = 2}) end),
-	button({}, 3, function () terminal("-name iwconfig -e watch -n1 /sbin/iwconfig "..config.widgets.wifi) end)
-})
+wifiwidget:buttons(join(
+  awful.button({}, 1, function ()      run_or_raise("wicd-client -n", { class = "Wicd-client.py" } )  end),
+  awful.button({}, 2,  function () naughty.notify({text = get_autoap(), timeout = 2}) end),
+  awful.button({}, 3, function () terminal("-name iwconfig -e watch -n1 /sbin/iwconfig "..config.widgets.wifi) end)
+))
 
 function dump_autoap()
 	os.execute('curl -s http://gw/user/autoap.htm  > /tmp/.awesome.autoap &')
@@ -643,10 +646,10 @@ netwidget = widget({
 	name = 'netwidget',
 
 })
-netwidget:buttons({
-	button({}, 3, function () terminal("-name fping -e fping -le 10.6.6.1 google.com") end),
-	button({}, 1, function () terminal("-name mtr -e mtr google.com") end)
-})
+netwidget:buttons(join(
+  awful.button({}, 3, function () terminal("-name fping -e fping -le 10.6.6.1 google.com") end),
+  awful.button({}, 1, function () terminal("-name mtr -e mtr google.com") end)
+))
 netwidget.width = 100
 
 function get_net()
@@ -660,10 +663,10 @@ cpugraphwidget = widget({
 	name = 'cpugraphwidget',
 	align = 'left'
 })
-cpugraphwidget:buttons({
-	button({}, 3, function () terminal("-name top -e top") end),
-	button({}, 1, function () terminal("-name htop -e htop --sort-key PERCENT_CPU") end)
-})
+cpugraphwidget:buttons(join(
+  awful.button({}, 3, function () terminal("-name top -e top") end),
+  awful.button({}, 1, function () terminal("-name htop -e htop --sort-key PERCENT_CPU") end)
+))
 
 cpugraphwidget.height = 0.85
 cpugraphwidget.width = 40
@@ -732,10 +735,10 @@ memgraphwidget = widget({
 	name = 'memgraphwidget',
 	align = 'left'
 })
-memgraphwidget:buttons({
-	button({}, 3, function () terminal("-name top -e top") end),
-	button({}, 1, function () terminal("-name htop -e htop --sort-key PERCENT_MEM") end)
-})
+memgraphwidget:buttons(join(
+  awful.button({}, 3, function () terminal("-name top -e top") end),
+  awful.button({}, 1, function () terminal("-name htop -e htop --sort-key PERCENT_MEM") end)
+))
 
 memgraphwidget.height = 0.85
 memgraphwidget.width = 40
@@ -875,14 +878,14 @@ function mountlist()
 --                        '<span color="#333333">' .. mnt[2] .. '</span>' .. 
                         config.widgets.space --.. "  "
 			
-                        w[i]:buttons({
-                            button({}, 1, function () terminal(" -name mc -geometry 169x55 -bd \\".. beautiful.border_focus .." -e mc " .. esc) end),
-                            button({}, 3, function () 
+                        w[i]:buttons(join(
+                            awful.button({}, 1, function () terminal(" -name mc -geometry 169x55 -bd \\".. beautiful.border_focus .." -e mc " .. esc) end),
+                            awful.button({}, 3, function ()
                                 awful.util.spawn("eject " .. esc)
                                 awful.util.spawn("pumount " .. esc)
                                 --awful.util.spawn("pumount -l " .. esc)
-			    end),
-			})
+			    end)
+			))
         end
     end
     awful.hooks.timer.register(1, update)
@@ -895,9 +898,9 @@ local mountwidget = mountlist()
 --{{{ widgets / mail
 mailwidget = widget({ type = "textbox", name = "mailwidget", align = "right"})
 
-mailwidget:buttons({
-    button({ }, 1, function () awful.util.spawn('firefox http://gmail.com'); awful.tag.viewonly(shifty.name2tag('www')) end),
-})
+mailwidget:buttons(join(
+  awful.button({ }, 1, function () awful.util.spawn('firefox http://gmail.com'); awful.tag.viewonly(shifty.name2tag('www')) end)
+))
 
 function get_mail()
    if info then return end
@@ -925,9 +928,9 @@ end
 --{{{ widgets / apt
 aptwidget = widget({ type = "textbox", name = "aptwidget", align="right"})
 
-aptwidget:buttons({
-    button({ }, 1, function () terminal("-name apt -title aptitude -e sudo aptitude") end),
-})
+aptwidget:buttons(join(
+  awful.button({ }, 1, function () terminal("-name apt -title aptitude -e sudo aptitude") end)
+))
 
 function get_apt()
   if info then return end
@@ -982,14 +985,14 @@ function showcalendar(inc_offset)
         })
 end
 
-clockwidget:buttons({
-        button({ }, 1, function () showcalendar(-1) end),
-        button({ }, 2, function () showcalendar(666) end),
-        button({ }, 3, function () showcalendar(1) end),
-        button({ }, 4, function () showcalendar(-1) end),
-        button({ }, 5, function () showcalendar(1) end),
+clockwidget:buttons(join(
+  awful.button({ }, 1, function () showcalendar(-1) end),
+  awful.button({ }, 2, function () showcalendar(666) end),
+  awful.button({ }, 3, function () showcalendar(1) end),
+  awful.button({ }, 4, function () showcalendar(-1) end),
+  awful.button({ }, 5, function () showcalendar(1) end)
+))
 
-})
 clockwidget.mouse_enter = function() showcalendar(0) end
 clockwidget.mouse_leave = function () remove_calendar() end
 --}}}
@@ -1005,13 +1008,13 @@ mysystray = widget({ type = "systray", name = "mysystray", align = "right" })
 --{{{ widgets / layoutbox
 mylayoutbox = {}
 for s = 1, screen.count() do
-    mylayoutbox[s] = widget({ type = "imagebox", align = "left" })
- mylayoutbox[s]:buttons({
-        button({ }, 1, function () awful.layout.inc(layouts, 1) end),
-        button({ }, 3, function () awful.layout.inc(layouts, -1) end),
-        button({ }, 4, function () awful.layout.inc(layouts, 1) end),
-        button({ }, 5, function () awful.layout.inc(layouts, -1) end)
-    })
+  mylayoutbox[s] = widget({ type = "imagebox", align = "left" })
+  mylayoutbox[s]:buttons(join(
+    awful.button({ }, 1, function () awful.layout.inc(layouts, 1) end),
+    awful.button({ }, 3, function () awful.layout.inc(layouts, -1) end),
+    awful.button({ }, 4, function () awful.layout.inc(layouts, 1) end),
+    awful.button({ }, 5, function () awful.layout.inc(layouts, -1) end)
+  ))
 
 --    mylayoutbox[s].text = "<bg image=\"/home/koniu/.config/awesome/icons/layouts/tilew.png\" resize=\"true\"/> "
 end
@@ -1088,13 +1091,14 @@ function hook_1s()
 	end
 	clockwidget.text = config.widgets.space .. "<span font_desc='' color='#cccccc'>" .. os.date("%H<span color='#999999'>:</span>%M<span color='#999999'>:</span>%S") .. "</span> "
 end
-
+hook_1s()
 
 function hook_3s ()
 --	if lidclosed then return end
 	dump_mounts()
 	get_mounts()
 end
+hook_3s()
 
 function hook_5s ()
 	if lidclosed then return end
@@ -1104,6 +1108,7 @@ function hook_5s ()
 	dump_autoap()
 	get_autoap()
 end
+hook_5s()
 
 function hook_1m ()
 	lidclosed = islidclosed()
@@ -1144,30 +1149,37 @@ end
 
 --{{{ panels / taglist+tasklist
 mytaglist = {}
-mytaglist.buttons = { button({ }, 1, awful.tag.viewonly),
-                      button({ modkey }, 1, awful.client.movetotag),
-                      button({ }, 3, function (tag) tag.selected = not tag.selected end),
-                      button({ modkey }, 3, awful.client.toggletag),
-                      button({ }, 4, awful.tag.viewnext),
-                      button({ }, 5, awful.tag.viewprev) }
+mytaglist.buttons = join(
+  awful.button({ }, 1, awful.tag.viewonly),
+  awful.button({ modkey }, 1, awful.client.movetotag),
+  awful.button({ }, 3, function (tag) tag.selected = not tag.selected end),
+  awful.button({ modkey }, 3, awful.client.toggletag),
+  awful.button({ }, 4, awful.tag.viewnext),
+  awful.button({ }, 5, awful.tag.viewprev)
+)
 mytasklist = {}
-mytasklist.buttons = { button({ }, 1, function (c)
-                                          if not c:isvisible() then
-                                              awful.tag.viewonly(c:tags()[1])
-                                          end
-                                          client.focus = c
-                                          c:raise()
-                                      end),
---                       button({ }, 3, function () if instance then instance:hide() end instance = awful.menu.clients({ width=250 }) end),
-		       button({ }, 3, function () if instance then instance:hide() instance = nil else instance = awful.menu.clients({ width=250 }) end end),
-                       button({ }, 4, function ()
-                                          awful.client.focus.byidx(1)
-                                          if client.focus then client.focus:raise() end
-                                      end),
-                       button({ }, 5, function ()
-                                          awful.client.focus.byidx(-1)
-                                          if client.focus then client.focus:raise() end
-                                      end) }
+mytasklist.buttons = join(
+  awful.button({ }, 1, function (c)
+    if not c:isvisible() then awful.tag.viewonly(c:tags()[1]) end
+    client.focus = c
+    c:raise()
+    end),
+  awful.button({ }, 3, function ()
+    if instance then
+      instance:hide(); instance = nil
+    else
+      instance = awful.menu.clients({ width=250 })
+    end
+    end),
+  awful.button({ }, 4, function ()
+    awful.client.focus.byidx(1)
+    if client.focus then client.focus:raise() end
+    end),
+  awful.button({ }, 5, function ()
+    awful.client.focus.byidx(-1)
+    if client.focus then client.focus:raise() end
+    end)
+  )
 
 
 for s = 1, screen.count() do
@@ -1500,17 +1512,18 @@ clientkeys = join(
   awful.key({ modkey            }, "o",       awful.client.movetoscreen, kfmt("mod + o", "move to screen")),
   awful.key({ modkey, "Shift"   }, "r",       function (c) c:redraw() end, kfmt("mod + shift + r", "redraw")),
   awful.key({ modkey,           }, "q",       function (c) c:kill() end, kfmt("mod + q", "kill client")),
-  awful.key({ "Mod1", "Mod4"    }, "i",       ci)
+  awful.key({ "Mod1", "Mod4"    }, "i",       ci),
+  awful.key({ "Mod1", "Mod4"    }, "a",       function(c) c.ontop = not c.ontop end, kfmt("mod + alt + a", "toggle on top"))
 )
 --table.insert(globalkeys, key({ "Shift", }, "F5", function (c) root.fake_input("key_press",23); end)) --root.fake_input("key_release",23); dbg{'aaa'} end))
 --}}}
 
 -- {{{ bindings / set keys and buttons
-root.buttons({
-    button({ }, 3, function () mymainmenu:toggle() end),
-    button({ }, 4, awful.tag.viewnext),
-    button({ }, 5, awful.tag.viewprev)
-})
+root.buttons(join(
+  awful.button({ }, 3, function () mymainmenu:toggle() end),
+  awful.button({ }, 4, awful.tag.viewnext),
+  awful.button({ }, 5, awful.tag.viewprev)
+))
 root.keys(globalkeys)
 shifty.config.clientkeys = clientkeys
 shifty.config.globalkeys = globalkeys
