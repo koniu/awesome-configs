@@ -86,7 +86,8 @@ shifty.config.tags = {
 ["gimp"]    = { spawn = "gimp", mwfact = 0.18, icon = "/usr/share/icons/hicolor/16x16/apps/gimp.png",
                 layout = awful.layout.suit.tile, icon_only = true, sweep_delay = 2, exclusive = true,   },
 ["xev"]     = { position = 0, spawn = "urxvtc -name xev -e xev", layout = awful.layout.suit.tile,       },
-["live"]    = { icon = "/home/koniu/live.png", layout = awful.layout.suit.floating, sweep_delay = 2     },
+["live"]    = { icon = "/home/koniu/live.png", layout = awful.layout.suit.floating, sweep_delay = 2,
+                icon_only = true,                                                                       },
 ["sql"]     = { layout = awful.layout.suit.tile.left                                                    },
 
 }
@@ -879,8 +880,8 @@ function mountlist()
                         w[i]:buttons(join(
                             awful.button({}, 1, function () terminal(" -name mc -geometry 169x55 -bd \\".. beautiful.border_focus .." -e mc " .. esc) end),
                             awful.button({}, 3, function ()
-                                awful.util.spawn("eject " .. esc)
-                                awful.util.spawn("pumount " .. esc)
+                                awful.util.spawn("eject " .. esc, false)
+                                awful.util.spawn("pumount " .. esc, false)
                                 --awful.util.spawn("pumount -l " .. esc)
 			    end)
 			))
@@ -1223,10 +1224,10 @@ globalkeys = join(
   awful.doc.set_default({ class = "1. global actions" }),
   awful.key({ modkey, "Control" }, "F1",          helpmouse, nil, "'whats this'"),
   awful.key({ modkey            }, "grave",       function () terminal() end, nil, "terminal"),
-  awful.key({ modkey            }, "x",           function () awful.util.spawn("xkill") end, nil, "xkill"),
+  awful.key({ modkey            }, "x",           function () awful.util.spawn("xkill", false) end, nil, "xkill"),
   awful.key({ modkey, "Mod1"    }, "grave",       function () terminal("-name dupa -fg '#1A1914'  -font 6x10 -g 80x24-10-10") end, nil, "popup terminal"),
   awful.key({ modkey, "Control" }, "grave",       function () terminal("-name tail -title log/awesome -e tail -fn0 ~/log/awesome") end, nil, "awesome log"),
-  awful.key({                   }, "Print",       function () awful.util.spawn("~/bin/shot") end, nil, "screenshot"),
+  awful.key({                   }, "Print",       function () awful.util.spawn("~/bin/shot", false) end, nil, "screenshot"),
 -- }}}
 
 -- {{{ bindings / global / tag manipulation
@@ -1255,14 +1256,14 @@ globalkeys = join(
 -- }}}
 
 -- {{{ bindings / global / mm awful.keys
-  awful.key({                 }, "XF86AudioPlay",  function () awful.util.spawn("mpc toggle") end),
-  awful.key({                 }, "XF86AudioStop",  function () awful.util.spawn("mpc stop") end),
-  awful.key({                 }, "XF86AudioPrev",  function () awful.util.spawn("mpc prev") end),
-  awful.key({                 }, "XF86AudioNext",  function () awful.util.spawn("mpc next") end),
-  awful.key({ "Control"       }, "XF86AudioPrev",  function () awful.util.spawn("mpc seek -10") end),
-  awful.key({ "Control"       }, "XF86AudioNext",  function () awful.util.spawn("mpc seek +10") end),
-  awful.key({ "Control"       }, "XF86AudioPlay",  function () awful.util.spawn("mpc volume -5") end),
-  awful.key({ "Control"       }, "XF86AudioStop",  function () awful.util.spawn("mpc volume +5") end),
+  awful.key({                 }, "XF86AudioPlay",  function () awful.util.spawn("mpc toggle", false) end),
+  awful.key({                 }, "XF86AudioStop",  function () awful.util.spawn("mpc stop", false) end),
+  awful.key({                 }, "XF86AudioPrev",  function () awful.util.spawn("mpc prev", false) end),
+  awful.key({                 }, "XF86AudioNext",  function () awful.util.spawn("mpc next", false) end),
+  awful.key({ "Control"       }, "XF86AudioPrev",  function () awful.util.spawn("mpc seek -10", false) end),
+  awful.key({ "Control"       }, "XF86AudioNext",  function () awful.util.spawn("mpc seek +10", false) end),
+  awful.key({ "Control"       }, "XF86AudioPlay",  function () awful.util.spawn("mpc volume -5", false) end),
+  awful.key({ "Control"       }, "XF86AudioStop",  function () awful.util.spawn("mpc volume +5", false) end),
 -- }}}
 
 -- {{{ bindings / global / default rc.lua keys
@@ -1383,7 +1384,7 @@ globalkeys = join(
     mypromptbox,
 	  function(line)
       local name,pid = line:match("(%a+) (%d+)")
-      awful.util.spawn("kill " .. pid) 
+      awful.util.spawn("kill " .. pid, false)
 	  end,
     function (cmd, cur_pos, ncomp)
         local ps = {}
