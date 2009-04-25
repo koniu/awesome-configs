@@ -547,7 +547,10 @@ function help(c)
       end
       if not ignored then
         if not tmp[docu.class] then tmp[docu.class] = {} end
-        table.insert(tmp[docu.class], docu.text)
+        local mods = table.concat(j.modifiers," + ")
+        if #mods > 0 then mods = mods .. " + "  end
+        local str = string.format("<span color='orange'>%-30s</span> %s", mods .. j.key, docu.text)
+        table.insert(tmp[docu.class], str)
       end
     end
   end
