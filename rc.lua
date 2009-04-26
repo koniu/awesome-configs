@@ -89,6 +89,7 @@ shifty.config.tags = {
 ["live"]    = { icon = "/home/koniu/live.png", layout = awful.layout.suit.floating, sweep_delay = 2,
                 icon_only = true,                                                                       },
 ["sql"]     = { layout = awful.layout.suit.tile.left                                                    },
+["irc"]     = { position = 1, spawn = "urxvtc -name irc -e screen -S irc -R irssi -n koniu -c OFTC"     },
 
 }
 --}}}
@@ -119,6 +120,7 @@ shifty.config.apps = {
     { match = { "Gimp",                             },  tag = "gimp",                                 },
     { match = { "Mplayer",                          },  tag = "mplayer",                              },
     { match = { "^Acroread.*"                       },  tag = "pdf",                                  },
+    { match = { "^irc$",                            },  tag = "irc",                                  },
 
     -- qjackctl tweaks
     { match = { "jackctl"                           },  tag = "jack",                                 },
