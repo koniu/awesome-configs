@@ -156,11 +156,11 @@ shifty.config.apps = {
 --{{{ vars / shifty / gittags(tm)
 
 local gittags = {
-  [ "d:awsm" ] = { push = "", main = "zsh", dir = "~/awesome", commit = "-a -s",
+  [ "d:awsm" ] = { push = "push mg +", main = "zsh", dir = "~/awesome", commit = "-a -s",
                    url = "http://git.naquadah.org/?p=awesome.git;a=shortlog;h=refs/heads/master" },
-[ "d:shifty" ] = { push = "push mg +shifty-master", main = "vim lib/shifty.lua.in", dir = "~/shifty", commit = "-a -s",
+[ "d:shifty" ] = { push = "push mg +", main = "vim lib/shifty.lua.in", dir = "~/shifty", commit = "-a -s",
                    url = "http://git.mercenariesguild.net/?p=awesome.git;a=shortlog;h=refs/heads/shifty-master" },
-  [ "d:conf" ] = { push = "push origin +config-master:master", main = "vim rc.lua", dir = "~/awesome/.config", commit = "-a",
+  [ "d:conf" ] = { push = "push origin +", main = "vim rc.lua", dir = "~/awesome/.config", commit = "-a",
                    url = "http://github.com/koniu/awesome-configs/commits/master/rc.lua" },
 }
 
@@ -173,13 +173,17 @@ for n, v in pairs(gittags) do
   local cmds = {
     log = function() terminal("-name "..n.."pop -hold -title '"..n.." git log' -cd "..v.dir.." -e git -p log") end,
     diff = function() terminal("-name "..n.."pop -hold -title '"..n.." git diff' -cd "..v.dir.." -e git -p diff --patch-with-stat") end,
-    push = function() terminal("-name "..n.."pop -hold -title '"..n.." git push' -cd "..v.dir.." -e git "..v.push) end,
     pull = function() terminal("-name "..n.."pop -hold -title '"..n.." git pull' -cd "..v.dir.." -e git pull") end,
     status = function() terminal("-name "..n.."pop -hold -title '"..n.." git status' -cd "..v.dir.." -e git status") end,
     prompt = function() terminal("-name "..n.."cmd -title '"..n.." git prompt' -cd "..v.dir.." -e zsh") end,
     commit = function() terminal("-name "..n.."cmd -hold -title '"..n.." git commit' -cd "..v.dir.." -e git commit "..v.commit) end,
     gitweb = function() awful.util.spawn("firefox '"..v.url.."'"); see_www(); end,
     apidoc = function() awful.util.spawn("firefox http://awesome.naquadah.org/apidoc/modules/capi.html"); see_www(); end,
+    push = function()
+                local br=awful.util.pread("cd "..v.dir.."; git branch --no-color 2> /dev/null | grep \\*")
+                br = br:sub(3, #br-1)
+                terminal("-name "..n.."pop -hold -title '"..n.." git push "..br.."' -cd "..v.dir.." -e git "..v.push..br) 
+           end,
     branch = function()
                 awful.prompt.run({
                   fg_cursor = "#FF1CA9", bg_cursor = beautiful.bg_normal, ul_cursor="single",
