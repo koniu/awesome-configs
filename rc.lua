@@ -1597,7 +1597,8 @@ awful.hooks.arrange.register(function (screen)
     -- Give focus to the latest client in history if no window has focus
     -- or if the current window is a desktop or a dock one.
     if not client.focus then
-        local c = awful.client.focus.history.get(screen, 0)
+        local c = awful.mouse.client_under_pointer()
+        if not c then c = awful.client.focus.history.get(screen, 0) end
         if c then client.focus = c end
     end
 end)
