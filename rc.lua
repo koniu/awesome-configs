@@ -7,7 +7,7 @@ require("naughty")
 
 --{{{ dbg function
 function dbg(vars)
-    local a = nil
+    local a = ""
     local text = "<span color = \"#FF004D\">dbg </span>"
     for i,j in pairs(vars) do
         a = "<span color='#333333'>" .. i .. " </span>"
@@ -19,7 +19,7 @@ function dbg(vars)
         end
         text = text .. " \n" .. a
     end
-    naughty.notify{ text = text, timeout = 0, hover_timeout = 0.2 }
+    naughty.notify{ text = text, timeout = 0, hover_timeout = 0.2, preset = {height = 16, screen = screen.count() } }
 end
 --}}}
 
@@ -285,7 +285,7 @@ naughty.config.margin = 5
 naughty.config.presets.normal.height = 12
 --naughty.config.timeout = 0
 --naughty.config.hover_timeout = 0.2
-naughty.config.screen = LCD
+naughty.config.presets.normal.screen = LCD
 --}}}
 
 --{{{ vars / widgets
