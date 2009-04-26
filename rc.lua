@@ -89,7 +89,8 @@ shifty.config.tags = {
 ["live"]    = { icon = "/home/koniu/live.png", layout = awful.layout.suit.floating, sweep_delay = 2,
                 icon_only = true,                                                                       },
 ["sql"]     = { layout = awful.layout.suit.tile.left                                                    },
-["irc"]     = { position = 1, spawn = "urxvtc -name irc -e screen -S irc -R irssi -n koniu -c OFTC"     },
+["irc"]     = { position = 1,
+                spawn = "urxvtc -name irc -e screen -t irc -S irc -R irssi -n koniu -c OFTC"            },
 
 }
 --}}}
@@ -186,8 +187,7 @@ for n, v in pairs(gittags) do
                 },
                 mypromptbox,
 	              function(line)
-                  local g = io.popen("cd "..v.dir.."; git checkout "..line.." 2>&1")
-                  local txt = g:read(); g:close()
+                  local txt = awful.util.pread("cd "..v.dir.."; git checkout "..line.." 2>&1")
                   local clr = "white"
                   if txt:find("^error") then
                     clr = "red"
@@ -284,7 +284,7 @@ naughty.config.position = "top_right"
 naughty.config.spacing = 3
 naughty.config.padding = 5
 naughty.config.margin = 5
-naughty.config.presets.normal.height = 12
+naughty.config.presets.normal.height = 16
 --naughty.config.timeout = 0
 --naughty.config.hover_timeout = 0.2
 naughty.config.presets.normal.screen = LCD
@@ -523,7 +523,7 @@ end
 --{{{ functions / islidclosed
 function islidclosed()
 	local f = io.open("/proc/acpi/button/lid/LID/state")
-	state = f:read()
+	local state = f:read()
 	f:close()
 	if state:find("closed") then
 		return true
@@ -571,7 +571,7 @@ function help(c)
     end
     v = v .. "\n\n"
   end
-  naughty.notify{ text = v, timeout = 0, width = 310, font="Monospace 6.5", height = 10 }
+  naughty.notify{ text = v, timeout = 0, width = 310, font="Monospace 6.5", preset = { height = 12 } }
 end
 --}}}
 
@@ -1344,7 +1344,7 @@ globalkeys = join(
       val = awful.util.eval("return " .. expr)
 		  naughty.notify({ 
         text = expr .. ' = <span color="white">' .. val .. "</span>", 
-        timeout = 0, run = function() io.popen("echo ".. val .. " | xsel -i"):close() end, 
+        timeout = 0, run = function() awful.util.pread("echo ".. val .. " | xsel -i") end,
       })
 	  end,
 	  nil, awful.util.getdir("cache") .. "/calc") 
@@ -1354,27 +1354,20 @@ globalkeys = join(
 -- {{{ bindings / global / prompts / dict
   awful.key({ modkey }, "d",
   function ()
-	  info = true
-    local g = io.popen("xsel -o")
-    local paste = g:read()
-    g:close()
-    color = '#008DFA'
-	  awful.prompt.run({ 
+    info = true
+    local paste = awful.util.pread("xsel -o")
+    local color = '#008DFA'
+    awful.prompt.run({
       fg_cursor = color, bg_cursor=beautiful.bg_normal, ul_cursor = "single", 
       text = paste, selectall = true, 
       prompt = "<span color='"..color.."'>Dict:</span> " 
     }, 
     mypromptbox,
-	  function(word)
-		  local f = io.popen("dict -d wn " .. word .. " 2>&1")
-		  local fr = ""
-		  for line in f:lines() do
-		    fr = fr .. line .. '\n'
-		  end
-		  f:close()
-		  naughty.notify({ text = '<span font_desc="Sans 7">'..fr..'</span>', timeout = 0, width = 400 })
-	  end,
-	  nil, awful.util.getdir("cache") .. "/dict") 
+    function(word)
+      local fr = awful.util.pread("dict -d wn " .. word .. " 2>&1")
+      naughty.notify({ text = '<span font_desc="Sans 7">'..fr..'</span>', timeout = 0, width = 400 })
+    end,
+    nil, awful.util.getdir("cache") .. "/dict")
   end, nil, "dictionary"),
 -- }}}
 
@@ -1382,7 +1375,7 @@ globalkeys = join(
   awful.key({ modkey }, "k",
   function ()
 	  info = true
-	  awful.prompt.run({ 
+	  awful.prompt.run({
       fg_cursor = "#FF4F4F", bg_cursor = beautiful.bg_normal, ul_cursor="single", 
       text = paste, selectall = true, prompt = "<span color='#FF4F4F'>Kill:</span> " 
     }, 
