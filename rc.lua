@@ -1271,15 +1271,15 @@ globalkeys = join(
   awful.key({ modkey, "Shift"   }, "XF86Forward", function () awful.client.swap.byidx(1) end, nil, "swap with next"),
 -- }}}
 
--- {{{ bindings / global / mm awful.keys
-  awful.key({                 }, "XF86AudioPlay",  function () awful.util.spawn("mpc toggle", false) end),
-  awful.key({                 }, "XF86AudioStop",  function () awful.util.spawn("mpc stop", false) end),
-  awful.key({                 }, "XF86AudioPrev",  function () awful.util.spawn("mpc prev", false) end),
-  awful.key({                 }, "XF86AudioNext",  function () awful.util.spawn("mpc next", false) end),
-  awful.key({ "Control"       }, "XF86AudioPrev",  function () awful.util.spawn("mpc seek -10", false) end),
-  awful.key({ "Control"       }, "XF86AudioNext",  function () awful.util.spawn("mpc seek +10", false) end),
-  awful.key({ "Control"       }, "XF86AudioPlay",  function () awful.util.spawn("mpc volume -5", false) end),
-  awful.key({ "Control"       }, "XF86AudioStop",  function () awful.util.spawn("mpc volume +5", false) end),
+-- {{{ bindings / global / mm keys
+  awful.key({                 }, "XF86AudioPlay",  function () awful.util.spawn("mpc --no-status toggle", false) end),
+  awful.key({                 }, "XF86AudioStop",  function () awful.util.spawn("mpc --no-status stop", false) end),
+  awful.key({                 }, "XF86AudioPrev",  function () awful.util.spawn("mpc --no-status prev", false) end),
+  awful.key({                 }, "XF86AudioNext",  function () awful.util.spawn("mpc --no-status next", false) end),
+  awful.key({ "Control"       }, "XF86AudioPrev",  function () awful.util.spawn("mpc --no-status seek -10", false) end),
+  awful.key({ "Control"       }, "XF86AudioNext",  function () awful.util.spawn("mpc --no-status seek +10", false) end),
+  awful.key({ "Control"       }, "XF86AudioPlay",  function () awful.util.spawn("mpc --no-status volume -5", false) end),
+  awful.key({ "Control"       }, "XF86AudioStop",  function () awful.util.spawn("mpc --no-status volume +5", false) end),
 -- }}}
 
 -- {{{ bindings / global / default rc.lua keys
