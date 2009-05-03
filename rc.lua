@@ -1191,11 +1191,13 @@ mytasklist.buttons = join(
     end, nil, "Focus previous client")
   )
 
+mytagprompt = {}
 
 for s = 1, screen.count() do
-    -- Create a promptbox for each screen
-    -- Create an imagebox widget which will contains an icon indicating which layout we're using.
-    -- We need one layoutbox per screen.
+
+    -- Create a tag prompt widget
+    mytagprompt[s] = widget({	type = 'textbox', })
+
     -- Create a taglist widget
     mytaglist[s] = awful.widget.taglist.new(s, awful.widget.taglist.label.all, mytaglist.buttons)
     awful.doc.set(mytaglist[s], { name = "mytaglist", class = "widgets", text = "Taglist widget" })
@@ -1216,6 +1218,7 @@ for s = 1, screen.count() do
     -- Add widgets to the statusbar - order matters
     tabbar[s].widgets = {
         mytaglist[s],
+        mytagprompt[s],
         mylayoutbox[s],
         mytasklist[s],
 	
@@ -1466,7 +1469,26 @@ globalkeys = join(
 
 	  	mypromptbox.text = tmp
     end
-  end)
+  end),
+-- }}}
+
+-- {{{ bindings / global / prompts / tagjump
+  awful.key({ "Mod5" }, "/", function ()
+		info = true
+    wi = mytagprompt[mouse.screen]
+    wi.bg_image = image("/home/koniu/.config/awesome/icons/arrow.png")
+
+	  awful.prompt.run({
+        fg_cursor = "#DDFF00", bg_cursor=beautiful.bg_normal, ul_cursor = "single",
+        prompt = "   ", text = " ", selectall = true
+      },
+      wi,
+      function(n) local t = shifty.name2tag(n); if t then awful.tag.viewonly(t) end end,
+      function (cmd, cur_pos, ncomp) return shifty.completion(cmd, cur_pos, ncomp, { "existing" }) end,
+      os.getenv("HOME") .. "/.cache/awesome/tagjump",
+      nil,
+      function() wi.bg_image = nil end)
+  end, nil, "jump to tag")
 -- }}}
 
 -- }}}
