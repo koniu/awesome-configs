@@ -29,7 +29,7 @@ require("wicked")
 --{{{ vars 
 
 --{{{ vars / common
-theme_path = "/home/koniu/.config/awesome/theme.dark.master"
+theme_path = "/home/koniu/.config/awesome/theme.dark.master.lua"
 beautiful.init(theme_path)
 modkey = "Mod4"
 if screen.count() == 2 then LCD = 2 else LCD = 1 end
