@@ -1353,9 +1353,13 @@ globalkeys = join(
     mypromptbox.widget,
 	  function(expr)
       val = awful.util.eval("return " .. expr)
-		  naughty.notify({ 
-        text = expr .. ' = <span color="white">' .. val .. "</span>", 
-        timeout = 0, run = function() awful.util.pread("echo ".. val .. " | xsel -i") end,
+      local calc = naughty.notify({
+        text = expr .. ' = <span color="white">' .. val .. "</span>",
+        timeout = 0,
+        run = function(calc)
+          calc.die()
+          awful.util.pread("echo ".. val .. " | xsel -i")
+        end,
       })
 	  end,
 	  nil, awful.util.getdir("cache") .. "/calc") 
