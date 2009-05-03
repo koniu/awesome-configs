@@ -599,10 +599,12 @@ wifiwidget = widget({
 })
 
 wifiwidget:buttons(join(
-  awful.button({}, 1, function ()      run_or_raise("wicd-client -n", { class = "Wicd-client.py" } )  end),
-  awful.button({}, 2,  function () naughty.notify({text = get_autoap(), timeout = 2}) end),
-  awful.button({}, 3, function () terminal("-name iwconfig -e watch -n1 /sbin/iwconfig "..config.widgets.wifi) end)
+  awful.button({}, 1, function () run_or_raise("wicd-client -n", { class = "Wicd-client.py" } )  end, nil, "show networks"),
+  awful.button({}, 2, function () naughty.notify({text = get_autoap(), timeout = 2}) end, nil, "show autoap status"),
+  awful.button({}, 3, function () terminal("-name iwconfig -e watch -n1 /sbin/iwconfig "..config.widgets.wifi) end, nil, "show iwconfig")
 ))
+
+awful.doc.set(wifiwidget, { class = "widgets", text = "This widget shows WIFI range", name = "wifiwidget" })
 
 function dump_autoap()
 	os.execute('curl -s http://gw/user/autoap.htm  > /tmp/.awesome.autoap &')
@@ -1141,6 +1143,7 @@ for s = LCD, screen.count() do
     widgetbar[s].widgets = awful.util.table.join(widgets_left,widgets_right)
     widgetbar[s].screen = s
 --widgetbar[s].ontop = true
+  awful.doc.set(widgetbar[s], { name = "widgetbar", class = "panels", text = "Panel with widgets" })
 end
 --}}}
 
@@ -1157,12 +1160,12 @@ end
 --{{{ panels / taglist+tasklist
 mytaglist = {}
 mytaglist.buttons = join(
-  awful.button({ }, 1, awful.tag.viewonly),
-  awful.button({ modkey }, 1, awful.client.movetotag),
-  awful.button({ }, 3, function (tag) tag.selected = not tag.selected end),
-  awful.button({ modkey }, 3, awful.client.toggletag),
-  awful.button({ }, 4, awful.tag.viewnext),
-  awful.button({ }, 5, awful.tag.viewprev)
+  awful.button({ }, 1, awful.tag.viewonly, nil, "Switch to tag"),
+  awful.button({ modkey }, 1, awful.client.movetotag, nil, "Move client to tag"),
+  awful.button({ }, 3, function (tag) tag.selected = not tag.selected end, nil, "Toggle tag"),
+  awful.button({ modkey }, 3, awful.client.toggletag, nil, "Toggle client on tag"),
+  awful.button({ }, 4, awful.tag.viewnext, nil, "Switch to next tag"),
+  awful.button({ }, 5, awful.tag.viewprev, nil, "Switch to previous tag")
 )
 mytasklist = {}
 mytasklist.buttons = join(
@@ -1170,22 +1173,22 @@ mytasklist.buttons = join(
     if not c:isvisible() then awful.tag.viewonly(c:tags()[1]) end
     client.focus = c
     c:raise()
-    end),
+    end, nil, "Focus client"),
   awful.button({ }, 3, function ()
     if instance then
       instance:hide(); instance = nil
     else
       instance = awful.menu.clients({ width=250 })
     end
-    end),
+    end, nil, "Show menu with all clients"),
   awful.button({ }, 4, function ()
     awful.client.focus.byidx(1)
     if client.focus then client.focus:raise() end
-    end),
+    end, nil, "Focus next client"),
   awful.button({ }, 5, function ()
     awful.client.focus.byidx(-1)
     if client.focus then client.focus:raise() end
-    end)
+    end, nil, "Focus previous client")
   )
 
 
@@ -1195,12 +1198,13 @@ for s = 1, screen.count() do
     -- We need one layoutbox per screen.
     -- Create a taglist widget
     mytaglist[s] = awful.widget.taglist.new(s, awful.widget.taglist.label.all, mytaglist.buttons)
+    awful.doc.set(mytaglist[s], { name = "mytaglist", class = "widgets", text = "Taglist widget" })
 
     -- Create a tasklist widget
     mytasklist[s] = awful.widget.tasklist.new(function(c)
                                                   return awful.widget.tasklist.label.currenttags(c, s)
                                               end, mytasklist.buttons)
-
+    awful.doc.set(mytasklist[s], { name = "mytasklist", class = "widgets", text = "Tasklist widget" })
     -- Create the wibox
 end
 shifty.taglist = mytaglist
@@ -1218,6 +1222,7 @@ for s = 1, screen.count() do
     }
     tabbar[s].screen = s
 --    tabbar[s].ontop = true
+    awful.doc.set(tabbar[s], { name = "tabbar", class = "panels", text = "Panel with tag/task-list" })
 end
 -- }}}
 
@@ -1519,6 +1524,7 @@ clientkeys = join(
 --}}}
 
 -- {{{ bindings / set keys and buttons
+awful.doc.set_default({})
 root.buttons(join(
   awful.button({ }, 3, function () mymainmenu:toggle() end),
   awful.button({ }, 4, awful.tag.viewnext),
