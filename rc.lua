@@ -85,10 +85,9 @@ shifty.config.tags = {
 ["gqview"]  = { position = 5, spawn = 'gqview', icon_only = true, icon="/usr/share/pixmaps/gqview.png"  },
 ["gimp"]    = { spawn = "gimp", mwfact = 0.18, icon = "/usr/share/icons/hicolor/16x16/apps/gimp.png",
                 layout = awful.layout.suit.tile, icon_only = true, sweep_delay = 2, exclusive = true,   },
-["xev"]     = { position = 0, spawn = "urxvtc -name xev -e xev", layout = awful.layout.suit.tile,       },
+["xev"]     = { position = 0, spawn = "urxvtc -name xev -e xev -rv", layout = awful.layout.suit.tile,   },
 ["live"]    = { icon = "/home/koniu/live.png", layout = awful.layout.suit.floating, sweep_delay = 2,
                 icon_only = true,                                                                       },
-["sql"]     = { layout = awful.layout.suit.tile.left                                                    },
 ["irc"]     = { position = 1,
                 spawn = "urxvtc -name irc -e screen -t irc -S irc -R irssi -n koniu -c OFTC"            },
 
@@ -156,11 +155,11 @@ shifty.config.apps = {
 --{{{ vars / shifty / gittags(tm)
 
 local gittags = {
-  [ "d:awsm" ] = { push = "push mg +", main = "zsh", dir = "~/awesome", commit = "-a -s",
+  [ "d:awsm" ] = { push = "push mg +", main = "zsh", dir = "/home/koniu/awesome", commit = "-a -s",
                    url = "http://git.naquadah.org/?p=awesome.git;a=shortlog;h=refs/heads/master" },
-[ "d:shifty" ] = { push = "push mg +", main = "vim lib/shifty.lua.in", dir = "~/shifty", commit = "-a -s",
+[ "d:shifty" ] = { push = "push mg +", main = "vim lib/shifty.lua.in", dir = "/home/koniu/shifty", commit = "-a -s",
                    url = "http://git.mercenariesguild.net/?p=awesome.git;a=shortlog;h=refs/heads/shifty-master" },
-  [ "d:conf" ] = { push = "push origin +", main = "vim rc.lua", dir = "~/awesome/.config", commit = "-a",
+  [ "d:conf" ] = { push = "push origin +", main = "vim rc.lua", dir = "/home/koniu/.config/awesome", commit = "-a",
                    url = "http://github.com/koniu/awesome-configs/commits/master/rc.lua" },
 }
 
@@ -178,7 +177,7 @@ for n, v in pairs(gittags) do
     prompt = function() terminal("-name "..n.."cmd -title '"..n.." git prompt' -cd "..v.dir.." -e zsh") end,
     commit = function() terminal("-name "..n.."cmd -hold -title '"..n.." git commit' -cd "..v.dir.." -e git commit "..v.commit) end,
     gitweb = function() awful.util.spawn("firefox '"..v.url.."'"); see_www(); end,
-    apidoc = function() awful.util.spawn("firefox http://awesome.naquadah.org/apidoc/modules/capi.html"); see_www(); end,
+    apidoc = function() awful.util.spawn("firefox http://awesome.naquadah.org/doc/api/"); see_www(); end,
     push = function()
                 local br=awful.util.pread("cd "..v.dir.."; git branch --no-color 2> /dev/null | grep \\*")
                 br = br:sub(3, #br-1)
