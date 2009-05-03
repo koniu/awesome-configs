@@ -189,7 +189,7 @@ for n, v in pairs(gittags) do
                   fg_cursor = "#FF1CA9", bg_cursor = beautiful.bg_normal, ul_cursor="single",
                   text = paste, selectall = true, prompt = "<span color='#FF1CA9'>Branch:</span> "
                 },
-                mypromptbox,
+                mypromptbox.widget,
 	              function(line)
                   local txt = awful.util.pread("cd "..v.dir.."; git checkout "..line.." 2>&1")
                   local clr = "white"
@@ -1006,7 +1006,7 @@ clockwidget.mouse_leave = function () remove_calendar() end
 --}}}
 
 --{{{ widgets / prompt
-mypromptbox = widget({ type = "textbox", name = "mypromptbox", align = "left" })
+mypromptbox = awful.widget.prompt({ align = "left" })
 --}}}
 
 --{{{ widgets / systray
@@ -1286,7 +1286,7 @@ globalkeys = join(
 
 -- Standard program
 
-  awful.key({ modkey, "Control" }, "r",           function () mypromptbox.text = awful.util.escape(awful.util.restart()) end, nil, "restart awesome"),
+  awful.key({ modkey, "Control" }, "r",           function () mypromptbox.widget.text = awful.util.escape(awful.util.restart()) end, nil, "restart awesome"),
   awful.key({ modkey, "Shift"   }, "q",           awesome.quit, nil, "quit awesome"),
 
 -- Layout manipulation
@@ -1305,18 +1305,18 @@ globalkeys = join(
   awful.doc.set_default({ class = "9. prompts" }),
 
 -- {{{ bindings / global / prompts / run
-  awful.key({ "Mod1" }, "F2",
-  function ()
+  awful.key({ "Mod1" }, "F2", function () mypromptbox:run() end, nil, "run prompt"),
+--[[unction ()
 		info = true
 	  awful.prompt.run({
       fg_cursor = "orange", bg_cursor=beautiful.bg_normal, ul_cursor = "single",
       prompt = "<span color='orange'>Run:</span> " 
     },
-    mypromptbox,
+    mypromptbox.widget,
     awful.util.spawn,
     awful.completion.shell,
     os.getenv("HOME") .. "/.cache/awesome/history") 
-  end, nil, "run"),
+  end, nil, "run"),--]]
 -- }}}
 
 -- {{{ bindings / global / prompts / lua
@@ -1327,7 +1327,7 @@ globalkeys = join(
       fg_cursor="#D1FF00", bg_cursor=beautiful.bg_normal, ul_cursor = "single",
       prompt = "<span color = '#D1FF00'>Lua:</span> "
     },
-    mypromptbox,
+    mypromptbox.widget,
     awful.util.eval,
     lua_completion,
     os.getenv("HOME") .. "/.cache/awesome/history_eval") 
@@ -1343,7 +1343,7 @@ globalkeys = join(
       fg_cursor = "#00A5AB", bg_cursor=beautiful.bg_normal, ul_cursor = "single",
       prompt = "<span color='#00A5AB'>Calc:</span> " 
     }, 
-    mypromptbox,
+    mypromptbox.widget,
 	  function(expr)
       val = awful.util.eval("return " .. expr)
 		  naughty.notify({ 
@@ -1366,7 +1366,7 @@ globalkeys = join(
       text = paste, selectall = true, 
       prompt = "<span color='"..color.."'>Dict:</span> " 
     }, 
-    mypromptbox,
+    mypromptbox.widget,
     function(word)
       local fr = awful.util.pread("dict -d wn " .. word .. " 2>&1")
       naughty.notify({ text = '<span font_desc="Sans 7">'..fr..'</span>', timeout = 0, width = 400 })
@@ -1383,7 +1383,7 @@ globalkeys = join(
       fg_cursor = "#FF4F4F", bg_cursor = beautiful.bg_normal, ul_cursor="single", 
       text = paste, selectall = true, prompt = "<span color='#FF4F4F'>Kill:</span> " 
     }, 
-    mypromptbox,
+    mypromptbox.widget,
 	  function(line)
       local name,pid = line:match("(%a+) (%d+)")
       awful.util.spawn("kill " .. pid, false)
