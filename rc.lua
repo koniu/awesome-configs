@@ -1342,7 +1342,7 @@ globalkeys = join(
 -- }}}
 
 -- {{{ bindings / global / prompts / calc
-  awful.key({ modkey }, "c",
+  awful.key({ modkey, "Mod1" }, "c",
   function ()
     info = true
     awful.prompt.run({ 
@@ -1367,7 +1367,7 @@ globalkeys = join(
 -- }}}
 
 -- {{{ bindings / global / prompts / dict
-  awful.key({ modkey }, "d",
+  awful.key({ modkey, "Mod1" }, "d",
   function ()
     info = true
     local paste = awful.util.pread("xsel -o")
@@ -1387,7 +1387,7 @@ globalkeys = join(
 -- }}}
 
 -- {{{ bindings / global / prompts / kill
-  awful.key({ modkey }, "k",
+  awful.key({ modkey, "Mod1" }, "k",
   function ()
 	  info = true
 	  awful.prompt.run({
