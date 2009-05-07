@@ -122,19 +122,17 @@ shifty.config.apps = {
 
     -- various tweaks
     { match = { "sqlitebrowser"                     },  slave = true, float = false, tag = "sql"      },
+    { match = { "popterm",                          },  ontop = true, float = true, intrusive = true  },
 
     -- slaves
     { match = { "gimp-image-window","xmag","^Downloads$", "ufraw", "qjackctl", "fping", "watch",
                                                     },  slave = true,                                 },
 
     -- floats
-    { match = { "recordMyDesktop", "Skype", "QQQjackctl", "dupa", "MPlayer", "xmag", "gcolor2"
+    { match = { "recordMyDesktop", "Skype", "QQQjackctl", "MPlayer", "xmag", "gcolor2"
                                                     },  float = true,                                 },
-    -- ontop
-    { match = { "dupa",
-                                                    },  ontop = true,                                 },
     -- intruders
-    { match = { "^dialog$", "xmag", "gcolor2", "dupa", "^Download$", 
+    { match = { "^dialog$", "xmag", "gcolor2", "^Download$",
                                                     },  intrusive = true,                             },
     -- all
     { match = { "",                                 },  honorsizehints = false,  
@@ -1179,12 +1177,14 @@ globalkeys = join(
 
 -- {{{ bindings / global / spawns
   awful.doc.set_default({ class = "1. global actions" }),
-  awful.key({ modkey, "Control" }, "F1",          helpmouse, nil, "'whats this'"),
+  awful.key({ modkey            }, "F1",          awful.help.run, nil, "help mode"),
+  awful.key({ modkey, "Control" }, "F1",          awful.help.whatsthis, nil, "what's this"),
   awful.key({ modkey            }, "grave",       function () terminal() end, nil, "terminal"),
   awful.key({ modkey            }, "x",           function () awful.util.spawn("xkill", false) end, nil, "xkill"),
-  awful.key({ modkey, "Mod1"    }, "grave",       function () terminal("-name dupa -fg '#1A1914'  -font 6x10 -g 80x24-10-10") end, nil, "popup terminal"),
-  awful.key({ modkey, "Control" }, "grave",       function () terminal("-name tail -title log/awesome -e tail -fn0 ~/log/awesome") end, nil, "awesome log"),
-  awful.key({                   }, "Print",       function () awful.util.spawn("~/bin/shot", false) end, nil, "screenshot"),
+  awful.key({ modkey, "Mod1"    }, "grave",       function () terminal("-name popterm -font 6x10 -g 80x24-10-10") end, nil, "popup terminal"),
+  awful.key({ modkey, "Control" }, "grave",       function () terminal("-name tail -title log/awesome -e tail -fn0 /home/koniu/log/awesome") end, nil, "awesome log"),
+  awful.key({                   }, "Print",       function () awful.util.spawn("/home/koniu/bin/shot", false) end, nil, "screenshot"),
+  awful.key({ "Control"         }, "Print",       function () awful.util.spawn("/home/koniu/bin/shot -s", false) end, nil, "selective screenshot"),
 -- }}}
 
 -- {{{ bindings / global / tag manipulation
