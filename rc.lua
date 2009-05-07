@@ -1297,11 +1297,13 @@ globalkeys = join(
       local calc = naughty.notify({
         text = expr .. ' = <span color="white">' .. val .. "</span>",
         timeout = 0,
-        run = function(calc)
-          calc.die()
-          awful.util.pread("echo ".. val .. " | xsel -i")
+        run = function(n)
+          n.die()
+          awful.util.spawn_with_shell("echo ".. n.val .. " | xsel -i")
         end,
       })
+      calc.val = val
+
 	  end,
 	  nil, awful.util.getdir("cache") .. "/calc") 
   end, nil, "calculator"),
