@@ -30,6 +30,7 @@ require("wicked")
 
 --{{{ vars / common
 theme_path = "/home/koniu/.config/awesome/theme.dark.master.lua"
+icon_path = "/home/koniu/.config/awesome/icons/"
 beautiful.init(theme_path)
 modkey = "Mod4"
 if screen.count() == 2 then LCD = 2 else LCD = 1 end
@@ -73,23 +74,19 @@ awful.doc.desc_sep = " + "
 --{{{ vars / shifty / config.tags
 shifty.config.tags = {
 
-["sys"]     = { position = 0, exclusive = true, mwfact = 0.75307, screen = LCD,
-                layout = awful.layout.suit.tile.bottom,                                                 },
+["sys"]     = { position = 0, exclusive = true, mwfact = 0.75307, screen = LCD, layout = "tilebottom"   },
 ["jack"]    = { position = 0, exclusive = true, mwfact = 0.25307, nmaster = 2, screen = LCD,
-                icon_only = true, icon = "/home/koniu/.config/awesome/icons/audio-x-generic.png",
-                layout = awful.layout.suit.floating,                                                    },
+                icon_only = true, icon = icon_path .. "audio-x-generic.png", layout = "floating"        },
 ["term"]    = { position = 2, exclusive = true,  screen = LCD,                                          },
 ["www"]     = { position = 3, exclusive = true,  screen = LCD, sweep_delay = 2,                         },
 ["fb"]      = { position = 9, exclusive = true,                                                         },
 ["dir"]     = { rel_index = 1, exclusive = false,                                                       },
-["gqview"]  = { position = 5, spawn = 'gqview', icon_only = true, icon="/usr/share/pixmaps/gqview.png"  },
+["gqview"]  = { rel_index = 1, spawn = 'gqview', icon_only = true, icon="/usr/share/pixmaps/gqview.png" },
 ["gimp"]    = { spawn = "gimp", mwfact = 0.18, icon = "/usr/share/icons/hicolor/16x16/apps/gimp.png",
-                layout = awful.layout.suit.tile, icon_only = true, sweep_delay = 2, exclusive = true,   },
-["xev"]     = { position = 0, spawn = "urxvtc -name xev -e xev -rv", layout = awful.layout.suit.tile,   },
-["live"]    = { icon = "/home/koniu/live.png", layout = awful.layout.suit.floating, sweep_delay = 2,
-                icon_only = true,                                                                       },
-["irc"]     = { position = 1,
-                spawn = "urxvtc -name irc -e screen -t irc -S irc -R irssi -n koniu -c OFTC"            },
+                layout = "tile", icon_only = true, sweep_delay = 2, exclusive = true,                   },
+["xev"]     = { position = 0, spawn = "urxvtc -name xev -e xev -rv", layout = "tile"                    },
+["live"]    = { icon = "/home/koniu/live.png", layout = "floating", sweep_delay = 2, icon_only = true,  },
+["irc"]     = { position = 1, spawn = "urxvtc -name irc -e screen -t irc -S irc -R irssi"               },
 
 }
 --}}}
@@ -102,12 +99,7 @@ shifty.config.apps = {
                                                     },  tag = "sys",	                                },
     { match = { "Iceweasel.*", "Firefox.*"	        },	tag = "www",		                              },
     { match = { "urxvt"                             },	tag = "term",                                 },
-    { match = { "mc"				                        },	tag = "dir",                   
-    	                                                  keys = { key({ modkey, }, "F4", 
-                                                                  function (c) 
-                                                                    dbg{'aaa'}
-                                                                    c:kill() 
-                                                                  end) },                             }, 
+    { match = { "^mc$"                              },  tag = "dir",                                  },
     { match = { "Wine"                              },  tag = "wine",                                 },
     { match = { "Ardour.*", "Jamin",                },  tag = "ardour",                               },
     { match = { "Gmpc",                             },  tag = "mpd",                                  },
@@ -132,21 +124,24 @@ shifty.config.apps = {
     { match = { "sqlitebrowser"                     },  slave = true, float = false, tag = "sql"      },
 
     -- slaves
-    { match = { "gimp-image-window","xmag","^Downloads$", "ufraw", "qjackctl", "fping",
+    { match = { "gimp-image-window","xmag","^Downloads$", "ufraw", "qjackctl", "fping", "watch",
                                                     },  slave = true,                                 },
 
     -- floats
     { match = { "recordMyDesktop", "Skype", "QQQjackctl", "dupa", "MPlayer", "xmag", "gcolor2"
                                                     },  float = true,                                 },
+    -- ontop
+    { match = { "dupa",
+                                                    },  ontop = true,                                 },
     -- intruders
     { match = { "^dialog$", "xmag", "gcolor2", "dupa", "^Download$", 
                                                     },  intrusive = true,                             },
     -- all
     { match = { "",                                 },  honorsizehints = false,  
                                                         buttons = join(
-                                                            awful.button({ }, 1, function (c) client.focus = c; c:raise() end),
-                                                            awful.button({ "Mod1" }, 1, function (c) awful.mouse.client.move() end),
-                                                            awful.button({ "Mod1" }, 3, awful.mouse.client.resize )
+                                                            awful.button({ }, 1, function (c) client.focus = c; c:raise() end, nil, "Focus client"),
+                                                            awful.button({ "Mod1" }, 1, function (c) awful.mouse.client.move() end, nil, "Move client"),
+                                                            awful.button({ "Mod1" }, 3, awful.mouse.client.resize, nil, "Resize client" )
                                                         ),                                            },
 
 }
@@ -170,8 +165,8 @@ for n, v in pairs(gittags) do
   local spawn = "urxvtc -name "..n.."main -title '"..v.main.."' -cd "..v.dir.." -e "..v.main
   local see_www = function() awful.tag.viewonly(shifty.name2tag("www")) end
   local cmds = {
-    log = function() terminal("-name "..n.."pop -hold -title '"..n.." git log' -cd "..v.dir.." -e git -p log") end,
-    diff = function() terminal("-name "..n.."pop -hold -title '"..n.." git diff' -cd "..v.dir.." -e git -p diff --patch-with-stat") end,
+    log = function() terminal("-font 6x10 -name "..n.."pop -hold -title '"..n.." git log' -cd "..v.dir.." -e git -p log") end,
+    diff = function() terminal("-font 6x10 -name "..n.."pop -hold -title '"..n.." git diff' -cd "..v.dir.." -e git -p diff --patch-with-stat") end,
     pull = function() terminal("-name "..n.."pop -hold -title '"..n.." git pull' -cd "..v.dir.." -e git pull") end,
     status = function() terminal("-name "..n.."pop -hold -title '"..n.." git status' -cd "..v.dir.." -e git status") end,
     prompt = function() terminal("-name "..n.."cmd -title '"..n.." git prompt' -cd "..v.dir.." -e zsh") end,
@@ -266,13 +261,12 @@ end
 --}}}
 
 shifty.config.defaults = { 
-    layout = awful.layout.suit.max,
+    layout = "max",
     leave_kills = false,
-    --run = function(tag) naughty.notify({ text = tag.name }) end,
-    --run = function(tag) naughty.notify({ text = "Shifty Created: "    ..(awful.tag.getproperty(tag,"position") or shifty.tag2index(mouse.screen,tag)).. " : "..tag.name }) end
 }
 
 shifty.config.default_name = "?"
+shifty.config.layouts = layouts
 shifty.init()
 --}}}
 
