@@ -273,18 +273,13 @@ shifty.init()
 --{{{ vars / naughty
 
 --  naughty settings
-naughty.config.border_color = 'black'
-naughty.config.font = 'Monospace 7.5'
-naughty.config.icon_size = 32
-naughty.config.width = 300
-naughty.config.position = "top_right"
-naughty.config.spacing = 3
-naughty.config.padding = 5
-naughty.config.margin = 5
-naughty.config.presets.normal.height = 16
---naughty.config.timeout = 0
---naughty.config.hover_timeout = 0.2
-naughty.config.presets.normal.screen = LCD
+naughty.config.spacing = 1
+naughty.config.default_preset = {
+  font = 'Monospace 6.5',
+  border_width = 1,
+  margin = 5,
+  screen = LCD,
+}
 --}}}
 
 --{{{ vars / widgets
