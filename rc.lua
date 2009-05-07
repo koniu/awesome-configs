@@ -19,7 +19,7 @@ function dbg(vars)
         end
         text = text .. " \n" .. a
     end
-    naughty.notify{ text = text, timeout = 0, hover_timeout = 0.2, preset = {height = 16, screen = screen.count() } }
+    naughty.notify{ text = text, timeout = 0, hover_timeout = 0.2, screen = screen.count() }
 end
 --}}}
 
@@ -492,7 +492,7 @@ function ti()
 		  i = i + 1
 	end
 
-	naughty.notify{ text = "<span font_desc=\"Verdana Bold 20\">&lt; " .. t.name .. " &gt;</span>\n"..tostring(t).."\nclients: " .. #t:clients() .. "\n" .. v, timeout = 0, width = "230"}
+	naughty.notify{ text = "<span font_desc=\"Verdana Bold 20\">&lt; " .. t.name .. " &gt;</span>\n"..tostring(t).."\nclients: " .. #t:clients() .. "\n" .. v, timeout = 0 }
 end
 --}}}
 
@@ -939,7 +939,6 @@ function showcalendar(inc_offset)
         calendar = naughty.notify({ 
                     text = os.date("<b><span color=\"white\">%a, %d %B %Y</span></b>\n\n") .. cal, 
                     timeout = 0, hover_timeout = 0.5,
-                    width = 150, 
         })
 end
 
@@ -1329,7 +1328,7 @@ globalkeys = join(
     mypromptbox.widget,
     function(word)
       local fr = awful.util.pread("dict -d wn " .. word .. " 2>&1")
-      naughty.notify({ text = '<span font_desc="Sans 7">'..fr..'</span>', timeout = 0, width = 400 })
+      naughty.notify({ text = '<span font_desc="Sans 7">'..fr..'</span>', timeout = 0 })
     end,
     nil, awful.util.getdir("cache") .. "/dict")
   end, nil, "dictionary"),
