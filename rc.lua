@@ -526,6 +526,13 @@ end
 lidclosed = islidclosed()
 --}}}
 
+--{{{ functions / utficon
+function utficon(code)
+	return 	'<span font_desc="DejaVu Sans 8">&#' .. code .. ';</span>'
+end
+--}}}
+
+
 --}}}
 
 --{{{ widgets
