@@ -287,6 +287,23 @@ config.widgets.space = "   "
 config.widgets.wifi = "wlan0"
 --}}}
 
+--{{{ vars / logwatch
+config.logs = {
+  mpd       = { file = "/home/koniu/.mpd/mpd.log", },
+  aptitude  = { file = "/var/log/aptitude", },
+  syslog    = { file = "/var/log/syslog",
+                ignore = { "Changing fan level" },
+  },
+  awesome   = { file = "/home/koniu/log/awesome",
+                ignore = {
+                  "/var/lib/dpkg", -- aptwidget failure when aptitude running
+                  "wicd", "wired profiles found", -- wicd junk
+                  "seek to:", "Close unzip stream", -- gmpc junk
+                },
+  },
+}
+--}}}
+
 --}}}
 
 --{{{ functions
@@ -528,6 +545,46 @@ lidclosed = islidclosed()
 function utficon(code)
 	return 	'<span font_desc="DejaVu Sans 8">&#' .. code .. ';</span>'
 end
+--}}}
+
+--{{{ functions / logwatch
+
+function logwatch()
+  for k, log in pairs(config.logs) do
+    -- read log file
+    local f = io.open(log.file)
+    local l = f:read("*a")
+    f:close()
+
+    -- first read just set length
+    if not log.len then
+      log.len = #l
+
+    -- if updated
+    elseif log.len < #l then
+      local diff = l:sub(log.len +1, #l-1)
+
+      -- check if ignored
+      local ignored = false
+      for i, phr in ipairs(log.ignore or {}) do
+        if diff:find(phr) then ignored = true; break end
+      end
+
+      -- display log updates
+      if not ignored then
+        naughty.notify{
+          title = '<span color="white">' .. k .. "</span>: " .. log.file,
+          text = awful.util.escape(diff),
+          hover_timeout = 0.2, timeout = 0,
+        }
+      end
+
+      -- set last length
+      log.len = #l
+    end
+  end
+end
+logwatch()
 --}}}
 
 
@@ -1016,6 +1073,7 @@ widgets_right={
 
 --{{{ widgets / hook functions
 function hook_1s()
+  logwatch()
 	local color,color2=''
 	if lidclosed then return end
 
