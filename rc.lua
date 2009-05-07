@@ -825,11 +825,8 @@ function mountlist()
         for i,mnt in ipairs(mnts) do
             local tmp = {}
             local esc=string.gsub(mnt[1],' ','\\ ')
---	    w[i].text = --'<bg image="/home/koniu/.config/awesome/icons/hdd.png" />'.. 
-	    w[i].bg_image = image("/home/koniu/.config/awesome/icons/hdd.png")
-	    w[i].text = "   " .. mnt[1]:gsub(mnt[3],''):upper() .. 
-                        '<span color="' .. beautiful.widget_value .. '">' .. mnt[2] .. '</span>' .. 
---                        '<span color="#333333">' .. mnt[2] .. '</span>' .. 
+            w[i].text = utficon(9187) .. " " .. mnt[1]:gsub(mnt[3],''):upper() ..
+                       '<span color="' .. beautiful.widget_value .. '">' .. mnt[2] .. '</span>' ..
                         config.widgets.space --.. "  "
 			
                         w[i]:buttons(join(
