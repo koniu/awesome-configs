@@ -75,7 +75,7 @@ shifty.config.tags = {
 ["jack"]    = { position = 0, exclusive = true, mwfact = 0.25307, nmaster = 2, screen = LCD,
                 icon_only = true, icon = icon_path .. "audio-x-generic.png", layout = "floating"        },
 ["term"]    = { position = 2, exclusive = true,  screen = LCD,                                          },
-["www"]     = { position = 3, exclusive = true,  screen = LCD, sweep_delay = 2,                         },
+["www"]     = { position = 3, exclusive = true,  screen = LCD, sweep_delay = 3,                         },
 ["fb"]      = { position = 9, exclusive = true,                                                         },
 ["dir"]     = { rel_index = 1, exclusive = false,                                                       },
 ["gqview"]  = { rel_index = 1, spawn = 'gqview', icon_only = true, icon="/usr/share/pixmaps/gqview.png" },
@@ -1293,8 +1293,8 @@ globalkeys = join(
   awful.key({                 }, "XF86AudioNext",  function () awful.util.spawn("mpc --no-status next", false) end),
   awful.key({ "Control"       }, "XF86AudioPrev",  function () awful.util.spawn("mpc --no-status seek -10", false) end),
   awful.key({ "Control"       }, "XF86AudioNext",  function () awful.util.spawn("mpc --no-status seek +10", false) end),
-  awful.key({ "Control"       }, "XF86AudioPlay",  function () awful.util.spawn("mpc --no-status volume -5", false) end),
-  awful.key({ "Control"       }, "XF86AudioStop",  function () awful.util.spawn("mpc --no-status volume +5", false) end),
+  awful.key({ "Mod1", "Mod4"  }, "Down",           function () awful.util.spawn("mpc --no-status volume -5", false) end),
+  awful.key({ "Mod1", "Mod4"  }, "Up",             function () awful.util.spawn("mpc --no-status volume +5", false) end),
 -- }}}
 
 -- {{{ bindings / global / default rc.lua keys
@@ -1471,7 +1471,7 @@ globalkeys = join(
 )
 
 -- {{{ bindings / global / shifty.getpos
-for i=1, ( shifty.config.maxtags or 9 ) do
+for i=0, ( shifty.config.maxtags or 9 ) do
   table.insert(globalkeys, key({ modkey }, i,
   function ()
     local t = awful.tag.viewonly(shifty.getpos(i))
