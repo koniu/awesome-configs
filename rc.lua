@@ -64,9 +64,6 @@ config.scroll_offset = 2
 join = awful.util.table.join
 doc = awful.doc
 
-awful.doc.desc_format = "%-30s %s"
-awful.doc.desc_sep = " + "
-
 --}}}
 
 --{{{ vars / shifty
@@ -215,7 +212,7 @@ for n, v in pairs(gittags) do
   --}}}
 
   --{{{ vars / shifty / gittags(tm) / tag settings + bindings
-  awful.doc.set_default({ class = "gittags(tm)" })
+  awful.doc.set_default({ group = "gittags(tm)" })
   shifty.config.tags[n] = {
     position = 9, exclusive = true,  screen = LCD, layout = awful.layout.suit.tile.bottom, spawn = spawn,
     keys  = awful.util.table.join(
@@ -231,10 +228,11 @@ for n, v in pairs(gittags) do
               awful.key({ modkey }, "grave", cmds.prompt, nil, "cmdline")
             ),
   }
+  awful.doc.set_default({ })
   --}}}
 
   --{{{ vars / shifty / gittags(tm) / client settings + bindings
-  awful.doc.set_default({ class = "gittags(tm) / client" })
+  awful.doc.set_default({ group = "gittags(tm) / client" })
   -- match to tags
   table.insert(shifty.config.apps,
                { match = { n.."main$", n.."cmd$", n.."pop$" }, tag = n })
@@ -253,6 +251,7 @@ for n, v in pairs(gittags) do
                { match = { n.." git "..m },
                  keys = join(awful.key({"Mod1", modkey}, "l", function(c) c:kill(); f() end, nil, "reload client")), })
   end
+  awful.doc.set_default({ })
   --}}}
 
 end
@@ -869,6 +868,7 @@ function mountlist()
         if len < #mnts then
             for i = len, #mnts do
                 w[i] = widget({ type = "textbox", align='right' })
+                awful.doc.set(w[i], { name = "mountwidget", text = "Mount widget", class = "widgets" })
             end
         -- Remove widgets
         elseif len > #mnts then
@@ -885,12 +885,12 @@ function mountlist()
                         config.widgets.space --.. "  "
 			
                         w[i]:buttons(join(
-                            awful.button({}, 1, function () terminal(" -name mc -geometry 169x55 -bd \\".. beautiful.border_focus .." -e mc " .. esc) end),
+                            awful.button({}, 1, function () terminal(" -name mc -geometry 169x55 -bd \\".. beautiful.border_focus .." -e mc " .. esc) end, nil, "Browse"),
                             awful.button({}, 3, function ()
                                 awful.util.spawn("eject " .. esc, false)
                                 awful.util.spawn("pumount " .. esc, false)
                                 --awful.util.spawn("pumount -l " .. esc)
-			    end)
+			    end, nil, "Unmount")
 			))
         end
     end
@@ -959,6 +959,7 @@ end
 
 --{{{ widgets / clock
 clockwidget = widget({ type = "textbox", name = "clockwidget", align = "right" })
+awful.doc.set(clockwidget, { text = "System time", class = "widgets", name = "clockwidget" })
 
 calendar = nil
 local offset = 0 
@@ -991,11 +992,11 @@ function showcalendar(inc_offset)
 end
 
 clockwidget:buttons(join(
-  awful.button({ }, 1, function () showcalendar(-1) end),
-  awful.button({ }, 2, function () showcalendar(666) end),
-  awful.button({ }, 3, function () showcalendar(1) end),
-  awful.button({ }, 4, function () showcalendar(-1) end),
-  awful.button({ }, 5, function () showcalendar(1) end)
+  awful.button({ }, 1, function () showcalendar(-1) end, nil, "Show previous month"),
+  awful.button({ }, 2, function () showcalendar(666) end, nil, "Show current month"),
+  awful.button({ }, 3, function () showcalendar(1) end, nil, "Show next month"),
+  awful.button({ }, 4, function () showcalendar(-1) end, nil, "Show previous month"),
+  awful.button({ }, 5, function () showcalendar(1) end, nil, "Show next month")
 ))
 
 clockwidget.mouse_enter = function() showcalendar(0) end
@@ -1234,7 +1235,7 @@ end
 globalkeys = join(
 
 -- {{{ bindings / global / spawns
-  awful.doc.set_default({ class = "1. global actions" }),
+  awful.doc.set_default({ group = "1. global actions" }),
   awful.key({ modkey            }, "F1",          awful.help.run, nil, "help mode"),
   awful.key({ modkey, "Control" }, "F1",          awful.help.whatsthis, nil, "what's this"),
   awful.key({ modkey            }, "grave",       function () terminal() end, nil, "terminal"),
@@ -1246,7 +1247,7 @@ globalkeys = join(
 -- }}}
 
 -- {{{ bindings / global / tag manipulation
-  awful.doc.set_default({ class = "2. tag manipulation" }),
+  awful.doc.set_default({ group = "2. tag manipulation" }),
   awful.key({                   }, "XF86Back",    awful.tag.viewprev, nil, "previous tag"),
   awful.key({                   }, "XF86Forward", awful.tag.viewnext, nil, "next tag"),
   awful.key({  modkey           }, "XF86Back",    shifty.shift_prev, nil, "move tag left" ),
@@ -1261,7 +1262,7 @@ globalkeys = join(
 -- }}}
 
 -- {{{ bindings / global / client manipulation
-  awful.doc.set_default({ class = "3. client manipulation" }),
+  awful.doc.set_default({ group = "3. client manipulation" }),
   awful.key({ "Shift"           }, "XF86Back",    shifty.send_prev, nil, "move to prev tag"),
   awful.key({ "Shift"           }, "XF86Forward", shifty.send_next, nil, "move to next tag"),
   awful.key({ "Control"         }, "XF86Back",    function () awful.client.focus.byidx(-1);  if client.focus then client.focus:raise() end end, nil, "focus previous"),
@@ -1283,7 +1284,7 @@ globalkeys = join(
 
 -- {{{ bindings / global / default rc.lua keys
 
-  awful.doc.set_default({ class = "default" }),
+  awful.doc.set_default({ group = "default" }),
   awful.key({ modkey            }, "Escape",      awful.tag.history.restore, nil, "prev selected tags"),
   awful.key({ modkey, "Control" }, "j",           function () awful.screen.focus(1) end, nil, "next screen"),
   awful.key({ modkey, "Control" }, "k",           function () awful.screen.focus(-1) end, nil, "prev screen"),
@@ -1308,7 +1309,7 @@ globalkeys = join(
 
 -- {{{ bindings / global / prompts
 
-  awful.doc.set_default({ class = "9. prompts" }),
+  awful.doc.set_default({ group = "9. prompts" }),
 
 -- {{{ bindings / global / prompts / run
   awful.key({ "Mod1" }, "F2", function () mypromptbox:run() end, nil, "run prompt"),
@@ -1534,8 +1535,7 @@ end
 
 --{{{ bindings / client
 clientkeys = join(
-  awful.doc.set_default({ class = "3. client manipulation" }),
-  awful.key({ modkey            }, "F1",      help, nil, "this help"),
+  awful.doc.set_default({ group = "3. client manipulation" }),
   awful.key({ modkey            }, "m",       function (c) c.maximized_horizontal = not c.maximized_horizontal
                                                      c.maximized_vertical = not c.maximized_vertical end, nil, "maximize"),
   awful.key({ modkey            }, "f",       function (c) c.fullscreen = not c.fullscreen end, nil, "fullscreen"),

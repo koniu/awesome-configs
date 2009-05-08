@@ -5,7 +5,6 @@
 theme = {}
 
 theme.font = "ProggyTinyTTSZ 12"
-theme.help_font = "Monospace 6.5"
 theme.tasklist_font = "Sans 7"
 theme.titlebar_font = "Sans 7"
 
@@ -24,6 +23,9 @@ theme.border_marked = "#91231c"
 
 theme.widget_label = "#333333"
 theme.widget_value = "#555555"
+
+theme.help_font = "Monospace 6.5"
+theme.help_highlight = theme.fg_urgent
 
 theme.tasklist_floating_icon = "~/.config/awesome/icons/floating.png"
 
