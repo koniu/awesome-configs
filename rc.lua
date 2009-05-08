@@ -486,34 +486,49 @@ end
 
 --{{{ functions / taginfo
 function ti()
-	local v = ""
-	local t = awful.tag.selected() 
-	local i = 1
+  local t = awful.tag.selected()
+  local v = ""
 
-	  for op, val in pairs(awful.tag.getdata(t)) do
-	          v =  v .. "\n" .. i .. ": " .. op .. " = " .. tostring(val)
-		  i = i + 1
-	end
+  v = v .. "<span font_desc=\"Verdana Bold 20\">" .. t.name .. "</span>\n"
+  v = v .. tostring(t) .. "\n\n"
+  v = v .. "clients: " .. #t:clients() .. "\n\n"
 
-	naughty.notify{ text = "<span font_desc=\"Verdana Bold 20\">&lt; " .. t.name .. " &gt;</span>\n"..tostring(t).."\nclients: " .. #t:clients() .. "\n" .. v, timeout = 0 }
+  local i = 1
+  for op, val in pairs(awful.tag.getdata(t)) do
+    v =  v .. string.format("%2s: %-12s = %s\n", i, op, tostring(val))
+    i = i + 1
+  end
+
+	naughty.notify{ text = v, timeout = 0, margin = 10 }
 end
 --}}}
 
 --{{{ functions / clientinfo
 function ci()
-	local v = ""
-	local c = client.focus
+  local v = ""
+
+  -- object
+  local c = client.focus
+  v = v .. tostring(c)
+
+  -- geometry
+  local cc = c:geometry()
+  local signx = (cc.x > 0 and "+") or ""
+  local signy = (cc.y > 0 and "+") or ""
+  v = v .. " @ " .. cc.width .. 'x' .. cc.height .. signx .. cc.x .. signy .. cc.y .. "\n\n"
+
   local inf = {
-    "id", "group_id", "leader_id", "name", "icon_name", "skip_taskbar", "type", "class", "role", "instance", "pid", "machine", "icon_name", "screen",
-    "hide", "minimize", "size_hints_honor", "titlebar", "urgent", "focus", "opacity", "ontop", "above", "below",
-    "fullscreen", "transient_for",
+    "name", "icon_name", "type", "class", "role", "instance", "pid",
+    "icon_name", "skip_taskbar", "id", "group_id", "leader_id", "machine",
+    "screen", "hide", "minimize", "size_hints_honor", "titlebar", "urgent",
+    "focus", "opacity", "ontop", "above", "below", "fullscreen", "transient_for"
    }
 
   for i = 1, #inf do
-    v =  v .. "\n" .. i .. ": " .. inf[i] .. " = " .. tostring(c[inf[i]])
+    v =  v .. string.format("%2s: %-16s = %s\n", i, inf[i], tostring(c[inf[i]]))
   end
 
-	naughty.notify{ text = v, timeout = 0, width = 230}
+  naughty.notify{ text = v, timeout = 0, margin = 10 }
 end
 --}}}
 
