@@ -84,6 +84,7 @@ shifty.config.tags = {
 ["xev"]     = { position = 0, spawn = "urxvtc -name xev -e xev -rv", layout = "tile"                    },
 ["live"]    = { icon = "/home/koniu/live.png", layout = "floating", sweep_delay = 2, icon_only = true,  },
 ["irc"]     = { position = 1, spawn = "urxvtc -name irc -e screen -t irc -S irc -R irssi"               },
+["ard"]     = { layout = "tilebottom", mwfact = 0.8, exclusive = true                                   },
 
 }
 --}}}
@@ -116,6 +117,9 @@ shifty.config.apps = {
     { match = { "Informat.*CK Audio Connection Kit" },  kill = true,                                  },
     { match = { "qjackctlMessagesForm",
                 "Error.*Connection Kit"             },  nopopup = true,                               },
+    -- ardour
+    { match = { "Ardour"                            },  tag = "ard",                                  },
+    { match = { "ardour_plugin_editor"              },  slave = true,                                 },
 
     -- various tweaks
     { match = { "sqlitebrowser"                     },  slave = true, float = false, tag = "sql"      },
