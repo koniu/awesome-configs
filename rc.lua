@@ -618,7 +618,7 @@ wifiwidget:buttons(join(
   awful.button({}, 3, function () terminal("-name iwconfig -e watch -n1 /sbin/iwconfig "..config.widgets.wifi) end, nil, "show iwconfig")
 ))
 
-awful.doc.set(wifiwidget, { class = "widgets", text = "This widget shows WIFI range", name = "wifiwidget" })
+awful.doc.set(wifiwidget, { class = "widgets", description = "This widget shows WIFI range", name = "wifiwidget" })
 
 function dump_autoap()
 	os.execute('curl -s http://gw/user/autoap.htm  > /tmp/.awesome.autoap &')
@@ -883,7 +883,7 @@ function mountlist()
         if len < #mnts then
             for i = len, #mnts do
                 w[i] = widget({ type = "textbox", align='right' })
-                awful.doc.set(w[i], { name = "mountwidget", text = "Mount widget", class = "widgets" })
+                awful.doc.set(w[i], { name = "mountwidget", description = "Mount widget", class = "widgets" })
             end
         -- Remove widgets
         elseif len > #mnts then
@@ -974,7 +974,7 @@ end
 
 --{{{ widgets / clock
 clockwidget = widget({ type = "textbox", name = "clockwidget", align = "right" })
-awful.doc.set(clockwidget, { text = "System time", class = "widgets", name = "clockwidget" })
+awful.doc.set(clockwidget, { description = "System time", class = "widgets", name = "clockwidget" })
 
 calendar = nil
 local offset = 0 
@@ -1236,9 +1236,8 @@ for s = 1, screen.count() do
         mytasklist[s],
 	
     }
-    tabbar[s].screen = s
 --    tabbar[s].ontop = true
-    awful.doc.set(tabbar[s], { name = "tabbar", class = "panels", text = "Panel with tag/task-list" })
+    awful.doc.set(tabbar[s], { name = "tabbar", class = "panels", description  = "Panel with tag/task-list" })
 end
 -- }}}
 
