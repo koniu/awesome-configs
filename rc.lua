@@ -302,9 +302,11 @@ config.logs = {
                   "/var/lib/dpkg", -- aptwidget failure when aptitude running
                   "wicd", "wired profiles found", -- wicd junk
                   "seek to:", "Close unzip stream", -- gmpc junk
+                  "^nolog"
                 },
   },
 }
+config.logs.shutup = nil
 --}}}
 
 --}}}
@@ -589,7 +591,7 @@ function logwatch()
       end
 
       -- display log updates
-      if not ignored then
+      if not ignored or config.logs.shutup then
         naughty.notify{
           title = '<span color="white">' .. k .. "</span>: " .. log.file,
           text = awful.util.escape(diff),
