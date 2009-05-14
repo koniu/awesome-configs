@@ -1156,23 +1156,18 @@ end
 --{{{ panels / widget
 widgetbar = {}
 for s = LCD, screen.count() do
-    widgetbar[s] = wibox({ position = "top", name = "widgetbar" .. s,
-                                 fg = beautiful.fg_normal, bg = beautiful.bg_normal, height = 16 })
-    -- Add widgets to the statusbar - order matters
-    widgetbar[s].widgets = awful.util.table.join(widgets_left,widgets_right)
-    widgetbar[s].screen = s
---widgetbar[s].ontop = true
-  awful.doc.set(widgetbar[s], { name = "widgetbar", class = "panels", text = "Panel with widgets" })
+  widgetbar[s] = awful.wibox({ position = "top", name = "widgetbar" .. s, screen = s,
+                               fg = beautiful.fg_normal, bg = beautiful.bg_normal, height = 16 })
+  widgetbar[s].widgets = awful.util.table.join(widgets_left,widgets_right)
+  awful.doc.set(widgetbar[s], { name = "widgetbar", class = "panels", description = "Panel with widgets" })
 end
 --}}}
 
 --{{{ panels / separator
 separatorbar = {}
 for s = 1, screen.count() do
-    separatorbar[s] = wibox({ position = "top", name = "separatorbar" .. s, bg = beautiful.bg_normal, height = 3 })
-    separatorbar[s].widgets = { widget({type="textbox"}) }
-   separatorbar[s].screen = s
---   separatorbar[s].ontop = true
+  separatorbar[s] = awful.wibox({ position = "top", name = "separatorbar" .. s,
+                                  bg = beautiful.bg_normal, height = 3, screen = s })
 end
 --}}}
 
@@ -1213,37 +1208,31 @@ mytasklist.buttons = join(
 mytagprompt = {}
 
 for s = 1, screen.count() do
+  -- Create a tag prompt widget
+  mytagprompt[s] = widget({	type = 'textbox', })
 
-    -- Create a tag prompt widget
-    mytagprompt[s] = widget({	type = 'textbox', })
+  -- Create a taglist widget
+  mytaglist[s] = awful.widget.taglist(s, awful.widget.taglist.label.all, mytaglist.buttons)
+  awful.doc.set(mytaglist[s], { name = "mytaglist", class = "widgets", description = "Taglist widget" })
 
-    -- Create a taglist widget
-    mytaglist[s] = awful.widget.taglist.new(s, awful.widget.taglist.label.all, mytaglist.buttons)
-    awful.doc.set(mytaglist[s], { name = "mytaglist", class = "widgets", text = "Taglist widget" })
-
-    -- Create a tasklist widget
-    mytasklist[s] = awful.widget.tasklist.new(function(c)
-                                                  return awful.widget.tasklist.label.currenttags(c, s)
-                                              end, mytasklist.buttons)
-    awful.doc.set(mytasklist[s], { name = "mytasklist", class = "widgets", text = "Tasklist widget" })
-    -- Create the wibox
+  -- Create a tasklist widget
+  mytasklist[s] = awful.widget.tasklist(
+    function(c) return awful.widget.tasklist.label.currenttags(c, s) end, mytasklist.buttons)
+  awful.doc.set(mytasklist[s], { name = "mytasklist", class = "widgets", description = "Tasklist widget" })
 end
 shifty.taglist = mytaglist
 
 tabbar = {}
 for s = 1, screen.count() do
-    tabbar[s] = wibox({ position = "top", name = "tabbar" .. s,
-                                 fg = beautiful.fg_normal, bg = beautiful.bg_normal })
-    -- Add widgets to the statusbar - order matters
-    tabbar[s].widgets = {
-        mytaglist[s],
-        mytagprompt[s],
-        mylayoutbox[s],
-        mytasklist[s],
-	
-    }
---    tabbar[s].ontop = true
-    awful.doc.set(tabbar[s], { name = "tabbar", class = "panels", description  = "Panel with tag/task-list" })
+  tabbar[s] = awful.wibox({ position = "top", name = "tabbar" .. s, screen = s,
+                            fg = beautiful.fg_normal, bg = beautiful.bg_normal })
+  tabbar[s].widgets = {
+    mytaglist[s],
+    mytagprompt[s],
+    mylayoutbox[s],
+    mytasklist[s],
+  }
+  awful.doc.set(tabbar[s], { name = "tabbar", class = "panels", description  = "Panel with tag/task-list" })
 end
 -- }}}
 
