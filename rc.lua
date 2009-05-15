@@ -1264,13 +1264,15 @@ globalkeys = join(
 -- {{{ bindings / global / spawns
   awful.doc.set_default({ group = "1. global actions" }),
   awful.key({ modkey            }, "F1",          awful.help.run, nil, "help mode"),
+  awful.key({ modkey            }, "slash",       awful.help.promptline, nil, "help prompt"),
   awful.key({ modkey, "Control" }, "F1",          awful.help.whatsthis, nil, "what's this"),
   awful.key({ modkey            }, "grave",       function () terminal() end, nil, "terminal"),
   awful.key({ modkey            }, "x",           function () awful.util.spawn("xkill", false) end, nil, "xkill"),
   awful.key({ modkey, "Mod1"    }, "grave",       function () terminal("-name popterm -font 6x10 -g 80x24-10-10") end, nil, "popup terminal"),
   awful.key({ modkey, "Control" }, "grave",       function () terminal("-name tail -title log/awesome -e tail -fn0 /home/koniu/log/awesome") end, nil, "awesome log"),
-  awful.key({                   }, "Print",       function () awful.util.spawn("/home/koniu/bin/shot", false) end, nil, "screenshot"),
-  awful.key({ "Control"         }, "Print",       function () awful.util.spawn("/home/koniu/bin/shot -s", false) end, nil, "selective screenshot"),
+  awful.key({                   }, "Print",       function () awful.util.spawn_with_shell("~/bin/shot") end, nil, "screenshot"),
+  awful.key({ "Control"         }, "Print",       function () awful.util.spawn_with_shell("sleep 1s; ~/bin/shot -s") end, nil, "selective screenshot"),
+  awful.key({ "Mod1"            }, "Print",       function () awful.util.spawn_with_shell("sleep 5s; ~/bin/shot") end, nil, "delayed screenshot"),
 -- }}}
 
 -- {{{ bindings / global / tag manipulation
@@ -1528,7 +1530,6 @@ clientkeys = join(
   awful.key({ "Mod1", "Mod4"    }, "i",       ci),
   awful.key({ "Mod1", "Mod4"    }, "a",       function(c) c.ontop = not c.ontop end, nil, "toggle on top")
 )
---table.insert(globalkeys, key({ "Shift", }, "F5", function (c) root.fake_input("key_press",23); end)) --root.fake_input("key_release",23); dbg{'aaa'} end))
 --}}}
 
 -- {{{ bindings / set keys and buttons
