@@ -358,39 +358,38 @@ end
 --{{{ functions / scrollclient
 -- scrolling clients bigger than workspace
 function scrollclient()
-	local c = client.focus
-	if not c then return end
+  local c = client.focus
+  if not c then return end
 
-	local ss = screen[c.screen].geometry
-	local ws = screen[c.screen].workarea
-	local cc = c:geometry()
-	local mc = mouse.coords()
-	local step = 0
+  local ss = screen[c.screen].geometry
+  local ws = awful.wibox.get_workarea(c.screen)
+  local cc = c:geometry()
+  local mc = mouse.coords()
+  local step = 0
 
-	-- left edge
-	if mc.x < config.scroll_offset and cc.x < 0 then
-		step = math.min(config.step, -cc.x)
-		awful.client.moveresize(step,0,0,0,c)
-	end
-		
-	-- right edge
-	if mc.x > ws.width - config.scroll_offset and cc.x + cc.width > ws.width + 1 then
-		step = math.min(config.step, cc.x + cc.width-ws.width)
-		awful.client.moveresize(-step,0,0,0,c)
-	end
+  -- left edge
+  if mc.x < config.scroll_offset and cc.x < 0 then
+    step = math.min(config.step, -cc.x)
+    awful.client.moveresize(step,0,0,0,c)
+  end
 
-	-- top edge
-	if mc.y < config.scroll_offset and cc.y < ss.height - ws.height then
-		step = math.min(config.step, ss.height - ws.height - cc.y - 1) -- FIXME: -1 is for the frame to hide under panels BROKEN
-		awful.client.moveresize(0,step,0,0,c)
-	end
+  -- right edge
+  if mc.x > ws.width - config.scroll_offset and cc.x + cc.width > ws.width + 1 then
+    step = math.min(config.step, cc.x + cc.width-ws.width)
+    awful.client.moveresize(-step,0,0,0,c)
+  end
 
-	-- bottom edge
-	if mc.y > ws.height - config.scroll_offset and cc.y + cc.height > ss.height then
-		step = math.min(config.step, cc.y + cc.height - ss.height)
-		awful.client.moveresize(0,-step,0,0,c)
-	end
+  -- top edge
+  if mc.y < config.scroll_offset and cc.y < ss.height - ws.height then
+    step = math.min(config.step, ss.height - ws.height - cc.y - 1) -- FIXME: -1 is for the frame to hide under panels BROKEN
+    awful.client.moveresize(0,step,0,0,c)
+  end
 
+  -- bottom edge
+  if mc.y > ws.height - config.scroll_offset and cc.y + cc.height > ss.height then
+    step = math.min(config.step, cc.y + cc.height - ss.height)
+    awful.client.moveresize(0,-step,0,0,c)
+  end
 end
 --}}}
 
