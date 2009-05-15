@@ -1070,7 +1070,6 @@ end
 -- separator widgets
 sep_l = widget({
 	type = 'textbox',
-	name = 'sep_l',
 	align = 'left',
 })
 sep_l.text='<span font_desc="verdana 4"> </span>'
@@ -1247,7 +1246,9 @@ for s = 1, screen.count() do
   tabbar[s].widgets = {
     mytaglist[s],
     mytagprompt[s],
+    sep_l,
     mylayoutbox[s],
+    sep_l,
     mytasklist[s],
   }
   awful.doc.set(tabbar[s], { name = "tabbar", class = "panels", description  = "Panel with tag/task-list" })
@@ -1600,7 +1601,10 @@ end)
 awful.hooks.arrange.register(function (screen)
     local layout = awful.layout.getname(awful.layout.get(screen))
     if layout and beautiful["layout_" ..layout] then
-        mylayoutbox[screen].image = image(beautiful["layout_" .. layout])
+      local img = image(beautiful["layout_" .. layout])
+        mylayoutbox[screen].image = img
+        mylayoutbox[screen].resize = false
+        mylayoutbox[screen].valign = "center"
     else
         mylayoutbox[screen].image = nil
     end

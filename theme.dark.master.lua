@@ -36,15 +36,16 @@ theme.menu_width    = 100
 
 theme.wallpaper_cmd = { "xsetroot -solid '#524E41'" }
 
-theme.layout_fairh = "/usr/share/awesome/themes/default/layouts/fairhw.png"
-theme.layout_fairv = "/usr/share/awesome/themes/default/layouts/fairvw.png"
-theme.layout_floating = "/usr/share/awesome/themes/default/layouts/floatingw.png"
-theme.layout_magnifier = "/usr/share/awesome/themes/default/layouts/magnifierw.png"
-theme.layout_max = "/usr/share/awesome/themes/default/layouts/maxw.png"
-theme.layout_tilebottom = "/usr/share/awesome/themes/default/layouts/tilebottomw.png"
-theme.layout_tileleft = "/usr/share/awesome/themes/default/layouts/tileleftw.png"
-theme.layout_tile = "/usr/share/awesome/themes/default/layouts/tilew.png"
-theme.layout_tiletop = "/usr/share/awesome/themes/default/layouts/tiletopw.png"
+local layout_icons = "/home/koniu/.config/awesome/icons/layouts/"
+theme.layout_fairh = layout_icons .. "fairh.png"
+theme.layout_fairv = layout_icons .. "fairv.png"
+theme.layout_floating = layout_icons .. "floating.png"
+theme.layout_magnifier = layout_icons .. "magnifier.png"
+theme.layout_max = layout_icons .. "max.png"
+theme.layout_tilebottom = layout_icons .. "tilebottom.png"
+theme.layout_tileleft = layout_icons .. "tileleft.png"
+theme.layout_tile = layout_icons .. "tile.png"
+theme.layout_tiletop = layout_icons .. "tiletop.png"
 
 theme.awesome_icon = "/usr/share/awesome/icons/awesome16.png"
 
