@@ -55,6 +55,7 @@ layouts =
 config = {}
 config.terminal = "urxvtc"
 
+config.tasklist_noicons = true
 -- step for scrolling
 config.step = 15
 
@@ -1233,7 +1234,15 @@ for s = 1, screen.count() do
 
   -- Create a tasklist widget
   mytasklist[s] = awful.widget.tasklist(
-    function(c) return awful.widget.tasklist.label.currenttags(c, s) end, mytasklist.buttons)
+    function(c)
+	    local text, bg, status_image, icon = awful.widget.tasklist.label.currenttags(c, s)
+      if not config.tasklist_noicons then
+        return text, bg, status_image, icon
+      else
+        return text, bg, status_image
+      end
+    end,
+  mytasklist.buttons)
   awful.doc.set(mytasklist[s], { name = "mytasklist", class = "widgets", description = "Tasklist widget" })
 end
 shifty.taglist = mytaglist
