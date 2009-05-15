@@ -502,11 +502,13 @@ function ti()
 
   local i = 1
   for op, val in pairs(awful.tag.getdata(t)) do
+    if op == "layout" then val = awful.layout.getname(val) end
+    if op == "keys" then val = '#' .. #val end
     v =  v .. string.format("%2s: %-12s = %s\n", i, op, tostring(val))
     i = i + 1
   end
 
-	naughty.notify{ text = v, timeout = 0, margin = 10 }
+	naughty.notify{ text = v:sub(1,#v-1), timeout = 0, margin = 10 }
 end
 --}}}
 
