@@ -299,6 +299,7 @@ naughty.config.default_preset = {
 --{{{ vars / widgets
 config.widgets = {}
 config.widgets.watchmount = { "/dev/sda2", "/media/", "/mnt/" }
+config.widgets.autostart = { photo = "gq" }
 config.widgets.space = "   "
 config.widgets.wifi = "wlan0"
 --}}}
@@ -939,7 +940,19 @@ function mountlist()
                         config.widgets.space --.. "  "
 			
                         w[i]:buttons(join(
-                            awful.button({}, 1, function () terminal(" -name mc -geometry 169x55 -bd \\".. beautiful.border_focus .." -e mc " .. esc) end, nil, "Browse"),
+                            awful.button({}, 1, function ()
+                              for m, spwn in pairs(config.widgets.autostart) do
+                                if mnt[1]:lower():find(m) then
+                                  awful.util.spawn_with_shell(spwn .. " " .. esc)
+                                  break
+                                else
+                                  terminal(" -name mc -geometry 169x55 -bd \\".. beautiful.border_focus .." -e mc " .. esc)
+                                end
+                              end
+                            end, nil, "Browse (autostart)"),
+                            awful.button({}, 2, function ()
+                                  terminal(" -name mc -geometry 169x55 -bd \\".. beautiful.border_focus .." -e mc " .. esc)
+                            end, nil, "Browse"),
                             awful.button({}, 3, function ()
                                 awful.util.spawn("eject " .. esc, false)
                                 awful.util.spawn("pumount " .. esc, false)
