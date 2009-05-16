@@ -80,7 +80,8 @@ shifty.config.tags = {
 ["www"]     = { position = 3, exclusive = true,  screen = LCD, sweep_delay = 3,                         },
 ["fb"]      = { position = 9, exclusive = true,                                                         },
 ["dir"]     = { rel_index = 1, exclusive = false,                                                       },
-["gqview"]  = { rel_index = 1, spawn = 'gqview', icon_only = true, icon="/usr/share/pixmaps/gqview.png" },
+["gq"]      = { rel_index = 1, icon_only = true, icon="/usr/share/pixmaps/gqview.png",
+                max_clients = 2, spawn = 'gq',                                                          },
 ["gimp"]    = { spawn = "gimp", mwfact = 0.18, icon = "/usr/share/icons/hicolor/16x16/apps/gimp.png",
                 layout = "tile", icon_only = true, sweep_delay = 2, exclusive = true,                   },
 ["xev"]     = { position = 0, spawn = "urxvtc -name xev -e xev -rv", layout = "tile"                    },
@@ -122,6 +123,16 @@ shifty.config.apps = {
     -- ardour
     { match = { "Ardour"                            },  tag = "ard",                                  },
     { match = { "ardour_plugin_editor"              },  slave = true,                                 },
+
+    -- geeqie
+    { match = { "^Geeqie$"                          },  tag = "gq"                                    },
+    { match = { "Full screen...Geeqie"              },  intrusive = true                              },
+    { match = { "Tools...Geeqie"                    },
+      keys = join(
+        awful.key({}, "Escape", function(c) awful.util.spawn("kill " .. c.pid) end, nil, { group = "3. client manipulation", text = "quit" }),
+        awful.key({modkey}, "q", function(c) awful.util.spawn("kill " .. c.pid) end, nil, { group = "3. client manipulation", text = "quit" })
+      )
+    },
 
     -- various tweaks
     { match = { "sqlitebrowser"                     },  slave = true, float = false, tag = "sql"      },
@@ -297,13 +308,17 @@ config.logs = {
   mpd       = { file = "/home/koniu/.mpd/mpd.log", },
   aptitude  = { file = "/var/log/aptitude", },
   syslog    = { file = "/var/log/syslog",
-                ignore = { "Changing fan level" },
+                ignore = {
+                  "Changing fan level",
+                  "run-parts", -- cron
+                },
   },
   awesome   = { file = "/home/koniu/log/awesome",
                 ignore = {
                   "/var/lib/dpkg", -- aptwidget failure when aptitude running
                   "wicd", "wired profiles found", -- wicd junk
                   "seek to:", "Close unzip stream", -- gmpc junk
+                  "geeqie", "LIRC", -- geeqie junk
                   "^nolog"
                 },
   },
