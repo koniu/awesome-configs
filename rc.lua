@@ -104,16 +104,15 @@ shifty.config.apps = {
     { match = { "Wine"                              },  tag = "wine",                                 },
     { match = { "Ardour.*", "Jamin",                },  tag = "ardour",                               },
     { match = { "Gmpc",                             },  tag = "mpd",                                  },
-
-    { match = { "Live",                             }, 	tag = "live", nopopup = true, 
-                                                        geometry = { 0, 34, 1400, 1000 },             },
-
     { match = { "foobar2000.exe",                   },  tag = "fb", nopopup = true,                   },
     { match = { "Deluge", "nicotine"                },  tag = "dl",                                   },
     { match = { "Mplayer",                          },  tag = "mplayer",                              },
     { match = { "^Acroread.*"                       },  tag = "pdf",                                  },
     { match = { "^irc$",                            },  tag = "irc",                                  },
 
+    -- ableton live
+    { match = { "Live",                             }, 	tag = "live", nopopup = true,
+                                                        geometry = { 0, 34, 1400, 1000 },             },
     -- qjackctl tweaks
     { match = { "jackctl"                           },  tag = "jack",                                 },
     { match = { "Informat.*CK Audio Connection Kit" },  kill = true,                                  },
