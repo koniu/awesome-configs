@@ -140,6 +140,8 @@ shifty.config.apps = {
     -- various tweaks
     { match = { "sqlitebrowser"                     },  slave = true, float = false, tag = "sql"      },
     { match = { "popterm",                          },  ontop = true, float = true, intrusive = true  },
+    { match = { "htop"                              },
+      keys = join(awful.key({}, "Delete", function(c) sendkey(75); sendkey(36) end))                  },
 
     -- slaves
     { match = { "gimp-image-window","xmag","^Downloads$", "ufraw", "qjackctl", "fping", "watch",
@@ -1313,6 +1315,7 @@ globalkeys = join(
   awful.key({                   }, "Print",       function () awful.util.spawn_with_shell("~/bin/shot") end, nil, "screenshot"),
   awful.key({ "Control"         }, "Print",       function () awful.util.spawn_with_shell("sleep 1s; ~/bin/shot -s") end, nil, "selective screenshot"),
   awful.key({ "Mod1"            }, "Print",       function () awful.util.spawn_with_shell("sleep 5s; ~/bin/shot") end, nil, "delayed screenshot"),
+  awful.key({                   }, "XF86Launch1", function () terminal("-name htop -e htop --sort-key PERCENT_CPU") end),
 -- }}}
 
 -- {{{ bindings / global / tag manipulation
