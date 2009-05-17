@@ -1202,17 +1202,17 @@ hook_3s()
 function hook_5s ()
 	if lidclosed then return end
 	batterywidget.text = get_bat()
-	get_mail()
+--	get_mail()
 	get_apt()
-	dump_autoap()
-	get_autoap()
+--	dump_autoap()
+--	get_autoap()
 end
 hook_5s()
 
 function hook_1m ()
 	lidclosed = islidclosed()
 	if lidclosed then return end
-	dump_mail()
+--	dump_mail()
 end
 
 function hook_10m ()
