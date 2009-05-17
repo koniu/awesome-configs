@@ -667,7 +667,6 @@ else
 end
 --}}}
 
-
 --}}}
 
 --{{{ widgets
@@ -1491,8 +1490,8 @@ globalkeys = join(
     }, 
     mypromptbox.widget,
 	  function(line)
-      local name,pid = line:match("(%a+) (%d+)")
-      awful.util.spawn("kill " .. pid, false)
+      local name,pid,sig = line:match("(%a+) (%d+).-(.*)")
+      awful.util.spawn("kill " .. (sig or "") .. " " .. pid, false)
 	  end,
     function (cmd, cur_pos, ncomp)
         local ps = {}
