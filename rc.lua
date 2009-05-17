@@ -316,15 +316,16 @@ config.logs = {
   syslog    = { file = "/var/log/syslog",
                 ignore = {
                   "Changing fan level",
-                  "run-parts", -- cron
+                  "CRON",
                 },
   },
   awesome   = { file = "/home/koniu/log/awesome",
                 ignore = {
                   "/var/lib/dpkg", -- aptwidget failure when aptitude running
                   "wicd", "wired profiles found", -- wicd junk
-                  "seek to:", "Close unzip stream", -- gmpc junk
+                  "seek to:", "Close unzip stream", "pos is: ", "Image won't fit",  -- mpd/gmpc junk
                   "geeqie", "LIRC", -- geeqie junk
+                  "gimp",
                   "^nolog"
                 },
   },
