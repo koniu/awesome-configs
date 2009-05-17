@@ -608,6 +608,7 @@ end
 
 --{{{ functions / logwatch
 function log_watch()
+  if not inot then return end
   local events, nread, errno, errstr = inot:nbread()
   if events then
     for i, event in ipairs(events) do
@@ -641,7 +642,7 @@ function log_changed(logname)
     end
 
     -- display log updates
-    if not ignored or config.logs_quiet then
+    if not ignored and not config.logs_quiet then
       naughty.notify{
         title = '<span color="white">' .. logname .. "</span>: " .. log.file,
         text = awful.util.escape(diff),
@@ -656,11 +657,16 @@ end
 
 local errno, errstr
 inot, errno, errstr = inotify.init(true)
-for logname, log in pairs(config.logs) do
-  log_changed(logname)
-  log.wd, errno, errstr = inot:add_watch(log.file, { "IN_MODIFY" })
+if not inot then
+  naughty.notify{text = "Failed to initialize inotify: " .. errstr }
+else
+  for logname, log in pairs(config.logs) do
+    log_changed(logname)
+    log.wd, errno, errstr = inot:add_watch(log.file, { "IN_MODIFY" })
+  end
 end
 --}}}
+
 
 --}}}
 
