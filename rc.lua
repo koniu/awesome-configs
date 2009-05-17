@@ -586,6 +586,20 @@ end
 lidclosed = islidclosed()
 --}}}
 
+--{{{ functions / sendkey
+fakekeys = {}
+function sendkey(code)
+  local f = function()
+    root.fake_input("key_press", code)
+    root.fake_input("key_release", code)
+    awful.hooks.timer.unregister(fakekeys[code])
+    table.remove(fakekeys, code)
+  end
+  fakekeys[code] = f
+  awful.hooks.timer.register(0.15, f)
+end
+--}}}
+
 --{{{ functions / utficon
 function utficon(code)
 	return 	'<span font_desc="DejaVu Sans 8">&#' .. code .. ';</span>'
