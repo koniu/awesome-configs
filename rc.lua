@@ -83,7 +83,7 @@ shifty.config.tags = {
 ["gq"]      = { rel_index = 1, icon_only = true, icon="/usr/share/pixmaps/gqview.png",
                 max_clients = 2, spawn = 'gq',                                                          },
 ["gimp"]    = { spawn = "gimp", mwfact = 0.18, icon = "/usr/share/icons/hicolor/16x16/apps/gimp.png",
-                layout = "tile", icon_only = true, sweep_delay = 2, exclusive = true,                   },
+                layout = "max", icon_only = true, sweep_delay = 2, exclusive = true,                    },
 ["xev"]     = { position = 0, spawn = "urxvtc -name xev -e xev -rv", layout = "tile"                    },
 ["live"]    = { icon = "/home/koniu/live.png", layout = "floating", sweep_delay = 2, icon_only = true,  },
 ["irc"]     = { position = 1, spawn = "urxvtc -title irc -name irc -e screen -t irc -S irc -R irssi"    },
@@ -110,7 +110,6 @@ shifty.config.apps = {
 
     { match = { "foobar2000.exe",                   },  tag = "fb", nopopup = true,                   },
     { match = { "Deluge", "nicotine"                },  tag = "dl",                                   },
-    { match = { "Gimp",                             },  tag = "gimp",                                 },
     { match = { "Mplayer",                          },  tag = "mplayer",                              },
     { match = { "^Acroread.*"                       },  tag = "pdf",                                  },
     { match = { "^irc$",                            },  tag = "irc",                                  },
@@ -123,6 +122,11 @@ shifty.config.apps = {
     -- ardour
     { match = { "Ardour"                            },  tag = "ard",                                  },
     { match = { "ardour_plugin_editor"              },  slave = true,                                 },
+
+    -- gimp
+    { match = { "Gimp",                             },  tag = "gimp",                                 },
+    { match = { "gimp.toolbox",                     },  slave = true , struts = { right=200 },
+                                                        geometry = {nil,35,200,733}                   },
 
     -- geeqie
     { match = { "^Geeqie$"                          },  tag = "gq"                                    },
