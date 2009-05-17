@@ -80,7 +80,7 @@ shifty.config.tags = {
 ["www"]     = { position = 3, exclusive = true,  screen = LCD, sweep_delay = 3,                         },
 ["fb"]      = { position = 9, exclusive = true,                                                         },
 ["dir"]     = { rel_index = 1, exclusive = false,                                                       },
-["gq"]      = { rel_index = 1, icon_only = true, icon="/usr/share/pixmaps/gqview.png",
+["gq"]      = { rel_index = 1, icon_only = true, icon = icon_path .. "gq.png",
                 max_clients = 2, spawn = 'gq',                                                          },
 ["gimp"]    = { spawn = "gimp", mwfact = 0.18, icon = "/usr/share/icons/hicolor/16x16/apps/gimp.png",
                 layout = "max", icon_only = true, sweep_delay = 2, exclusive = true,                    },
