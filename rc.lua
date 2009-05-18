@@ -559,7 +559,7 @@ function ci()
     v =  v .. string.format("%2s: %-16s = %s\n", i, inf[i], tostring(c[inf[i]]))
   end
 
-  naughty.notify{ text = v, timeout = 0, margin = 10 }
+  naughty.notify{ text = v:sub(1,#v-1), timeout = 0, margin = 10 }
 end
 --}}}
 
