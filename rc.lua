@@ -588,15 +588,15 @@ lidclosed = islidclosed()
 
 --{{{ functions / sendkey
 fakekeys = {}
-function sendkey(code)
+function sendkey(codes)
   local f = function()
-    root.fake_input("key_press", code)
-    root.fake_input("key_release", code)
-    awful.hooks.timer.unregister(fakekeys[code])
-    table.remove(fakekeys, code)
+    for i = 1, #codes do root.fake_input("key_press", codes[i]) end
+    for i = #codes, 1, -1 do root.fake_input("key_release", codes[i]) end
+    awful.hooks.timer.unregister(fakekeys[1])
+    table.remove(fakekeys, 1)
   end
-  fakekeys[code] = f
-  awful.hooks.timer.register(0.15, f)
+  table.insert(fakekeys, f)
+  awful.hooks.timer.register(0.20, f)
 end
 --}}}
 
