@@ -1258,13 +1258,14 @@ mytasklist.buttons = join(
     client.focus = c
     c:raise()
     end, nil, "Focus client"),
-  awful.button({ }, 3, function ()
+  awful.button({ }, 2, function ()
     if instance then
       instance:hide(); instance = nil
     else
       instance = awful.menu.clients({ width=250 })
     end
     end, nil, "Show menu with all clients"),
+  awful.button({ }, 3, function (c) c.minimized = true end, nil, "Minimize client"),
   awful.button({ }, 4, function ()
     awful.client.focus.byidx(1)
     if client.focus then client.focus:raise() end
