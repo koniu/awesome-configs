@@ -110,6 +110,9 @@ shifty.config.apps = {
     { match = { "^Acroread.*"                       },  tag = "pdf",                                  },
     { match = { "^irc$",                            },  tag = "irc",                                  },
 
+    -- popterm (aka scratchpad)
+    { match = { "popterm",                          },  intrusive = true, struts = { bottom = 200 },
+                                                        dockable = true, float = true, sticky = true  },
     -- ableton live
     { match = { "Live",                             }, 	tag = "live", nopopup = true,
                                                         geometry = { 0, 34, 1400, 1000 },             },
@@ -139,9 +142,6 @@ shifty.config.apps = {
 
     -- various tweaks
     { match = { "sqlitebrowser"                     },  slave = true, float = false, tag = "sql"      },
-    { match = { "popterm",                          },  ontop = true, float = true, intrusive = true  },
-    { match = { "htop"                              },
-      keys = join(awful.key({}, "Delete", function(c) sendkey(75); sendkey(36) end))                  },
 
     -- slaves
     { match = { "gimp-image-window","xmag","^Downloads$", "ufraw", "qjackctl", "fping", "watch",
@@ -663,6 +663,30 @@ else
   for logname, log in pairs(config.logs) do
     log_changed(logname)
     log.wd, errno, errstr = inot:add_watch(log.file, { "IN_MODIFY" })
+  end
+end
+--}}}
+
+--{{{ functions / getclient
+function getclient(prop, val)
+  for i, c in ipairs(client.get()) do
+    if c[prop] == val then
+      return c
+    end
+  end
+end
+--}}}
+
+--{{{ functions / popterm
+function popterm()
+  local c = getclient("instance", "popterm")
+  if not c then
+    terminal("-name popterm -font 6x10 -g  171x19+0-0 ")
+  elseif c.hide then
+    c.hide = false
+    client.focus = c
+  else
+    c.hide = true
   end
 end
 --}}}
@@ -1331,12 +1355,12 @@ globalkeys = join(
   awful.key({ modkey, "Control" }, "F1",          awful.help.whatsthis, nil, "what's this"),
   awful.key({ modkey            }, "grave",       function () terminal() end, nil, "terminal"),
   awful.key({ modkey            }, "x",           function () awful.util.spawn("xkill", false) end, nil, "xkill"),
-  awful.key({ modkey, "Mod1"    }, "grave",       function () terminal("-name popterm -font 6x10 -g 80x24-10-10") end, nil, "popup terminal"),
+  awful.key({                   }, "XF86Launch1", popterm, nil, "popup terminal"),
   awful.key({ modkey, "Control" }, "grave",       function () terminal("-name tail -title log/awesome -e tail -fn0 /home/koniu/log/awesome") end, nil, "awesome log"),
   awful.key({                   }, "Print",       function () awful.util.spawn_with_shell("~/bin/shot") end, nil, "screenshot"),
   awful.key({ "Control"         }, "Print",       function () awful.util.spawn_with_shell("sleep 1s; ~/bin/shot -s") end, nil, "selective screenshot"),
   awful.key({ "Mod1"            }, "Print",       function () awful.util.spawn_with_shell("sleep 5s; ~/bin/shot") end, nil, "delayed screenshot"),
-  awful.key({                   }, "XF86Launch1", function () terminal("-name htop -e htop --sort-key PERCENT_CPU") end),
+  awful.key({ "Control", "Mod1" }, "Delete",      function () terminal("-name htop -e htop --sort-key PERCENT_CPU") end),
 -- }}}
 
 -- {{{ bindings / global / tag manipulation
