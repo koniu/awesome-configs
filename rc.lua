@@ -480,11 +480,8 @@ end
 --{{{ functions / terminal
 -- runs terminal
 function terminal(args)
-	if args then
-		awful.util.spawn(config.terminal .. ' ' .. args)
-	else
-		awful.util.spawn(config.terminal .. ' -title "ba:~"')
-	end
+  local args = args or ' -title "ba:~"'
+  awful.util.spawn(config.terminal .. ' ' .. args, false)
 end
 --}}}
 
