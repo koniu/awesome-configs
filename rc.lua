@@ -1127,15 +1127,16 @@ mysystray = widget({ type = "systray", name = "mysystray", align = "right" })
 --{{{ widgets / layoutbox
 mylayoutbox = {}
 for s = 1, screen.count() do
-  mylayoutbox[s] = widget({ type = "imagebox", align = "left" })
+  mylayoutbox[s] = awful.widget.layoutbox(s, { align = "left" })
+  mylayoutbox[s].image = img
+  mylayoutbox[s].resize = false
+  mylayoutbox[s].valign = "center"
   mylayoutbox[s]:buttons(join(
     awful.button({ }, 1, function () awful.layout.inc(layouts, 1) end),
     awful.button({ }, 3, function () awful.layout.inc(layouts, -1) end),
     awful.button({ }, 4, function () awful.layout.inc(layouts, 1) end),
     awful.button({ }, 5, function () awful.layout.inc(layouts, -1) end)
   ))
-
---    mylayoutbox[s].text = "<bg image=\"/home/koniu/.config/awesome/icons/layouts/tilew.png\" resize=\"true\"/> "
 end
 --}}}
 
@@ -1677,28 +1678,6 @@ awful.hooks.mouse_enter.register(function (c)
     if awful.layout.get(c.screen) ~= awful.layout.suit.magnifier
         and awful.client.focus.filter(c) then
         client.focus = c
-    end
-end)
--- }}}
-
--- {{{ hooks / arrange 
-awful.hooks.arrange.register(function (screen)
-    local layout = awful.layout.getname(awful.layout.get(screen))
-    if layout and beautiful["layout_" ..layout] then
-      local img = image(beautiful["layout_" .. layout])
-        mylayoutbox[screen].image = img
-        mylayoutbox[screen].resize = false
-        mylayoutbox[screen].valign = "center"
-    else
-        mylayoutbox[screen].image = nil
-    end
-
-    -- Give focus to the latest client in history if no window has focus
-    -- or if the current window is a desktop or a dock one.
-    if not client.focus then
-        local c = awful.mouse.client_under_pointer()
-        if not c then c = awful.client.focus.history.get(screen, 0) end
-        if c then client.focus = c end
     end
 end)
 -- }}}
