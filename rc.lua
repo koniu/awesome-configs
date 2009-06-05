@@ -22,10 +22,24 @@ function dbg(vars)
     naughty.notify{ text = text, timeout = 0, hover_timeout = 0.2, screen = screen.count() }
 end
 --}}}
+--{{{ remap function
+function remap(from_mod, from_key, to, desc)
+  return awful.util.table.join(awful.key(from_mod, from_key, 
+    function(c) 
+      for i,j in ipairs(to) do
+        sendkey(j)
+      end
+    end, nil, desc))
+end
+--}}}
 
 require("shifty")
 require("wicked")
 require("inotify")
+require("rodentbane")
+
+require("mpd")
+mpc = mpd.new()
 
 --{{{ vars 
 
@@ -66,6 +80,20 @@ config.scroll_offset = 2
 join = awful.util.table.join
 doc = awful.doc
 
+awful.help.combo_subst = {
+["(%u)"] = function(m) return string.lower(m) end,
+  control = "ctl",
+  mod1 = "alt",
+  mod4 = "win",
+  mod5 = "ralt",
+  XF86 = "x",
+  forward = "fwd",
+}
+
+awful.help.combo_ignore_groups = {
+  "1. global actions" ,
+  "default"
+}
 --}}}
 
 --{{{ vars / shifty
@@ -84,10 +112,10 @@ shifty.config.tags = {
                 max_clients = 2, spawn = 'gq',                                                          },
 ["gimp"]    = { spawn = "gimp", mwfact = 0.18, icon = "/usr/share/icons/hicolor/16x16/apps/gimp.png",
                 layout = "max", icon_only = true, sweep_delay = 2, exclusive = true,                    },
-["xev"]     = { rel_index = 0, spawn = "urxvtc -name xev -e xev -rv", layout = "tile"                    },
+["xev"]     = { rel_index = 0, spawn = "urxvtc -title 'Event Tester' -name xev -e sh -c 'xev -id $WINDOWID'" },
 ["live"]    = { icon = "/home/koniu/live.png", layout = "floating", sweep_delay = 2, icon_only = true,  },
 ["irc"]     = { position = 1, spawn = "urxvtc -title irc -name irc -e screen -t irc -S irc -R irssi"    },
-["ard"]     = { layout = "tilebottom", mwfact = 0.8, exclusive = true                                   },
+["tetris"]  = { rel_index = 0, spawn = "urxvtc -font '12x24kana' -name tetris -e tetris"                }, 
 
 }
 --}}}
@@ -98,49 +126,68 @@ shifty.config.apps = {
     -- tag matches
     { match = { "tail", "^top", "fping", "mtr", "htop", "iwconfig", "Wicd", "apt" 
                                                     },  tag = "sys",	                                },
-    { match = { "Iceweasel.*", "Firefox.*"	        },	tag = "www",		                              },
     { match = { "urxvt"                             },	tag = "term",                                 },
     { match = { "^mc$"                              },  tag = "dir",                                  },
     { match = { "Wine"                              },  tag = "wine",                                 },
     { match = { "Ardour.*", "Jamin",                },  tag = "ardour",                               },
     { match = { "Gmpc",                             },  tag = "mpd",                                  },
     { match = { "foobar2000.exe",                   },  tag = "fb", nopopup = true,                   },
-    { match = { "Deluge", "nicotine"                },  tag = "dl",                                   },
-    { match = { "Mplayer",                          },  tag = "mplayer",                              },
+    { match = { "Deluge", "nicotine", "Tucan.py"    },  tag = "dl",                                   },
+    { match = { "[Mm]player",                       },  tag = "mplayer",                              },
     { match = { "^Acroread.*"                       },  tag = "pdf",                                  },
     { match = { "^irc$",                            },  tag = "irc",                                  },
+    
+    -- gajim
+    { match = { "^Gajim",                           },  tag = "irc",                                  },
+    { match = { "^messages$",                       },  nopopup = true,                               }, 
+    { match = { "^roster$",                         },  float = true, geometry = { 838,35,186,733 },
+                                                        dockable = true, struts = { right = 186 },
+                                                        skip_taskbar = true,                          },
 
     -- popterm (aka scratchpad)
     { match = { "popterm",                          },  intrusive = true, struts = { bottom = 200 },
-                                                        dockable = true, float = true, sticky = true  },
+                                                        dockable = true, float = true, sticky = true,
+                                                        geometry = { 0, 568, 1024, 200 }, hide = false,
+                                                        skip_taskbar = true                           },
     -- ableton live
     { match = { "Live",                             }, 	tag = "live", nopopup = true,
                                                         geometry = { 0, 34, 1400, 1000 },             },
+    -- firefox
+    { match = { "Iceweasel.*", "Firefox.*"          },  tag = "www",
+      keys = join( remap({ "Mod5" }, "Left",   {105, 112}, "Previous tab"),
+                   remap({ "Mod5" }, "Right",  {105, 117}, "Next tab") )                              },
+
     -- qjackctl tweaks
     { match = { "jackctl"                           },  tag = "jack",                                 },
     { match = { "Informat.*CK Audio Connection Kit" },  kill = true,                                  },
     { match = { "qjackctlMessagesForm",
                 "Error.*Connection Kit"             },  nopopup = true,                               },
-    -- ardour
-    { match = { "Ardour"                            },  tag = "ard",                                  },
-    { match = { "ardour_plugin_editor"              },  slave = true,                                 },
 
     -- gimp
-    { match = { "Gimp",                             },  tag = "gimp",                                 },
-    { match = { "gimp.toolbox",                     },  slave = true , struts = { right=200 },
-                                                        geometry = {nil,35,200,733}                   },
-
+    { match = { "Gimp",                             },  tag = "gimp",
+      keys = join(
+        awful.key({ "Mod1" }, "b", function(c) local a = getclient("role", "gimp-toolbox")
+                                               if a then a.hide = not a.hide end
+                                               end, nil, "Toggle toolbox"),
+        awful.key({ "Mod1" }, "v", function(c) local a = getclient("role", "gimp-dock")
+                                               if a then a.hide = not a.hide end
+                                               end, nil, "Toggle dock"))                              }, 
+    { match = { "^gimp.toolbox$",                   },  struts = { right=186}, skip_taskbar = true,
+                                                        geometry = {838,35,186,733}, slave = true     },
+    { match = { "^gimp.dock$",                      },  struts = { left=186}, skip_taskbar = true,
+                                                        geometry = {0,35,186,733}, slave = true       },
     -- geeqie
     { match = { "^Geeqie$"                          },  tag = "gq"                                    },
     { match = { "Full screen...Geeqie"              },  intrusive = true                              },
     { match = { "Tools...Geeqie"                    },
-      keys = join(
-        awful.key({}, "Escape", function(c) awful.util.spawn("kill " .. c.pid) end, nil, { group = "3. client manipulation", text = "quit" }),
-        awful.key({modkey}, "q", function(c) awful.util.spawn("kill " .. c.pid) end, nil, { group = "3. client manipulation", text = "quit" })
-      )
-    },
+      keys = join(awful.key({}, "Escape", function(c)  getclient("id", c.group_id + 2):kill() end))   },
 
     -- various tweaks
+    { match = { "htop"                              },  keys = join(
+                                                                      remap({}, "Delete", {75,36}),
+                                                                      remap({}, "period", {{50,60},{116,36}}),
+                                                                      remap({}, "comma", {{50,59},{111,36}})
+                                                                                                  )     },
     { match = { "sqlitebrowser"                     },  slave = true, float = false, tag = "sql"      },
 
     -- slaves
@@ -153,6 +200,9 @@ shifty.config.apps = {
     -- intruders
     { match = { "^dialog$", "xmag", "gcolor2", "^Download$",
                                                     },  intrusive = true,                             },
+    -- skip_taskbar 
+    { match = { "^xev$",                            },  skip_taskbar = true,                          },
+
     -- all
     { match = { "",                                 },  honorsizehints = false,  
                                                         buttons = join(
@@ -162,6 +212,40 @@ shifty.config.apps = {
                                                         ),                                            },
 
 }
+--}}}
+
+--{{{ vars / shifty / ardour 
+
+shifty.config.tags["ard"] = { 
+  layout = "tilebottom", mwfact = 0.8, exclusive = true,
+  keys = join(
+    awful.key({ "Mod1" }, "m", 
+      function(c) local m = getclient("instance", "ardour_mixer")
+        local e = getclient("instance", "ardour_editor")
+        if m then
+          if m.hide then m.hide = false; e.hide = true
+          else m.hide = true; e.hide = false end
+        end 
+      end)
+  )
+}
+
+local ardour_clients = {
+  { match = { "Ardour"                }, tag = "ard" },
+  { match = { "ardour_mixer"          }, hide = true },
+  { match = { "Ardour...Log"          }, 
+      struts = { bottom = 102 }, 
+      geometry = { 0, 666, 1024, 102 }
+  },
+  { match = { "ardour_plugin_editor", "Ardour...Log"  }, slave = true, skip_taskbar = true,
+    keys = join(
+      awful.key({}, "Escape", function(c) c:kill() end)
+    )
+  } 
+}
+
+for i, m in ipairs(ardour_clients) do table.insert(shifty.config.apps, m) end
+
 --}}}
 
 --{{{ vars / shifty / gittags(tm)
@@ -209,7 +293,7 @@ for n, v in pairs(gittags) do
                   elseif txt:find("^Switched") then
                     clr = "green"
                   end
-                  naughty.notify{ text="<span color='"..clr.."'>"..txt.."</span>" }
+                  naughty.notify{ text="<span color='"..clr.."'>"..txt:sub(1,#txt-1).."</span>" }
 	              end,
 
                 function (cmd, cur_pos, ncomp)
@@ -290,8 +374,6 @@ shifty.init()
 --}}}
 
 --{{{ vars / naughty
-
---  naughty settings
 naughty.config.spacing = 1
 naughty.config.default_preset = {
   font = 'Monospace 6.5',
@@ -304,33 +386,61 @@ naughty.config.default_preset = {
 --{{{ vars / widgets
 config.widgets = {}
 config.widgets.watchmount = { "/dev/sda2", "/media/", "/mnt/" }
-config.widgets.autostart = { photo = "gq" }
+config.widgets.autostart = {
+  photo = "gq %f",
+  movies = "urxvtc -name mc -geometry 169x55 -e mc %f ~/data/tmp", 
+  default = "urxvtc -name mc -geometry 169x55 -e mc %f"
+}
 config.widgets.space = "   "
 config.widgets.wifi = "wlan0"
 --}}}
 
 --{{{ vars / logwatch
 config.logs = {
-  mpd       = { file = "/home/koniu/.mpd/mpd.log", },
   aptitude  = { file = "/var/log/aptitude", },
+  mpd       = { file = "/home/koniu/.mpd/mpd.log",
+                subst = {
+                  ["^.- %d%d:%d%d : "] = "", -- cut out syslog's date/hostname prefix
+                },
+  },
   syslog    = { file = "/var/log/syslog",
                 ignore = {
                   "Changing fan level",
                   "CRON",
+  --                "MAC",
+                  "IPv6",
                 },
+                subst = {
+                  ["^.- %d%d:%d%d:%d%d %w- "] = "", -- cut out syslog's date/hostname prefix
+                  ["%[%d%d%d%d%d%d+%.%d%d%d%d%d%d%] "] = "", -- cut out kernel's timestamp
+                },
+                color = {
+                  ["%d+%.%d+%.%d+%.%d+"] = "#e0e0e0", -- highlight ipv4 addresses
+                  ["%w+:%w+:%w+:%w+:%w+:%w+"] = "#e0c0c0", -- highlight macs
+                  [" [Aa]dd%w- "] = "#99cc99",
+                  [" [Nn]ew "] = "#99cc99",
+                  [" [Rr]emov%w- "] = "#cc9999",
+                  [" [Ee]rr%w- "] = "#ff9999",
+                  [" [Tt]imeout "] = "#ff9999",
+                  ["%w-="] = "#666666",
+                  ["^%w-:"] = "#9999B6",
+                  [" .-: "] = "#B6B099",
+                },
+                quiet = false,
   },
   awesome   = { file = "/home/koniu/log/awesome",
                 ignore = {
                   "/var/lib/dpkg", -- aptwidget failure when aptitude running
-                  "wicd", "wired profiles found", -- wicd junk
                   "seek to:", "Close unzip stream", "pos is: ", "Image won't fit",  -- mpd/gmpc junk
                   "geeqie", "LIRC", -- geeqie junk
                   "gimp",
-                  "^nolog"
+                  "^nolog",
+                  "deprecate"
                 },
+                quiet = false
   },
 }
-config.logs_quiet = nil
+config.logs_quiet = false
 --}}}
 
 --}}}
@@ -338,11 +448,6 @@ config.logs_quiet = nil
 --{{{ functions
 
 --{{{ functions / run_or_raise
---- wikipaste ---
---- Spawns cmd if no client can be found matching properties
--- If such a client can be found, pop to first tag where it is visible, and give it focus
--- @param cmd the command to execute
--- @param properties a table of properties to match against clients.  Possible entries: any properties of the client object
 function run_or_raise(cmd, properties)
    local clients = client.get()
    for i, c in pairs(clients) do
@@ -362,7 +467,7 @@ function run_or_raise(cmd, properties)
          return
       end
    end
-   awful.util.spawn(cmd)
+   awful.util.spawn_with_shell(cmd)
 end
 --}}}
 
@@ -541,8 +646,8 @@ function ci()
 
   -- geometry
   local cc = c:geometry()
-  local signx = (cc.x > 0 and "+") or ""
-  local signy = (cc.y > 0 and "+") or ""
+  local signx = (cc.x >= 0 and "+")
+  local signy = (cc.y >= 0 and "+")
   v = v .. " @ " .. cc.width .. 'x' .. cc.height .. signx .. cc.x .. signy .. cc.y .. "\n\n"
 
   local inf = {
@@ -593,7 +698,7 @@ function sendkey(codes)
     table.remove(fakekeys, 1)
   end
   table.insert(fakekeys, f)
-  awful.hooks.timer.register(0.20, f)
+  awful.hooks.timer.register(0.05, f)
 end
 --}}}
 
@@ -618,37 +723,60 @@ end
 
 function log_changed(logname)
   local log = config.logs[logname]
+  local text = ""
 
-  -- read log file
+  -- open the file and seek to previous length
   local f = io.open(log.file)
-  local l = f:read("*a")
+  f:seek("set", log.len)
+
+  -- read new lines into a table
+  local lines = {}
+  if log.len then
+    for line in f:lines() do table.insert(lines, line) end
+  end
+
+  -- remember length and close file
+  log.len = f:seek("end")
   f:close()
 
-  -- first read just set length
-  if not log.len then
-    log.len = #l
-
-  -- if updated
-  else
-    local diff = l:sub(log.len +1, #l-1)
-
+  for _, l in ipairs(lines) do
     -- check if ignored
     local ignored = false
     for i, phr in ipairs(log.ignore or {}) do
-    if diff:find(phr) then ignored = true; break end
+      if l:find(phr) then ignored = true; break end
     end
 
-    -- display log updates
-    if not ignored and not config.logs_quiet then
-      naughty.notify{
-        title = '<span color="white">' .. logname .. "</span>: " .. log.file,
-        text = awful.util.escape(diff),
-        hover_timeout = 0.2, timeout = 0,
-      }
-    end
+    if not ignored and not log.quiet and not config.logs_quiet then
 
-    -- set last length
-    log.len = #l
+      -- escape string
+      l = awful.util.escape(l)
+
+      -- make substitutions
+      if log.subst then
+        for from, to in pairs(log.subst) do l = l:gsub(from, to) end
+      end
+     
+      -- wrap lines if too long
+      l = awful.util.linewrap(l, 80, l:find(" "))
+
+      -- colorize
+      if log.color then
+        for match, color in pairs(log.color) do 
+          l = l:gsub(match, "<span color='"..color.."'>%1</span>")
+        end
+      end
+
+      text = text .. l .. "\n"
+    end
+  end
+
+  -- display log updates
+  if #text > 0 then
+    naughty.notify{
+      title = '<span color="white">' .. logname .. "</span>: " .. log.file,
+      text = text:sub(1, #text-1),
+      hover_timeout = 0.2, timeout = 0,
+    }
   end
 end
 
@@ -678,12 +806,23 @@ end
 function popterm()
   local c = getclient("instance", "popterm")
   if not c then
-    terminal("-name popterm -font 6x10 -g  171x19+0-0 ")
+    terminal("-name popterm -font 6x10")
   elseif c.hide then
     c.hide = false
     client.focus = c
+    dbg{'unhide'}
   else
     c.hide = true
+    dbg{'hide'}
+  end
+end
+--}}}
+
+--{{{ functions / restore_focus
+function restore_focus(screen)
+  if not client.focus or not client.focus:isvisible() then
+    local c = awful.client.focus.history.get(screen, 0)
+    if c then client.focus = c end
   end
 end
 --}}}
@@ -699,7 +838,7 @@ wifiwidget = widget({
 })
 
 wifiwidget:buttons(join(
-  awful.button({}, 1, function () run_or_raise("wicd-client -n", { class = "Wicd-client.py" } )  end, nil, "show networks"),
+  awful.button({}, 1, function () run_or_raise("wicd-client -n >& /dev/null", { class = "Wicd-client.py" } )  end, nil, "show networks"),
   awful.button({}, 2, function () naughty.notify({text = get_autoap(), timeout = 2}) end, nil, "show autoap status"),
   awful.button({}, 3, function () terminal("-name iwconfig -e watch -n1 /sbin/iwconfig "..config.widgets.wifi) end, nil, "show iwconfig")
 ))
@@ -736,6 +875,10 @@ end
 local function get_wifi()
 	local v = ''
 	local a = io.open('/sys/class/net/'..config.widgets.wifi..'/wireless/link')
+  if not a then
+    netup = nil
+    return '<span color="#D9544C">off</span>'
+  end
 	v = a:read() 
 	a:close()
 	if v == "0" then 
@@ -806,6 +949,7 @@ local function get_bat()
 	local color = 'orange'
 	local v = ''
 	local a = io.open('/sys/class/power_supply/BAT0/status')
+  if not a then return end
 	local status = a:read()
 	a:close()
 	local b = io.open('/sys/class/power_supply/BAT0/current_now')
@@ -987,17 +1131,19 @@ function mountlist()
 			
                         w[i]:buttons(join(
                             awful.button({}, 1, function ()
+                              local action
                               for m, spwn in pairs(config.widgets.autostart) do
                                 if mnt[1]:lower():find(m) then
-                                  awful.util.spawn_with_shell(spwn .. " " .. esc)
+                                  action = spwn
                                   break
-                                else
-                                  terminal(" -name mc -geometry 169x55 -bd \\".. beautiful.border_focus .." -e mc " .. esc)
                                 end
                               end
+                              if not action then action = config.widgets.autostart.default end
+                              action = action:gsub("%%f", esc)
+                              awful.util.spawn_with_shell(action)
                             end, nil, "Browse (autostart)"),
                             awful.button({}, 2, function ()
-                                  terminal(" -name mc -geometry 169x55 -bd \\".. beautiful.border_focus .." -e mc " .. esc)
+                                  terminal(" -name mc -geometry 169x55 -e mc " .. esc)
                             end, nil, "Browse"),
                             awful.button({}, 3, function ()
                                 awful.util.spawn("eject " .. esc, false)
@@ -1124,7 +1270,7 @@ mypromptbox = awful.widget.prompt({ align = "left" })
 mysystray = widget({ type = "systray", name = "mysystray", align = "right" })
 --}}}
 
---{{{ widgets / layoutbox
+--[[{{{ widgets / layoutbox
 mylayoutbox = {}
 for s = 1, screen.count() do
   mylayoutbox[s] = awful.widget.layoutbox(s, { align = "left" })
@@ -1138,7 +1284,7 @@ for s = 1, screen.count() do
     awful.button({ }, 5, function () awful.layout.inc(layouts, -1) end)
   ))
 end
---}}}
+--}}}]]
 
 --{{{ widgets / initialize separators, widget tables
 
@@ -1201,10 +1347,10 @@ function hook_1s()
 	fanwidget.text		= widgettext('FAN', string.format("%-4s",get_fan()))
 	wifiwidget.text		= widgettext('WIFI', get_wifi())
 
+	if netup then
 	local b = wicked.widgets.net()
 	if b['{'..config.widgets.wifi.. ' down_kb}'] > 0 then color = beautiful.widget_value; color = beautiful.widget_value else color = '#333333' end
 	if b['{'..config.widgets.wifi.. ' up_kb}'] > 0 then color2 = beautiful.widget_value else color2 = '#333333' end
-	if netup then
 		netwidget.text = widgettext('NET', string.format('%3s <span color="#333333">/</span> %-3s', b['{'..config.widgets.wifi..' down_kb}'], b['{'..config.widgets.wifi.. ' up_kb}']), nil, color2)
 	else 
 		netwidget.text = ''
@@ -1331,7 +1477,7 @@ for s = 1, screen.count() do
     mytaglist[s],
     mytagprompt[s],
     sep_l,
-    mylayoutbox[s],
+    --mylayoutbox[s],
     sep_l,
     mytasklist[s],
   }
@@ -1348,6 +1494,18 @@ globalkeys = join(
 
 -- {{{ bindings / global / spawns
   awful.doc.set_default({ group = "1. global actions" }),
+  awful.key({ "Control"         }, "Escape",          function()
+          rodentbane.start()
+          rodentbane.cut("up")
+          rodentbane.cut("down")
+          rodentbane.cut("left")
+          rodentbane.cut("right")
+          rodentbane.cut("up")
+          rodentbane.cut("down")
+          rodentbane.cut("left")
+          rodentbane.cut("right")
+        end),
+  awful.key({ }, "KP_Insert",         function() sendkey({23}) end),
   awful.key({ modkey            }, "F1",          awful.help.run, nil, "help mode"),
   awful.key({ modkey            }, "slash",       awful.help.promptline, nil, "help prompt"),
   awful.key({ modkey, "Control" }, "F1",          awful.help.whatsthis, nil, "what's this"),
@@ -1365,6 +1523,8 @@ globalkeys = join(
   awful.doc.set_default({ group = "2. tag manipulation" }),
   awful.key({                   }, "XF86Back",    awful.tag.viewprev, nil, "previous tag"),
   awful.key({                   }, "XF86Forward", awful.tag.viewnext, nil, "next tag"),
+  awful.key({  modkey           }, "Left",    awful.tag.viewprev, nil, "previous tag"),
+  awful.key({  modkey           }, "Right", awful.tag.viewnext, nil, "next tag"),
   awful.key({  modkey           }, "XF86Back",    shifty.shift_prev, nil, "move tag left" ),
   awful.key({  modkey           }, "XF86Forward", shifty.shift_next, nil, "move tag right"),
 
@@ -1374,21 +1534,28 @@ globalkeys = join(
   awful.key({ modkey            }, "w",           shifty.del, nil, "tag delete"),
 
   awful.key({ modkey            }, 'i',           ti, nil, "tag info"),
+  awful.key({ modkey            }, 'p',           function()
+    shifty.set(awful.tag.selected(mouse.screen), { screen = awful.util.cycle(screen.count(), mouse.screen + 1) })
+  end
+    , nil, "tag info"),
 -- }}}
 
 -- {{{ bindings / global / client manipulation
   awful.doc.set_default({ group = "3. client manipulation" }),
   awful.key({ "Shift"           }, "XF86Back",    shifty.send_prev, nil, "move to prev tag"),
   awful.key({ "Shift"           }, "XF86Forward", shifty.send_next, nil, "move to next tag"),
-  awful.key({ "Control"         }, "XF86Back",    function () awful.client.focus.byidx(-1);  if client.focus then client.focus:raise() end end, nil, "focus previous"),
-  awful.key({ "Control"         }, "XF86Forward", function () awful.client.focus.byidx(1);  if client.focus then client.focus:raise() end end, nil, "focus next"),
+--  awful.key({ "control"         }, "xf86back",    function () awful.client.focus.byidx(-1);  if client.focus then client.focus:raise() end end, nil, "focus previous"),
+  --awful.key({ "Control"         }, "XF86Forward", function () awful.client.focus.byidx(1);  if client.focus then client.focus:raise() end end, nil, "focus next"),
+  awful.key({ "Mod4"         }, "Tab", function () awful.client.focus.byidx(1);  if client.focus then client.focus:raise() end end, nil, "focus next"),
   awful.key({ modkey, "Shift"   }, "XF86Back",    function () awful.client.swap.byidx(-1) end, nil, "swap with prev"),
   awful.key({ modkey, "Shift"   }, "XF86Forward", function () awful.client.swap.byidx(1) end, nil, "swap with next"),
 -- }}}
 
 -- {{{ bindings / global / mm keys
-  awful.key({                 }, "XF86AudioPlay",  function () awful.util.spawn("mpc --no-status toggle", false) end),
-  awful.key({                 }, "XF86AudioStop",  function () awful.util.spawn("mpc --no-status stop", false) end),
+  awful.key({                 }, "XF86AudioStop",  function () mpc:stop() end    ),
+  awful.key({                 }, "XF86AudioPlay",  function () mpc:toggle_play() end   ),
+  awful.key({ "Mod4", "Mod1"  },  "Right",  function () mpc:next() end   ),
+  awful.key({                 }, "XF86AudioNext",  function () awful.util.spawn("mpc --no-status next", false) end),
   awful.key({                 }, "XF86AudioPrev",  function () awful.util.spawn("mpc --no-status prev", false) end),
   awful.key({                 }, "XF86AudioNext",  function () awful.util.spawn("mpc --no-status next", false) end),
   awful.key({ "Control"       }, "XF86AudioPrev",  function () awful.util.spawn("mpc --no-status seek -10", false) end),
@@ -1403,7 +1570,7 @@ globalkeys = join(
   awful.key({ modkey            }, "Escape",      awful.tag.history.restore, nil, "prev selected tags"),
   awful.key({ modkey, "Control" }, "j",           function () awful.screen.focus(1) end, nil, "next screen"),
   awful.key({ modkey, "Control" }, "k",           function () awful.screen.focus(-1) end, nil, "prev screen"),
-  awful.key({ modkey            }, "Tab",         function () awful.client.focus.history.previous(); if client.focus then client.focus:raise() end end, nil, "prev foused client"),
+  --awful.key({ modkey            }, "Tab",         function () awful.client.focus.history.previous(); if client.focus then client.focus:raise() end end, nil, "prev foused client"),
   awful.key({ modkey            }, "u",           awful.client.urgent.jumpto, nil, "jump to urgent"),
 
 -- Standard program
@@ -1637,10 +1804,11 @@ shifty.config.globalkeys = globalkeys
 -- {{{ hooks / focus
 awful.hooks.focus.register(function (c)
   -- see if the client needs scrolling
-  local ws = screen[c.screen].workarea
+  local ws = awful.wibox.get_workarea(c.screen)
   local geom = c:geometry()
-  if geom.width > ws.width or geom.height > ws.height then
-    awful.hooks.timer.register(0.01, scrollclient)
+  if (geom.width > ws.width or geom.height > ws.height)
+    and not awful.client.dockable.get(c) then
+      awful.hooks.timer.register(0.01, scrollclient)
   end
   -- change border color
   if not awful.client.ismarked(c) then
@@ -1669,6 +1837,18 @@ end)
 -- {{{ hooks / unmarked 
 awful.hooks.unmarked.register(function (c)
     c.border_color = beautiful.border_focus
+end)
+-- }}}
+
+-- {{{ hooks / unmanage
+awful.hooks.unmanage.register(function (c)
+ -- restore_focus(c.screen)
+end)
+-- }}}
+
+-- {{{ hooks / tags
+awful.hooks.arrange.register(function (screen)
+  restore_focus(screen)
 end)
 -- }}}
 

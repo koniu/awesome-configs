@@ -4,6 +4,8 @@
 
 theme = {}
 
+theme.rodentbane_bg = "red"
+
 theme.font = "ProggyTinyTTSZ 12"
 theme.tasklist_font = "Sans 7"
 theme.titlebar_font = "Sans 7"
@@ -17,7 +19,7 @@ theme.fg_focus      = "#ffffff"
 theme.fg_urgent     = "#ffc500"
 
 theme.border_width  = 1
-theme.border_normal = "#151515"
+theme.border_normal = "#171717"
 theme.border_focus  = "#524E41"
 theme.border_marked = "#91231c"
 
