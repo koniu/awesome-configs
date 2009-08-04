@@ -11,16 +11,16 @@ theme.tasklist_font = "Sans 7"
 theme.titlebar_font = "Sans 7"
 
 theme.bg_normal     = "#171717"
-theme.bg_focus      = "#524E41"
+theme.bg_focus      = "#3D3A30"
 theme.bg_urgent     = "#171717"
 
-theme.fg_normal     = "#999999"
+theme.fg_normal     = "#575244"
 theme.fg_focus      = "#ffffff"
 theme.fg_urgent     = "#ffc500"
 
 theme.border_width  = 1
 theme.border_normal = "#171717"
-theme.border_focus  = "#524E41"
+theme.border_focus  = "#3D3A30"
 theme.border_marked = "#91231c"
 
 theme.widget_label = "#333333"
@@ -36,7 +36,7 @@ theme.menu_height   = 15
 theme.menu_width    = 100
 
 
-theme.wallpaper_cmd = { "xsetroot -solid '#524E41'" }
+theme.wallpaper_cmd = { "xsetroot -solid '#3D3A30'" }
 
 local layout_icons = "/home/koniu/.config/awesome/icons/layouts/"
 theme.layout_fairh = layout_icons .. "fairh.png"
