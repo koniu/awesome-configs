@@ -36,7 +36,6 @@ end
 require("shifty")
 require("wicked")
 require("inotify")
-require("rodentbane")
 
 require("mpd")
 mpc = mpd.new()
@@ -114,7 +113,7 @@ shifty.config.tags = {
                 layout = "max", icon_only = true, sweep_delay = 2, exclusive = true,                    },
 ["xev"]     = { rel_index = 0, spawn = "urxvtc -title 'Event Tester' -name xev -e sh -c 'xev -id $WINDOWID'" },
 ["live"]    = { icon = "/home/koniu/live.png", layout = "floating", sweep_delay = 2, icon_only = true,  },
-["irc"]     = { position = 1, spawn = "urxvtc -title irc -name irc -e screen -t irc -S irc -R irssi"    },
+["im"]      = { position = 1, spawn = "urxvtc -title IRC -name irc -e screen -t irc -S irc -R irssi"    },
 ["tetris"]  = { rel_index = 0, spawn = "urxvtc -font '-*-*-*-*-*-*-*-240-*-*-*-*-*-2' -name tetris -e tetris"                }, 
 
 }
@@ -135,11 +134,11 @@ shifty.config.apps = {
     { match = { "Deluge", "nicotine", "Tucan.py"    },  tag = "dl",                                   },
     { match = { "[Mm]player",                       },  tag = "mplayer",                              },
     { match = { "^Acroread.*"                       },  tag = "pdf",                                  },
-    { match = { "^irc$",                            },  tag = "irc",                                  },
-    
+    { match = { "^irc$",                            },  tag = "im",                                   },
+
     -- gajim
-    { match = { "^Gajim",                           },  tag = "irc",                                  },
-    { match = { "^messages$",                       },  nopopup = true,                               }, 
+    { match = { "^Gajim",                           },  tag = "im",                                   },
+    { match = { "^messages$",                       },  nopopup = true,                               },
     { match = { "^roster$",                         },  float = true, geometry = { 838,35,186,733 },
                                                         dockable = true, struts = { right = 186 },
                                                         skip_taskbar = true,                          },
@@ -265,6 +264,8 @@ local gittags = {
                    url = "http://git.mercenariesguild.net/?p=awesome.git;a=shortlog;h=refs/heads/shifty-master" },
   [ "d:conf" ] = { push = "push origin +", main = "vim rc.lua", dir = "/home/koniu/.config/awesome", commit = "-a",
                    url = "http://github.com/koniu/awesome-configs/commits/master/rc.lua" },
+  [ "d:obv" ] = { push = "", main = "zsh", dir = "/home/koniu/.config/awesome/obvious", commit = "-a -s",
+                   url = "http://git.mercenariesguild.net/?p=obvious.git;a=shortlog;h=refs/heads/master" },
   [ "d:vali" ] = { push = "", main = "zsh", dir = "/home/koniu/data/kit/git/validichro", commit = "-a",
                    url = "" },
 }
@@ -290,12 +291,13 @@ for n, v in pairs(gittags) do
                 terminal("-name "..n.."pop -hold -title '"..n.." git push "..br.."' -cd "..v.dir.." -e git "..v.push..br) 
            end,
     branch = function()
-                awful.prompt.run({
+                prompt.exec({
+                args = {
                   fg_cursor = "#FF1CA9", bg_cursor = beautiful.bg_normal, ul_cursor="single",
-                  text = paste, selectall = true, prompt = "<span color='#FF1CA9'>Branch:</span> "
+                  selectall = true, prompt = "<span color='#FF1CA9'>Branch:</span> "
                 },
-                mypromptbox.widget,
-	              function(line)
+
+                run_function = function(line)
                   local txt = awful.util.pread("cd "..v.dir.."; git checkout "..line.." 2>&1")
                   local clr = "white"
                   if txt:find("^error") then
@@ -306,7 +308,7 @@ for n, v in pairs(gittags) do
                   naughty.notify{ text="<span color='"..clr.."'>"..txt:sub(1,#txt-1).."</span>" }
 	              end,
 
-                function (cmd, cur_pos, ncomp)
+                completion_function = function (cmd, cur_pos, ncomp)
                   local branches = {}
                   local matches = {}
                   local g = io.popen("cd "..v.dir.."; git branch")
@@ -322,7 +324,7 @@ for n, v in pairs(gittags) do
                   while ncomp > #matches do ncomp = ncomp - #matches end
 
                   return matches[ncomp], cur_pos
-                end)
+                end})
             end
   }
   --}}}
@@ -818,7 +820,6 @@ function popterm()
   local c = getclient("instance", "popterm")
   if not c then
     terminal("-name popterm -font 6x10")
-    --dbg{'start'}
   elseif c.minimized then
     c.minimized = false
     client.focus = c
@@ -837,6 +838,117 @@ function restore_focus(screen, cli)
 end
 --}}}
 
+--{{{ functions / prompt
+prompt = require("obvious.popup_run_prompt")
+function prompt.exec(preset)
+  prompt.settings = awful.util.table.join(prompt.defaults, prompt.presets.default, preset)
+  prompt.run_prompt()
+end
+--}}}
+
+--{{{ functions / kill
+function kill(line)
+  local name,pid,sig = line:match("(%a+) (%d+).-(.*)")
+  awful.util.spawn("kill " .. (sig or "") .. " " .. pid, false)
+end
+
+function kill_completion(cmd, cur_pos, ncomp)
+  local ps = {}
+  local g = io.popen("ps hxuc")
+  for line in g:lines() do
+    local out = splitbywhitespace(line)
+    table.insert(ps, out[11] .. " " .. out[2])
+  end
+  g:close()
+
+  if cur_pos ~= #cmd + 1 and cmd:sub(cur_pos, cur_pos) ~= " " then return cmd, cur_pos end
+
+  local matches = {}
+  for i, j in ipairs(ps) do
+    if ps[i]:find("^" .. cmd:sub(1, cur_pos)) then table.insert(matches, ps[i]) end
+  end
+
+  if #matches == 0 then return cmd, cur_pos end
+  while ncomp > #matches do ncomp = ncomp - #matches end
+
+  -- return match and position
+  return matches[ncomp], cur_pos
+end
+--}}}
+
+--{{{ functions / calculator
+function calculator(expr)
+  val = awful.util.eval("return " .. expr)
+  local calc = naughty.notify({
+    text = expr .. ' = <span color="white">' .. val .. "</span>",
+    timeout = 0,
+    run = function(n)
+      n.die()
+      awful.util.spawn_with_shell("echo ".. n.val .. " | xsel -i")
+    end,
+  })
+  calc.val = val
+end
+--}}}
+
+--{{{ functions / dictionary
+function dictionary(word)
+  local fr = awful.util.pread("dict -d wn " .. word .. " 2>&1")
+  naughty.notify({ text = '<span font_desc="Sans 7">'..fr..'</span>', timeout = 0 })
+end
+--}}}
+
+--}}}
+
+--{{{ vars / obvious / prompts
+prompt.presets = {
+
+  default = {
+    width = 1, height = 32,
+    slide = true, move_speed = 0.003, move_amount = 1,
+    margin = { top = 10, left = 10 },
+  },
+
+  run =  {
+    completion_function = awful.completion.shell,
+    history = os.getenv("HOME") .. "/.cache/awesome/history",
+    args = { prompt = "<span color='orange'>Run:</span> ", fg_cursor = "orange",
+             bg_cursor = beautiful.bg_normal, ul_cursor = "single", },
+  },
+
+  lua = {
+    completion_function = lua_completion,
+    run_function = awful.util.eval,
+    history = os.getenv("HOME") .. "/.cache/awesome/history_eval",
+    args = { prompt = "<span color = '#D1FF00'>Lua:</span> ", fg_cursor = "#D1FF00",
+             bg_cursor = beautiful.bg_normal, ul_cursor = "single", },
+  },
+
+  calc = {
+    completion_function = lua_completion,
+    run_function = calculator,
+    history = os.getenv("HOME") .. "/.cache/awesome/history_calc",
+    args = { prompt = "<span color='#00A5AB'>Calc:</span> ", fg_cursor = "#00A5AB",
+             bg_cursor = beautiful.bg_normal, ul_cursor = "single", selectall = true, },
+  },
+
+  dict = {
+    completion_function = function() return end,
+    run_function = dictionary,
+    history = os.getenv("HOME") .. "/.cache/awesome/history_dict",
+    args = { prompt = "<span color='#008DFA'>Dict:</span> ", fg_cursor = "#008DFA", 
+             bg_cursor = beautiful.bg_normal, ul_cursor = "single", selectall = true, },
+  },
+
+  kill = {
+    completion_function = kill_completion,
+    run_function = kill,
+    history = "",
+    args = { prompt = "<span color='#FF4F4F'>Kill:</span> ", fg_cursor = "#FF4F4F", 
+             bg_cursor = beautiful.bg_normal, ul_cursor= "single", },
+  },
+
+}
 --}}}
 
 --{{{ widgets
@@ -859,10 +971,8 @@ function dump_autoap()
 	os.execute('curl -s http://gw/user/autoap.htm  > /tmp/.awesome.autoap &')
 end
 
-last_ap = "none"
 function get_autoap()
    local ap = ""
-   if info then return end
    local f = io.open('/tmp/.awesome.autoap')
    if not f then return end
    local line = f:read()
@@ -870,14 +980,14 @@ function get_autoap()
    if not line then return end
 
    local aar, beg = line:find('<title>')
-   if not arr or not beg then return end
+   if not aar or not beg then return end
    if line:sub(beg+32, beg+32) == 'S' then ap = "<span color=\"#FF602E\">searching...</span>" 
    elseif line:sub(beg+32,beg+32) == 'C' then 
 	   endd = line:find('</title>', beg) 
 	   ap = line:sub(beg+47,endd-2)
    end
    
-   if ap ~= last_ap then naughty.notify({title = "AutoAP network", text = ap, timeout = 10}) 
+   if last_ap and ap ~= last_ap then naughty.notify({title = "AutoAP network", text = ap, timeout = 10})
    last_ap = ap end
    return ap
 end
@@ -1120,7 +1230,7 @@ function mountlist()
         local len = w.len or #w
         -- Add more widgets
         if len < #mnts then
-            for i = len, #mnts do
+            for i = len + 1, #mnts do
                 w[i] = widget({ type = "textbox", align = "right" })
                 awful.doc.set(w[i], { name = "mountwidget", description = "Mount widget", class = "widgets" })
             end
@@ -1136,39 +1246,46 @@ function mountlist()
             local esc=string.gsub(mnt[1],' ','\\ ')
             w[i].text = mnt[1]:gsub(mnt[3],''):upper() ..
                        '<span color="' .. beautiful.widget_value .. '">' .. mnt[2] .. '</span>' ..
-                        config.widgets.space --.. "  "
+                        config.widgets.space
 			
-                        w[i].buttons = join(
-                            awful.button({}, 1, function ()
-                              local action
-                              for m, spwn in pairs(config.widgets.autostart) do
-                                if mnt[1]:lower():find(m) then
-                                  action = spwn
-                                  break
-                                end
-                              end
-                              if not action then action = config.widgets.autostart.default end
-                              action = action:gsub("%%f", esc)
-                              awful.util.spawn_with_shell(action)
-                            end, nil, "Open"),
-                            awful.button({}, 2, function ()
-                              local action = config.widgets.autostart.default
-                              action = action:gsub("%%f", esc)
-                              awful.util.spawn_with_shell(action)
-                            end, nil, "Browse"),
-                            awful.button({}, 3, function ()
-                                awful.util.spawn("eject " .. esc, false)
-                                awful.util.spawn("pumount " .. esc, false)
-                                --awful.util.spawn("pumount -l " .. esc)
-			    end, nil, "Unmount")
-			)
+            w[i].buttons = join(
+
+              awful.button({}, 1,
+              function ()
+                local action
+                for m, spwn in pairs(config.widgets.autostart) do
+                  if mnt[1]:lower():find(m) then
+                    action = spwn
+                    break
+                  end
+                end
+                if not action then action = config.widgets.autostart.default end
+                action = action:gsub("%%f", esc)
+                awful.util.spawn_with_shell(action)
+              end, nil, "Open"),
+
+              awful.button({}, 2,
+              function ()
+                local action = config.widgets.autostart.default
+                action = action:gsub("%%f", esc)
+                awful.util.spawn_with_shell(action)
+              end, nil, "Browse"),
+
+              awful.button({}, 3,
+              function ()
+                awful.util.spawn("eject " .. esc, false)
+                awful.util.spawn("pumount " .. esc, false)
+                --awful.util.spawn("pumount -l " .. esc)
+              end, nil, "Unmount")
+
+            )
         end
     end
     awful.hooks.timer.register(1, update)
     update()
     return w
 end
-local mountwidget = mountlist()
+mountwidget = mountlist()
 --}}}
 
 --{{{ widgets / mail
@@ -1179,7 +1296,6 @@ mailwidget.buttons = join(
 )
 
 function get_mail()
-   if info then return end
    local f = io.open('/tmp/.awesome.mail')
    if not f then return end
    local count = f:read()
@@ -1205,11 +1321,10 @@ end
 aptwidget = widget({ type = "textbox", name = "aptwidget", align="right"})
 
 aptwidget.buttons = join(
-  awful.button({ }, 1, function () terminal("-name apt -title aptitude -e sudo aptitude") end)
+  awful.button({ }, 1, function () terminal("-name apt -geometry 169x55 -title aptitude -e sudo aptitude") end)
 )
 
 function get_apt()
-  if info then return end
   local f = io.open('/tmp/.awesome.apt')
   if not f then return end
   local apt = f:read()
@@ -1273,10 +1388,6 @@ clockwidget.mouse_enter = function() showcalendar(0) end
 clockwidget.mouse_leave = function () remove_calendar() end
 --}}}
 
---{{{ widgets / prompt
-mypromptbox = awful.widget.prompt({ layout = awful.widget.layout.horizontal.leftright })
---}}}
-
 --{{{ widgets / systray
 mysystray = widget({ type = "systray", name = "mysystray", align = "right" })
 --}}}
@@ -1287,7 +1398,6 @@ for s = 1, screen.count() do
   mylayoutbox[s] = awful.widget.layoutbox(s, { })
   mylayoutbox[s].image = img
   mylayoutbox[s].resize = false
-  mylayoutbox[s].valign = "center"
   mylayoutbox[s].buttons = join(
     awful.button({ }, 1, function () awful.layout.inc(layouts, 1) end),
     awful.button({ }, 3, function () awful.layout.inc(layouts, -1) end),
@@ -1297,7 +1407,7 @@ for s = 1, screen.count() do
 end
 --}}}
 
---{{{ widgets / initialize separators, widget tables
+--{{{ widgets / separators
 
 -- separator widgets
 sep_l = widget({
@@ -1311,38 +1421,7 @@ sep_r = widget({
 	name = 'sep_r',
 	align = 'right',
 })
-sep_r.text='	'
-
--- widget tables
-widgetz = {
-
-  {
-	  sep_l,
-  	memgraphwidget,
-  	sep_l,
-  	cpugraphwidget,
-  	sep_l, sep_l, sep_l, sep_l,
-    cputempwidget,
-  	fanwidget,
-  	wifiwidget,
-  	netwidget,
-    mypromptbox, 
-    
-    layout = awful.widget.layout.horizontal.leftright 
-  },
-
-  clockwidget,
-  mysystray, 
-	batterywidget,
-	aptwidget,
-	sep_r,
-	mountwidget,
-  --sep_r,
-  --mailwidget,
-  
-  layout = awful.widget.layout.horizontal.rightleft
-}
-
+sep_r.text='       '
 --}}}
 
 --{{{ widgets / hook functions
@@ -1369,7 +1448,7 @@ function hook_1s()
 	else 
 		netwidget.text = ''
 	end
-	clockwidget.text = config.widgets.space .. (rec or "") .. "<span font_desc='' color='#cccccc'>" .. os.date("%H<span color='#999999'>:</span>%M<span color='#999999'>:</span>%S") .. "</span> "
+	clockwidget.text = (rec or "") .. "<span font_desc='' color='#cccccc'>" .. os.date("%H<span color='#999999'>:</span>%M<span color='#999999'>:</span>%S") .. "</span> "
 end
 hook_1s()
 
@@ -1410,8 +1489,32 @@ widgetbar = {}
 for s = LCD, screen.count() do
   widgetbar[s] = awful.wibox({ position = "top", name = "widgetbar" .. s, screen = s,
                                fg = beautiful.fg_normal, bg = beautiful.bg_normal, height = 16 })
-  widgetbar[s].widgets = widgetz
-  --widgetbar[s].widgets = awful.util.table.join(widgets_left,widgets_right) 
+  widgetbar[s].widgets = {
+
+    {
+      sep_l,
+      memgraphwidget,
+      sep_l,
+      cpugraphwidget,
+      sep_l, sep_l, sep_l, sep_l,
+      cputempwidget,
+      fanwidget,
+      wifiwidget,
+      netwidget,
+      layout = awful.widget.layout.horizontal.leftright,
+    },
+
+    clockwidget,
+    mysystray,
+    batterywidget,
+    aptwidget,
+    sep_r,
+    mountwidget,
+    --mailwidget,
+    layout = awful.widget.layout.horizontal.rightleft,
+
+  }
+
   awful.doc.set(widgetbar[s], { name = "widgetbar", class = "panels", description = "Panel with widgets" })
 end
 --}}}
@@ -1510,18 +1613,8 @@ globalkeys = join(
 
 -- {{{ bindings / global / spawns
   
-awful.doc.set_default({ group = "1. global actions" }),
-  awful.key({ "Control"         }, "Escape",          function()
-          rodentbane.start()
-          rodentbane.cut("up")
-          rodentbane.cut("down")
-          rodentbane.cut("left")
-          rodentbane.cut("right")
-          rodentbane.cut("up")
-          rodentbane.cut("down")
-          rodentbane.cut("left")
-          rodentbane.cut("right")
-        end),
+  awful.doc.set_default({ group = "1. global actions" }),
+
   awful.key({ }, "KP_Insert",         function() sendkey({23}) end),
   awful.key({ modkey            }, "F1",          awful.help.run, nil, "help mode"),
   awful.key({ modkey            }, "slash",       awful.help.promptline, nil, "help prompt"),
@@ -1535,7 +1628,7 @@ awful.doc.set_default({ group = "1. global actions" }),
   awful.key({ "Control"         }, "Print",       function () awful.util.spawn_with_shell("sleep 1s; ~/bin/shot -s") end, nil, "selective screenshot"),
   awful.key({ "Mod1"            }, "Print",       function () awful.util.spawn_with_shell("sleep 5s; ~/bin/shot") end, nil, "delayed screenshot"),
   awful.key({ "Control", "Mod1" }, "Delete",      function () terminal("-name htop -e htop --sort-key PERCENT_CPU") end),
-  awful.key({ modkey, "Mod1"    }, "r",          function() 
+  awful.key({ modkey, "Shift"   }, "r",           function ()
     if not rec or rec == "" then 
       rec = "<span color='red'>REC</span>"
       awful.util.spawn("recordmydesktop --no-sound") 
@@ -1577,18 +1670,15 @@ awful.doc.set_default({ group = "1. global actions" }),
 -- }}}
 
 -- {{{ bindings / global / mm keys
-  awful.key({                 }, "XF86AudioStop",  function () mpc:stop() end    ),
-  awful.key({                 }, "XF86AudioPlay",  function () mpc:toggle_play() end   ),
-  awful.key({ "Mod4", "Mod1"  },  "Right",  function () mpc:next() end   ),
-  awful.key({                 }, "XF86AudioNext",  function () mpc:next() end ), 
-  awful.key({                 }, "XF86AudioPrev",  function () mpc:previous() end ), 
+  awful.key({                 }, "XF86AudioStop",  function () mpc:stop() end),
+  awful.key({                 }, "XF86AudioPlay",  function () mpc:toggle_play() end),
+  awful.key({                 }, "XF86AudioNext",  function () mpc:next() end),
+  awful.key({                 }, "XF86AudioPrev",  function () mpc:previous() end),
   awful.key({ "Control"       }, "XF86AudioPrev",  function () awful.util.spawn("mpc --no-status seek -10", false) end),
   awful.key({ "Control"       }, "XF86AudioNext",  function () awful.util.spawn("mpc --no-status seek +10", false) end),
-  awful.key({ "Mod1", "Mod4"  }, "Down",           function () awful.util.spawn("mpc --no-status volume -5", false) end),
-  awful.key({ "Mod1", "Mod4"  }, "Up",             function () awful.util.spawn("mpc --no-status volume +5", false) end),
-  awful.key({                 }, "XF86AudioRaiseVolume",  function () awful.util.spawn("mpc --no-status volume +1", false) end),
-  awful.key({                 }, "XF86AudioLowerVolume",  function () awful.util.spawn("mpc --no-status volume -1", false) end),
-  awful.key({                 }, "XF86AudioMute",  function () awful.util.spawn("mpc --no-status random", false) end),
+  awful.key({                 }, "XF86AudioMute",  function () awful.util.spawn("amixer set Master toggle", false) end),
+  awful.key({                 }, "XF86AudioRaiseVolume",  function () mpc:volume_up(5) end),
+  awful.key({                 }, "XF86AudioLowerVolume",  function () mpc:volume_down(5) end),
 -- }}}
 
 -- {{{ bindings / global / default rc.lua keys
@@ -1602,7 +1692,7 @@ awful.doc.set_default({ group = "1. global actions" }),
 
 -- Standard program
 
-  awful.key({ modkey, "Control" }, "r",           function () mypromptbox.widget.text = awful.util.escape(awful.util.restart()) end, nil, "restart awesome"),
+  awful.key({ modkey, "Control" }, "r",           function () naughty.notify{ text = awful.util.escape(awful.util.restart()) } end, nil, "restart awesome"),
   awful.key({ modkey, "Shift"   }, "q",           awesome.quit, nil, "quit awesome"),
 
 -- Layout manipulation
@@ -1617,133 +1707,16 @@ awful.doc.set_default({ group = "1. global actions" }),
 --}}}
 
 -- {{{ bindings / global / prompts
-
   awful.doc.set_default({ group = "9. prompts" }),
-
--- {{{ bindings / global / prompts / run
-  awful.key({ "Mod1" }, "F2",
-  function ()
-		info = true
-	  awful.prompt.run({
-      fg_cursor = "orange", bg_cursor = beautiful.bg_normal, ul_cursor = "single",
-      prompt = "<span color='orange'>Run:</span> " 
-    },
-    mypromptbox.widget,
-    awful.util.spawn,
-    awful.completion.shell,
-    os.getenv("HOME") .. "/.cache/awesome/history") 
-  end, nil, "run prompt"),
--- }}}
-
--- {{{ bindings / global / prompts / lua
-  awful.key({ "Mod1" }, "F1",
-  function ()
-		info = true
-    awful.prompt.run({
-      fg_cursor="#D1FF00", bg_cursor=beautiful.bg_normal, ul_cursor = "single",
-      prompt = "<span color = '#D1FF00'>Lua:</span> "
-    },
-    mypromptbox.widget,
-    awful.util.eval,
-    lua_completion,
-    os.getenv("HOME") .. "/.cache/awesome/history_eval") 
-  end, nil, "lua"),
--- }}}
-
--- {{{ bindings / global / prompts / calc
-  awful.key({ modkey, "Mod1" }, "c",
-  function ()
-    info = true
-    awful.prompt.run({ 
-      text = val and tostring(val), selectall = true, 
-      fg_cursor = "#00A5AB", bg_cursor=beautiful.bg_normal, ul_cursor = "single",
-      prompt = "<span color='#00A5AB'>Calc:</span> " 
-    }, 
-    mypromptbox.widget,
-	  function(expr)
-      val = awful.util.eval("return " .. expr)
-      local calc = naughty.notify({
-        text = expr .. ' = <span color="white">' .. val .. "</span>",
-        timeout = 0,
-        run = function(n)
-          n.die()
-          awful.util.spawn_with_shell("echo ".. n.val .. " | xsel -i")
-        end,
-      })
-      calc.val = val
-
-	  end,
-	  nil, awful.util.getdir("cache") .. "/calc") 
-  end, nil, "calculator"),
--- }}}
-
--- {{{ bindings / global / prompts / dict
-  awful.key({ modkey, "Mod1" }, "d",
-  function ()
-    info = true
-    local paste = awful.util.pread("xsel -o")
-    local color = '#008DFA'
-    awful.prompt.run({
-      fg_cursor = color, bg_cursor=beautiful.bg_normal, ul_cursor = "single", 
-      text = paste, selectall = true, 
-      prompt = "<span color='"..color.."'>Dict:</span> " 
-    }, 
-    mypromptbox.widget,
-    function(word)
-      local fr = awful.util.pread("dict -d wn " .. word .. " 2>&1")
-      naughty.notify({ text = '<span font_desc="Sans 7">'..fr..'</span>', timeout = 0 })
-    end,
-    nil, awful.util.getdir("cache") .. "/dict")
-  end, nil, "dictionary"),
--- }}}
-
--- {{{ bindings / global / prompts / kill
-  awful.key({ modkey, "Mod1" }, "k",
-  function ()
-	  info = true
-	  awful.prompt.run({
-      fg_cursor = "#FF4F4F", bg_cursor = beautiful.bg_normal, ul_cursor="single", 
-      text = paste, selectall = true, prompt = "<span color='#FF4F4F'>Kill:</span> " 
-    }, 
-    mypromptbox.widget,
-	  function(line)
-      local name,pid,sig = line:match("(%a+) (%d+).-(.*)")
-      awful.util.spawn("kill " .. (sig or "") .. " " .. pid, false)
-	  end,
-    function (cmd, cur_pos, ncomp)
-        local ps = {}
-        local g = io.popen("ps hxuc") -- | awk '{print $11 \" \" $2}'")
-        for line in g:lines() do
-              local out = splitbywhitespace(line)
-            table.insert(ps, out[11] .. " " .. out[2])
-
-        end
-        g:close()
-    if cur_pos ~= #cmd + 1 and cmd:sub(cur_pos, cur_pos) ~= " " then
-        return cmd, cur_pos
-    end
-               local matches = {}
-            for i, j in ipairs(ps) do
-                if ps[i]:find("^" .. cmd:sub(1, cur_pos)) then
-                        table.insert(matches, ps[i])
-                end
-            end
-        if #matches == 0 then return cmd, cur_pos end
- while ncomp > #matches do ncomp = ncomp - #matches end
-
-    -- return match and position
-    return matches[ncomp], cur_pos
-
- 
-        end
-        
-        , awful.util.getdir("cache") .. "/kill") 
-  end, nil, "kill"),
+  awful.key({ "Mod1"          }, "F2",  function () prompt.exec(prompt.presets.run) end, nil, "run"),
+  awful.key({ "Mod1"          }, "F1",  function () prompt.exec(prompt.presets.lua) end, nil, "lua"),
+  awful.key({ modkey, "Mod1"  }, "c",   function () prompt.presets.calc.args.text = val and tostring(val); prompt.exec(prompt.presets.calc) end, nil, "calc"),
+  awful.key({ modkey, "Mod1"  }, "d",   function () prompt.presets.dict.args.text = awful.util.pread("xsel -o"); prompt.exec(prompt.presets.dict) end, nil, "dict"),
+  awful.key({ modkey, "Mod1"  }, "k",   function () prompt.exec(prompt.presets.kill) end, nil, "kill"),
 -- }}}
 
 -- {{{ bindings / global / prompts / tagjump
   awful.key({ "Mod5" }, "/", function ()
-		info = true
     wi = mytagprompt[mouse.screen]
     wi.bg_image = image("/home/koniu/.config/awesome/icons/arrow.png")
 
@@ -1791,9 +1764,6 @@ for i=0, ( shifty.config.maxtags or 9 ) do
       end
     end))
 end
--- }}}
-
-
 -- }}}
 
 --{{{ bindings / client
@@ -1877,7 +1847,7 @@ awful.hooks.unmanage.register(function (c)
 end)
 -- }}}
 
--- {{{ hooks / unmanage
+-- {{{ hooks / property
 awful.hooks.property.register(function (c, prop)
   if type(c) == "client" and (prop == "minimized" or prop == "hide") then
     restore_focus(c.screen, c)
@@ -1886,8 +1856,9 @@ end)
 -- }}}
 
 -- {{{ hooks / tags
-awful.hooks.tags.register(function (screen)
-  restore_focus(screen)
+awful.hooks.tags.register(function (scr)
+  restore_focus(scr)
+  if #screen[scr]:tags() == 0 then mylayoutbox[scr].image = nil end
 end)
 -- }}}
 
