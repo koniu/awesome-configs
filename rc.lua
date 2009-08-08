@@ -904,7 +904,8 @@ end
 prompt.presets = {
 
   default = {
-    width = 1, height = 32,
+    position = "top",
+    width = 1, height = 34,
     slide = true, move_speed = 0.003, move_amount = 1,
     margin = { top = 10, left = 10 },
   },
@@ -964,6 +965,8 @@ wifiwidget.buttons = join(
   awful.button({}, 2, function () naughty.notify({text = get_autoap(), timeout = 2}) end, nil, "show autoap status"),
   awful.button({}, 3, function () terminal("-name iwconfig -e watch -n1 /sbin/iwconfig "..config.widgets.wifi) end, nil, "show iwconfig")
 )
+wifiwidget.mouse_enter = function ()  naughty.destroy(popop); popop = naughty.notify({text = " adsadfjsa " or get_autoap(), timeout = 0, hover_timeout = 0.2 }) end
+wifiwidget.mouse_leave = function ()  popop.die() end
 
 awful.doc.set(wifiwidget, { class = "widgets", description = "This widget shows WIFI range", name = "wifiwidget" })
 
@@ -995,11 +998,12 @@ end
 local function get_wifi()
 	local v = ''
 	local a = io.open('/sys/class/net/'..config.widgets.wifi..'/wireless/link')
+
   if not a then
     netup = nil
     return '<span color="#D9544C">off</span>'
   end
-	v = a:read() 
+  v = math.floor(a:read() / 0.7)
 	a:close()
 	if v == "0" then 
 		  v = '<span color="#D9544C">down</span>'
@@ -1343,7 +1347,7 @@ end
 --}}}
 
 --{{{ widgets / clock
-clockwidget = widget({ type = "textbox", name = "clockwidget", align = "right" })
+clockwidget = widget({ type = "textbox", })
 awful.doc.set(clockwidget, { description = "System time", class = "widgets", name = "clockwidget" })
 
 calendar = nil
@@ -1384,7 +1388,7 @@ clockwidget.buttons = join(
   awful.button({ }, 5, function () showcalendar(1) end, nil, "Show next month")
 )
 
-clockwidget.mouse_enter = function() showcalendar(0) end
+clockwidget.mouse_enter = function() showcalendar(0); dbg{'kkk'}end
 clockwidget.mouse_leave = function () remove_calendar() end
 --}}}
 
