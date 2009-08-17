@@ -8,13 +8,24 @@ require("naughty")
 --{{{ dbg function
 function dbg(vars)
     local a = ""
-    local text = "<span color = \"#FF004D\">dbg </span>"
-    for i,j in pairs(vars) do
-        a = "<span color='#333333'>" .. i .. " </span>"
-        if type(j) == "string" or type(j) == "number" then a = a .. j 
-        elseif type(j) == "boolean" then 
-            if j then a = a .. "true" else a = a.. " false" end
-        elseif type(j) == "table" then a = a .. "table #" .. #j
+    local text = "<span color = \"#FF004D\">dbg</span>"
+    for i=1, table.maxn(vars) do
+        local j = vars[i]
+        a = "<span color='#553333'>" .. i .. " </span>"
+
+        if type(j) == "table" then
+          -- element count
+          local count = 0
+          local longest_key = 6
+          for k,v in pairs(j) do count = count + 1; longest_key = math.max((type(k) == "string" and #k) or 0, longest_key) end
+          a = a .. "table #" .. count
+          -- show elements
+          if vars.f then
+            for k,v in pairs(j) do
+              a = a .. string.format("\n  <span color='#333333'>%-"..longest_key.."s</span> %s", k, tostring(v))
+            end
+          end
+
         else a = a .. tostring(j) or "nil"
         end
         text = text .. " \n" .. a
@@ -138,21 +149,22 @@ shifty.config.apps = {
 
     -- gajim
     { match = { "^Gajim",                           },  tag = "im",                                   },
-    { match = { "^messages$",                       },  nopopup = true,                               },
+    { match = { "^messages$",                       },  nopopup = true, slave = true                  },
     { match = { "^roster$",                         },  float = true, geometry = { 838,35,186,733 },
                                                         dockable = true, struts = { right = 186 },
                                                         skip_taskbar = true,                          },
 
     -- popterm (aka scratchpad)
-    { match = { "popterm",                          },  intrusive = true, struts = { bottom = 200 },
-                                                        dockable = true, float = true, sticky = true,
+    { match = { "popterm",                          },  intrusive = true, opacity = 0.8,
+                                                        --dockable = true, struts = { bottom = 200 },
+                                                        float = true, sticky = true, ontop = true,
                                                         geometry = { 0, 568, 1024, 200 }, hide = false,
                                                         skip_taskbar = true, titlebar = nil },
     -- ableton live
     { match = { "Live",                             }, 	tag = "live", nopopup = true,
                                                         geometry = { 0, 34, 1400, 1000 },             },
     -- firefox
-    { match = { "Iceweasel.*", "Firefox.*"          },  tag = "www",
+    { match = { "Iceweasel.*", "Firefox.*", "^Chrome$" },  tag = "www",
       keys = join( remap({ "Mod5" }, "Left",   {105, 112}, "Previous tab"),
                    remap({ "Mod5" }, "Right",  {105, 117}, "Next tab") )                              },
 
@@ -194,7 +206,7 @@ shifty.config.apps = {
                                                     },  slave = true,                                 },
 
     -- floats
-    { match = { "recordMyDesktop", "Skype", "QQQjackctl", "MPlayer", "xmag", "gcolor2"
+    { match = { "recordMyDesktop", "Skype", "QQQjackctl", "MPlayer", "xmag", "gcolor2", "javax.swing"
                                                     },  float = true,                                 },
     -- nopopup 
     { match = { "^Downloads$", 
@@ -207,7 +219,7 @@ shifty.config.apps = {
     { match = { "^xev$", "^menu$"                   },  skip_taskbar = true,                          },
     
     -- dock 
-    { match = { "^menu$",                           },  dockable = true,   ontop=true                       },
+    { match = { "^menu$",                           },  dockable = true, ontop = true, opacity = 0.9  },
 
 
     -- all
@@ -294,7 +306,7 @@ for n, v in pairs(gittags) do
                 prompt.exec({
                 args = {
                   fg_cursor = "#FF1CA9", bg_cursor = beautiful.bg_normal, ul_cursor="single",
-                  selectall = true, prompt = "<span color='#FF1CA9'>Branch:</span> "
+                  selectall = true, prompt = "<span color='#FF1CA9'>Branch</span>: "
                 },
 
                 run_function = function(line)
@@ -392,6 +404,7 @@ naughty.config.default_preset = {
   border_width = 1,
   margin = 5,
   screen = LCD,
+  opacity = 0.95,
 }
 --}}}
 
@@ -541,7 +554,7 @@ function lua_completion (line, cur_pos, ncomp)
    end
 
    -- We're really interested in the part following the last (, [, comma or space
-   local lastsep = #line - (line:reverse():find('[[(, ]') or #line)
+   local lastsep = #line - (line:reverse():find('[[({, ]') or #line)
    local lastidentifier
    if lastsep ~= 0 then
       lastidentifier = line:sub(lastsep + 2)
@@ -556,7 +569,7 @@ function lua_completion (line, cur_pos, ncomp)
    if lastdot ~= 0 then
       -- We have an environment; for each component in it, descend into it
       for env in lastidentifier:sub(1, lastdot):gmatch('([^.]+)') do
-         if not environment[env] then
+         if not environment[env] or type(environment[env]) ~= "table" then
             -- Oops, no such subenvironment, bail out
             return line, cur_pos
          end
@@ -579,7 +592,8 @@ function lua_completion (line, cur_pos, ncomp)
    if #completions == 0 then
       return line, cur_pos
    end
-   
+
+   table.sort(completions)
    while ncomp > #completions do
       ncomp = ncomp - #completions
    end
@@ -823,6 +837,7 @@ function popterm()
   elseif c.minimized then
     c.minimized = false
     client.focus = c
+    c:raise()
   else
     c.minimized = true
   end
@@ -869,6 +884,7 @@ function kill_completion(cmd, cur_pos, ncomp)
   end
 
   if #matches == 0 then return cmd, cur_pos end
+  table.sort(matches)
   while ncomp > #matches do ncomp = ncomp - #matches end
 
   -- return match and position
@@ -905,23 +921,23 @@ prompt.presets = {
 
   default = {
     position = "top",
-    width = 1, height = 34,
+    width = 1, height = 35, border_width = 0, opacity = 0.9, margin = { top = 12, left = 12 },
     slide = true, move_speed = 0.003, move_amount = 1,
-    margin = { top = 10, left = 10 },
   },
 
   run =  {
     completion_function = awful.completion.shell,
+    run_function = function(s) local rv = awful.util.spawn(s, true); if rv then naughty.notify({ text = awful.util.escape(rv) }) end end,
     history = os.getenv("HOME") .. "/.cache/awesome/history",
-    args = { prompt = "<span color='orange'>Run:</span> ", fg_cursor = "orange",
+    args = { prompt = "<span color='orange'>Run</span>: ", fg_cursor = "orange",
              bg_cursor = beautiful.bg_normal, ul_cursor = "single", },
   },
 
   lua = {
     completion_function = lua_completion,
-    run_function = awful.util.eval,
+    run_function = function(s) local r, msg = pcall(awful.util.eval, s); if not r then naughty.notify({ text = awful.util.escape(msg) }) end end,
     history = os.getenv("HOME") .. "/.cache/awesome/history_eval",
-    args = { prompt = "<span color = '#D1FF00'>Lua:</span> ", fg_cursor = "#D1FF00",
+    args = { prompt = "<span color = '#D1FF00'>Lua</span>: ", fg_cursor = "#D1FF00",
              bg_cursor = beautiful.bg_normal, ul_cursor = "single", },
   },
 
@@ -929,7 +945,7 @@ prompt.presets = {
     completion_function = lua_completion,
     run_function = calculator,
     history = os.getenv("HOME") .. "/.cache/awesome/history_calc",
-    args = { prompt = "<span color='#00A5AB'>Calc:</span> ", fg_cursor = "#00A5AB",
+    args = { prompt = "<span color='#00A5AB'>Calc</span>: ", fg_cursor = "#00A5AB",
              bg_cursor = beautiful.bg_normal, ul_cursor = "single", selectall = true, },
   },
 
@@ -937,7 +953,7 @@ prompt.presets = {
     completion_function = function() return end,
     run_function = dictionary,
     history = os.getenv("HOME") .. "/.cache/awesome/history_dict",
-    args = { prompt = "<span color='#008DFA'>Dict:</span> ", fg_cursor = "#008DFA", 
+    args = { prompt = "<span color='#008DFA'>Dict</span>: ", fg_cursor = "#008DFA", 
              bg_cursor = beautiful.bg_normal, ul_cursor = "single", selectall = true, },
   },
 
@@ -945,7 +961,7 @@ prompt.presets = {
     completion_function = kill_completion,
     run_function = kill,
     history = "",
-    args = { prompt = "<span color='#FF4F4F'>Kill:</span> ", fg_cursor = "#FF4F4F", 
+    args = { prompt = "<span color='#FF4F4F'>Kill</span>: ", fg_cursor = "#FF4F4F", 
              bg_cursor = beautiful.bg_normal, ul_cursor= "single", },
   },
 
@@ -955,30 +971,53 @@ prompt.presets = {
 --{{{ widgets
 
 --{{{ widgets / wifi
-wifiwidget = widget({
-	type = 'textbox',
-	name = 'wifiwdget'
-})
-
-wifiwidget.buttons = join(
-  awful.button({}, 1, function () run_or_raise("wicd-client -n >& /dev/null", { class = "Wicd-client.py" } )  end, nil, "show networks"),
-  awful.button({}, 2, function () naughty.notify({text = get_autoap(), timeout = 2}) end, nil, "show autoap status"),
-  awful.button({}, 3, function () terminal("-name iwconfig -e watch -n1 /sbin/iwconfig "..config.widgets.wifi) end, nil, "show iwconfig")
-)
-wifiwidget.mouse_enter = function ()  naughty.destroy(popop); popop = naughty.notify({text = " adsadfjsa " or get_autoap(), timeout = 0, hover_timeout = 0.2 }) end
-wifiwidget.mouse_leave = function ()  popop.die() end
-
-awful.doc.set(wifiwidget, { class = "widgets", description = "This widget shows WIFI range", name = "wifiwidget" })
-
 function dump_autoap()
 	os.execute('curl -s http://gw/user/autoap.htm  > /tmp/.awesome.autoap &')
 end
+
+function show_netpopup()
+  naughty.destroy(netpopup)
+  local iwconfig = awful.util.pread("/sbin/iwconfig " .. config.widgets.wifi)
+  local ifconfig = awful.util.pread("/sbin/ifconfig " .. config.widgets.wifi)
+  local route = awful.util.pread("/bin/ip route")
+  local iwgetid = awful.util.pread("/sbin/iwgetid -c")
+
+  local start, endd = iwconfig:find('".*"')
+  if not start or not endd then return end
+  local essid = iwconfig:sub(start+1, endd-1)
+
+  start, endd = iwconfig:find("Rate.* Mb/s")
+  if not start or not endd then return end
+  local rate = iwconfig:sub(start+5,endd-5)
+
+  local start, endd = ifconfig:find("inet addr:.* Bcast")
+  if not start or not endd then return end
+  local ip = ifconfig:sub(start+10, endd-5)
+
+  local start, endd = route:find("via %d+%.%d+%.%d+%.%d+ dev " .. config.widgets.wifi)
+  if not start or not endd then return end
+  local gw = route:sub(start+4,endd-9)
+
+  local start, endd = iwgetid:find("Channel:%d+")
+  if not start or not endd then return end
+  local channel = iwgetid:sub(start+8,endd)
+
+  local autoap = get_autoap()
+  netpopup = naughty.notify({ text = "<b>essid: </b>" .. essid .. " (channel " .. channel .. ", " .. rate .. " mbps" .. ")\n" ..
+    ((autoap and ("<b>autoap essid: </b>" .. autoap.ap .. "\n")) or "") ..
+    ((autoap and ("<b>autoap gw: </b>" .. autoap.gw .. "\n")) or "" ) ..
+    ((autoap and ("<b>autoap packet loss: </b>" .. autoap.loss .. "\n")) or "" ) ..
+    "<b>ip: </b>" .. ip .. "\n" ..
+    "<b>gw: </b>" .. gw,
+    timeout = 5, hover_timeout = 0.2 })
+end
+
 
 function get_autoap()
    local ap = ""
    local f = io.open('/tmp/.awesome.autoap')
    if not f then return end
-   local line = f:read()
+   local line = f:read("*a")
    f:close()
    if not line then return end
 
@@ -989,10 +1028,15 @@ function get_autoap()
 	   endd = line:find('</title>', beg) 
 	   ap = line:sub(beg+47,endd-2)
    end
+
+
+   local start, endd = line:find("rescanning%. %d+%% packet loss")
+   if not start or not endd then return end
+   local loss = line:sub(start+12,endd-12)
    
    if last_ap and ap ~= last_ap then naughty.notify({title = "AutoAP network", text = ap, timeout = 10})
    last_ap = ap end
-   return ap
+   return { ap = ap, loss = loss, gw = gw}
 end
 
 local function get_wifi()
@@ -1014,6 +1058,23 @@ local function get_wifi()
 	end
 	return v 
 end
+
+wifiwidget = widget({
+	type = 'textbox',
+	name = 'wifiwdget'
+})
+
+wifiwidget.buttons = join(
+  awful.button({}, 1, function () run_or_raise("wicd-client -n >& /dev/null", { class = "Wicd-client.py" } )  end, nil, "show networks"),
+  awful.button({}, 2, show_netpopup, nil, "show autoap status"),
+  awful.button({}, 3, function () terminal("-name iwconfig -e watch -n1 /sbin/iwconfig "..config.widgets.wifi) end, nil, "show iwconfig")
+)
+
+wifiwidget.mouse_enter = function() show_netpopup() end
+wifiwidget.mouse_leave = function() naughty.destroy(netpopup) end
+
+awful.doc.set(wifiwidget, { class = "widgets", description = "This widget shows WIFI range", name = "wifiwidget" })
+
 --}}}
 
 --{{{ widgets / net
@@ -1124,7 +1185,7 @@ memgraphwidget.border_color = '#000000'
 memgraphwidget.grow = 'right'
 
 memgraphwidget:plot_properties_set('cache', {
-    fg = '#000000',
+    fg = '#0F120F',
     vertical_gradient = false
 })
 
@@ -1388,7 +1449,7 @@ clockwidget.buttons = join(
   awful.button({ }, 5, function () showcalendar(1) end, nil, "Show next month")
 )
 
-clockwidget.mouse_enter = function() showcalendar(0); dbg{'kkk'}end
+clockwidget.mouse_enter = function() showcalendar(0) end
 clockwidget.mouse_leave = function () remove_calendar() end
 --}}}
 
@@ -1509,6 +1570,8 @@ for s = LCD, screen.count() do
     },
 
     clockwidget,
+    sep_l, sep_l, sep_l, sep_l,
+    sep_l, sep_l, sep_l, sep_l,
     mysystray,
     batterywidget,
     aptwidget,

@@ -36,7 +36,7 @@ theme.menu_height   = 15
 theme.menu_width    = 100
 
 
-theme.wallpaper_cmd = { "xsetroot -solid '#3D3A30'" }
+theme.wallpaper_cmd = { "hsetroot -solid '#3D3A30'" }
 
 local layout_icons = "/home/koniu/.config/awesome/icons/layouts/"
 theme.layout_fairh = layout_icons .. "fairh.png"
