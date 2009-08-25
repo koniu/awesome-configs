@@ -1,8 +1,3 @@
--- Standard awesome library
-require("awful")
--- Theme handling library
-require("beautiful")
--- Notification library
 require("naughty")
 
 --{{{ dbg function
@@ -32,7 +27,13 @@ function dbg(vars)
     end
     naughty.notify{ text = text, timeout = 0, hover_timeout = 0.2, screen = screen.count() }
 end
+
 --}}}
+
+require("awful")
+require("awful.autofocus")
+require("beautiful")
+
 --{{{ remap function
 function remap(from_mod, from_key, to, desc)
   return awful.util.table.join(awful.key(from_mod, from_key, 
@@ -50,6 +51,7 @@ require("inotify")
 
 require("mpd")
 mpc = mpd.new()
+prompt = require("obvious.popup_run_prompt")
 
 --{{{ vars 
 
@@ -63,6 +65,7 @@ if screen.count() == 2 then LCD = 2 else LCD = 1 end
 -- Table of layouts to cover with awful.layout.inc, order matters.
 layouts =
 {
+    awful.layout.suit.max,
     awful.layout.suit.tile,
 --    awful.layout.suit.tile.left,
     awful.layout.suit.tile.bottom,
@@ -70,7 +73,6 @@ layouts =
     awful.layout.suit.fair,
     awful.layout.suit.floating,
 --    awful.layout.suit.fair.horizontal,
-    awful.layout.suit.max,
     awful.layout.suit.max.fullscreen,
 --    awful.layout.suit.magnifier,
 }
@@ -137,6 +139,7 @@ shifty.config.apps = {
     { match = { "tail", "^top", "fping", "mtr", "htop", "iwconfig", "Wicd", "apt" 
                                                     },  tag = "sys",	                                },
     { match = { "urxvt"                             },	tag = "term",                                 },
+    { match = { "^Conky$"                           },	intrusive = true, sticky = true               },
     { match = { "^mc$"                              },  tag = "dir",                                  },
     { match = { "Wine"                              },  tag = "wine",                                 },
     { match = { "Ardour.*", "Jamin",                },  tag = "ardour",                               },
@@ -150,7 +153,7 @@ shifty.config.apps = {
     -- gajim
     { match = { "^Gajim",                           },  tag = "im",                                   },
     { match = { "^messages$",                       },  nopopup = true, slave = true                  },
-    { match = { "^roster$",                         },  float = true, geometry = { 838,35,186,733 },
+    { match = { "^roster$",                         },  float = true, geometry = { 838,34,186,734 },
                                                         dockable = true, struts = { right = 186 },
                                                         skip_taskbar = true,                          },
 
@@ -158,7 +161,7 @@ shifty.config.apps = {
     { match = { "popterm",                          },  intrusive = true, opacity = 0.8,
                                                         --dockable = true, struts = { bottom = 200 },
                                                         float = true, sticky = true, ontop = true,
-                                                        geometry = { 0, 568, 1024, 200 }, hide = false,
+                                                        geometry = { 0, 568, 1024, 200 }, hide = nil,
                                                         skip_taskbar = true, titlebar = nil },
     -- ableton live
     { match = { "Live",                             }, 	tag = "live", nopopup = true,
@@ -178,10 +181,10 @@ shifty.config.apps = {
     { match = { "Gimp",                             },  tag = "gimp",
       keys = join(
         awful.key({ "Mod1" }, "b", function(c) local a = getclient("role", "gimp-toolbox")
-                                               if a then a.hide = not a.hide end
+                                               if a then a.hidden = not a.hidden end
                                                end, nil, "Toggle toolbox"),
         awful.key({ "Mod1" }, "v", function(c) local a = getclient("role", "gimp-dock")
-                                               if a then a.hide = not a.hide end
+                                               if a then a.hidden = not a.hidden end
                                                end, nil, "Toggle dock"))                              }, 
     { match = { "^gimp.toolbox$",                   },  struts = { right=170}, skip_taskbar = true,
                                                         geometry = {854,35,170,733}, slave = true     },
@@ -189,7 +192,7 @@ shifty.config.apps = {
                                                         geometry = {0,35,186,733}, slave = true       },
     -- geeqie
     { match = { "^Geeqie$"                          },  tag = "gq"                                    },
-    { match = { "Full screen...Geeqie"              },  intrusive = true                              },
+    { match = { "Full screen...Geeqie"              },  intrusive = true, border_width = 0            },
     { match = { "Tools...Geeqie"                    },
       keys = join(awful.key({}, "Escape", function(c)  getclient("id", c.group_id + 2):kill() end))   },
 
@@ -227,7 +230,9 @@ shifty.config.apps = {
                                                         buttons = join(
                                                             awful.button({ }, 1, function (c) client.focus = c; c:raise() end, nil, "Focus client"),
                                                             awful.button({ "Mod1" }, 1, function (c) awful.mouse.client.move() end, nil, "Move client"),
-                                                            awful.button({ "Mod1" }, 3, awful.mouse.client.resize, nil, "Resize client" )
+                                                            awful.button({ "Mod1" }, 3, awful.mouse.client.resize, nil, "Resize client" ),
+                                                            awful.button({ modkey }, 4, function(c) c.opacity = c.opacity + 0.05; dbg{c.opacity} end, nil, "Increase opacity" ),
+                                                            awful.button({ modkey }, 5, function(c) c.opacity = c.opacity - 0.05; dbg{c.opacity} end, nil, "Decrease opacity" )
                                                         ),                                            },
 
 }
@@ -412,9 +417,10 @@ naughty.config.default_preset = {
 config.widgets = {}
 config.widgets.watchmount = { "/dev/sda2", "/media/", "/mnt/" }
 config.widgets.autostart = {
-  photo = "gq %f",
+  default = "urxvtc -name mc -geometry 169x55 -e mc %f",
   movies = "urxvtc -name mc -geometry 169x55 -e mc %f ~/data/tmp", 
-  default = "urxvtc -name mc -geometry 169x55 -e mc %f"
+  photo = "gq %f",
+  p6000 = "gq %f/dcim",
 }
 config.widgets.space = "   "
 config.widgets.wifi = "wlan1"
@@ -515,7 +521,7 @@ function scrollclient()
   if not c then return end
 
   local ss = screen[c.screen].geometry
-  local ws = awful.wibox.get_workarea(c.screen)
+  local ws = screen[c.screen].workarea
   local cc = c:geometry()
   local mc = mouse.coords()
   local step = 0
@@ -672,8 +678,8 @@ function ci()
 
   -- geometry
   local cc = c:geometry()
-  local signx = (cc.x >= 0 and "+")
-  local signy = (cc.y >= 0 and "+")
+  local signx = cc.x >= 0 and "+"
+  local signy = cc.y >= 0 and "+"
   v = v .. " @ " .. cc.width .. 'x' .. cc.height .. signx .. cc.x .. signy .. cc.y .. "\n\n"
 
   local inf = {
@@ -834,27 +840,24 @@ function popterm()
   local c = getclient("instance", "popterm")
   if not c then
     terminal("-name popterm -font 6x10")
+    dbg{'start'}
   elseif c.minimized then
-    c.minimized = false
+--  local slide = function() obvious.popup_run_prompt.do_slide(c, { x = 0, y= 568, width = 1024, height = 200 }, 10), function() obvious.lib.hooks.timer.unregister(slide) end
+    dbg{'show'}  
+    c.minimized= false
     client.focus = c
     c:raise()
+--  obvious.lib.hooks.timer.register(0.01, 0.18, slide, 'slidin')
   else
+--  local slide = function() obvious.popup_run_prompt.do_slide(c, { x = 0, y= 768, width = 1024, height = 200 }, 10, function() obvious.lib.hooks.timer.unregister(slide); c.hide = true end) end
+--  obvious.lib.hooks.timer.register(0.01, 0.18, slide, 'slidin')
     c.minimized = true
-  end
-end
---}}}
-
---{{{ functions / restore_focus
-function restore_focus(screen, cli)
-  if not client.focus or not client.focus:isvisible() then
-    local c = awful.client.focus.history.get(screen, 0)
-    if c and cli ~= c then client.focus = c end
+    dbg{'hide'}
   end
 end
 --}}}
 
 --{{{ functions / prompt
-prompt = require("obvious.popup_run_prompt")
 function prompt.exec(preset)
   prompt.settings = awful.util.table.join(prompt.defaults, prompt.presets.default, preset)
   prompt.run_prompt()
@@ -921,23 +924,29 @@ prompt.presets = {
 
   default = {
     position = "top",
-    width = 1, height = 35, border_width = 0, opacity = 0.9, margin = { top = 12, left = 12 },
+    width = 1, height = 34, border_width = 0, opacity = 0.9, margin = { top = 12, left = 12 },
     slide = true, move_speed = 0.003, move_amount = 1,
   },
 
   run =  {
     completion_function = awful.completion.shell,
-    run_function = function(s) local rv = awful.util.spawn(s, true); if rv then naughty.notify({ text = awful.util.escape(rv) }) end end,
+    run_function = function(s)
+      local rv = awful.util.spawn(s, true)
+      if rv then naughty.notify({ text = awful.util.escape(rv), timeout = 0, hover_timeout = 0.2 }) end
+    end,
     history = os.getenv("HOME") .. "/.cache/awesome/history",
-    args = { prompt = "<span color='orange'>Run</span>: ", fg_cursor = "orange",
+    args = { prompt = "<span color='#CC8400'>Run</span>: ", fg_cursor = "#FFA500",
              bg_cursor = beautiful.bg_normal, ul_cursor = "single", },
   },
 
   lua = {
     completion_function = lua_completion,
-    run_function = function(s) local r, msg = pcall(awful.util.eval, s); if not r then naughty.notify({ text = awful.util.escape(msg) }) end end,
+    run_function = function(s)
+      local r, msg = pcall(awful.util.eval, s)
+      if not r then naughty.notify({ text = awful.util.escape(msg), timeout = 0, hover_timeout = 0.2 }) end
+    end,
     history = os.getenv("HOME") .. "/.cache/awesome/history_eval",
-    args = { prompt = "<span color = '#D1FF00'>Lua</span>: ", fg_cursor = "#D1FF00",
+    args = { prompt = "<span color = '#A7CC00'>Lua</span>: ", fg_cursor = "#D1FF00",
              bg_cursor = beautiful.bg_normal, ul_cursor = "single", },
   },
 
@@ -945,15 +954,15 @@ prompt.presets = {
     completion_function = lua_completion,
     run_function = calculator,
     history = os.getenv("HOME") .. "/.cache/awesome/history_calc",
-    args = { prompt = "<span color='#00A5AB'>Calc</span>: ", fg_cursor = "#00A5AB",
+    args = { prompt = "<span color='#007478'>Calc</span>: ", fg_cursor = "#00A5AB",
              bg_cursor = beautiful.bg_normal, ul_cursor = "single", selectall = true, },
   },
 
   dict = {
-    completion_function = function() return end,
+    completion_function = function() return false end,
     run_function = dictionary,
     history = os.getenv("HOME") .. "/.cache/awesome/history_dict",
-    args = { prompt = "<span color='#008DFA'>Dict</span>: ", fg_cursor = "#008DFA", 
+    args = { prompt = "<span color='#0073CC'>Dict</span>: ", fg_cursor = "#008DFA",
              bg_cursor = beautiful.bg_normal, ul_cursor = "single", selectall = true, },
   },
 
@@ -961,8 +970,19 @@ prompt.presets = {
     completion_function = kill_completion,
     run_function = kill,
     history = "",
-    args = { prompt = "<span color='#FF4F4F'>Kill</span>: ", fg_cursor = "#FF4F4F", 
+    args = { prompt = "<span color='#CC3F3F'>Kill</span>: ", fg_cursor = "#FF4F4F",
              bg_cursor = beautiful.bg_normal, ul_cursor= "single", },
+  },
+
+  search = {
+    completion_function = function() return false end,
+    run_function = function(s)
+      awful.util.spawn("firefox -new-tab 'http://yubnub.org/parser/parse?command=" .. awful.util.escape(s:gsub(" ", "%%20")) .. "'", false)
+      awful.tag.viewonly(shifty.name2tag("www"))
+    end,
+    history = os.getenv("HOME") .. "/.cache/awesome/history_search",
+    args = { prompt = "<span color='#B39607'>Search</span>: ", fg_cursor = "#FFD60A",
+             bg_cursor = beautiful.bg_normal, ul_cursor= "single", selectall = true},
   },
 
 }
@@ -1061,17 +1081,17 @@ end
 
 wifiwidget = widget({
 	type = 'textbox',
-	name = 'wifiwdget'
+	name = 'wifiwdget',
 })
 
-wifiwidget.buttons = join(
+wifiwidget:buttons(join(
   awful.button({}, 1, function () run_or_raise("wicd-client -n >& /dev/null", { class = "Wicd-client.py" } )  end, nil, "show networks"),
   awful.button({}, 2, show_netpopup, nil, "show autoap status"),
   awful.button({}, 3, function () terminal("-name iwconfig -e watch -n1 /sbin/iwconfig "..config.widgets.wifi) end, nil, "show iwconfig")
-)
+))
 
-wifiwidget.mouse_enter = function() show_netpopup() end
-wifiwidget.mouse_leave = function() naughty.destroy(netpopup) end
+wifiwidget:add_signal("mouse::enter", function() show_netpopup() end)
+wifiwidget:add_signal("mouse::leave", function() naughty.destroy(netpopup) end)
 
 awful.doc.set(wifiwidget, { class = "widgets", description = "This widget shows WIFI range", name = "wifiwidget" })
 
@@ -1083,10 +1103,10 @@ netwidget = widget({
 	name = 'netwidget',
 
 })
-netwidget.buttons = join(
+netwidget:buttons(join(
   awful.button({}, 3, function () terminal("-name fping -e fping -le 10.6.6.1 google.com") end),
   awful.button({}, 1, function () terminal("-name mtr -e mtr google.com") end)
-)
+))
 netwidget.width = 100
 
 function get_net()
@@ -1095,29 +1115,19 @@ end
 --}}}
 
 --{{{ widgets / cpugraph 
-cpugraphwidget = widget({
-	type = 'graph',
-	name = 'cpugraphwidget',
-	align = 'left'
-})
-cpugraphwidget.buttons = join(
+cpugraphwidget = awful.widget.graph({ layout = awful.widget.layout.horizontal.leftright })
+cpugraphwidget.widget:buttons(join(
   awful.button({}, 3, function () terminal("-name top -e top") end),
   awful.button({}, 1, function () terminal("-name htop -e htop --sort-key PERCENT_CPU") end)
-)
+))
 
-cpugraphwidget.height = 0.85
-cpugraphwidget.width = 40
-cpugraphwidget.bg = '#000000'
-cpugraphwidget.border_color = '#000000'
-cpugraphwidget.grow = 'right'
-
-cpugraphwidget:plot_properties_set('cpu', {
---    fg = '#6E6958',
-    fg = '#252020',
---    fg_center = '#285577',
---    fg_end = '#634141',
-    vertical_gradient = true
-})
+cpugraphwidget:set_color('#252020')
+cpugraphwidget:set_border_color('#000000')
+cpugraphwidget:set_background_color('#000000')
+--cpugraphwidget:set_height(12)
+cpugraphwidget:set_width(40)
+cpugraphwidget:set_scale(false)
+awful.widget.layout.margins[cpugraphwidget.widget] = { top = 2 }
 
 awful.doc.set(cpugraphwidget, "cpugraph")
 --}}}
@@ -1168,36 +1178,19 @@ end
 --}}}
 
 --{{{ widgets / memgraph
-memgraphwidget = widget({
-	type = 'graph',
-	name = 'memgraphwidget',
-	align = 'left'
-})
-memgraphwidget.buttons = join(
+memgraphwidget = awful.widget.graph({ })
+memgraphwidget.widget:buttons(join(
   awful.button({}, 3, function () terminal("-name top -e top") end),
   awful.button({}, 1, function () terminal("-name htop -e htop --sort-key PERCENT_MEM") end)
-)
+))
 
-memgraphwidget.height = 0.85
-memgraphwidget.width = 40
-memgraphwidget.bg = '#000000'
-memgraphwidget.border_color = '#000000'
-memgraphwidget.grow = 'right'
-
-memgraphwidget:plot_properties_set('cache', {
-    fg = '#0F120F',
-    vertical_gradient = false
-})
-
-
-memgraphwidget:plot_properties_set('used', {
---    fg = '#6E6958',
-    fg = '#202520',
---    fg_center = '#285577',
---    fg_end = '#285577',
-    vertical_gradient = false
-})
-
+memgraphwidget:set_color('#0F120F')
+memgraphwidget:set_border_color('#000000')
+memgraphwidget:set_background_color('#000000')
+--memgraphwidget:set_height(12)
+memgraphwidget:set_width(40)
+memgraphwidget:set_scale(false)
+awful.widget.layout.margins[memgraphwidget.widget] = { top = 2, right = 4 }
 
 function get_mem()
     -- Return MEM usage values
@@ -1313,7 +1306,7 @@ function mountlist()
                        '<span color="' .. beautiful.widget_value .. '">' .. mnt[2] .. '</span>' ..
                         config.widgets.space
 			
-            w[i].buttons = join(
+            w[i]:buttons(join(
 
               awful.button({}, 1,
               function ()
@@ -1343,10 +1336,12 @@ function mountlist()
                 --awful.util.spawn("pumount -l " .. esc)
               end, nil, "Unmount")
 
-            )
+            ))
         end
     end
-    awful.hooks.timer.register(1, update)
+    local t = timer({ timeout = 1 })
+    t:add_signal("timeout", update)
+    t:start()
     update()
     return w
 end
@@ -1356,9 +1351,9 @@ mountwidget = mountlist()
 --{{{ widgets / mail
 mailwidget = widget({ type = "textbox", name = "mailwidget", align = "right"})
 
-mailwidget.buttons = join(
+mailwidget:buttons(join(
   awful.button({ }, 1, function () awful.util.spawn('firefox http://gmail.com'); awful.tag.viewonly(shifty.name2tag('www')) end)
-)
+))
 
 function get_mail()
    local f = io.open('/tmp/.awesome.mail')
@@ -1385,9 +1380,9 @@ end
 --{{{ widgets / apt
 aptwidget = widget({ type = "textbox", name = "aptwidget", align="right"})
 
-aptwidget.buttons = join(
+aptwidget:buttons(join(
   awful.button({ }, 1, function () terminal("-name apt -geometry 169x55 -title aptitude -e sudo aptitude") end)
-)
+))
 
 function get_apt()
   local f = io.open('/tmp/.awesome.apt')
@@ -1431,26 +1426,28 @@ function showcalendar(inc_offset)
                 offset = save_offset + inc_offset
         end
         local datespec = os.date("*t")
-        datespec = datespec.year * 12 + datespec.month - 1 + offset
-        datespec = (datespec % 12 + 1) .. " " .. math.floor(datespec / 12)
-        local cal = awful.util.pread("cal -m " .. datespec)
+        local date = datespec.year * 12 + datespec.month - 1 + offset
+        date = (date % 12 + 1) .. " " .. math.floor(date / 12)
+        local cal = awful.util.pread("cal -m " .. date)
         cal = string.gsub(cal, "^%s*(.-)%s*$", "%1")
+        cal = string.gsub(cal, "Mo Tu We Th Fr Sa Su", "<span color='#333028'>Mo Tu We Th Fr Sa Su</span>")
+        if offset == 0 then cal = string.gsub(cal, datespec.day, "<span color='#CCC19F'>" .. datespec.day .. "</span>") end
         calendar = naughty.notify({ 
                     text = os.date("<b><span color=\"white\">%a, %d %B %Y</span></b>\n\n") .. cal, 
                     timeout = 0, hover_timeout = 0.5,
         })
 end
 
-clockwidget.buttons = join(
+clockwidget:buttons(join(
   awful.button({ }, 1, function () showcalendar(-1) end, nil, "Show previous month"),
   awful.button({ }, 2, function () showcalendar(666) end, nil, "Show current month"),
   awful.button({ }, 3, function () showcalendar(1) end, nil, "Show next month"),
   awful.button({ }, 4, function () showcalendar(-1) end, nil, "Show previous month"),
   awful.button({ }, 5, function () showcalendar(1) end, nil, "Show next month")
-)
+))
 
-clockwidget.mouse_enter = function() showcalendar(0) end
-clockwidget.mouse_leave = function () remove_calendar() end
+clockwidget:add_signal("mouse::enter", function() showcalendar(0) end)
+clockwidget:add_signal("mouse::leave", function () remove_calendar() end)
 --}}}
 
 --{{{ widgets / systray
@@ -1463,12 +1460,12 @@ for s = 1, screen.count() do
   mylayoutbox[s] = awful.widget.layoutbox(s, { })
   mylayoutbox[s].image = img
   mylayoutbox[s].resize = false
-  mylayoutbox[s].buttons = join(
+  mylayoutbox[s]:buttons(join(
     awful.button({ }, 1, function () awful.layout.inc(layouts, 1) end),
     awful.button({ }, 3, function () awful.layout.inc(layouts, -1) end),
     awful.button({ }, 4, function () awful.layout.inc(layouts, 1) end),
     awful.button({ }, 5, function () awful.layout.inc(layouts, -1) end)
-  )
+  ))
 end
 --}}}
 
@@ -1495,11 +1492,12 @@ function hook_1s()
 	local color,color2=''
 	if lidclosed then return end
 
-	cpugraphwidget:plot_data_add('cpu',wicked.widgets.cpu()[1])
+--	cpugraphwidget:plot_data_add('cpu',wicked.widgets.cpu()[1])
+  cpugraphwidget:add_value(wicked.widgets.cpu()[1]/100)
 	
 	local a = get_mem()
-	memgraphwidget:plot_data_add('used',a[1])
-	memgraphwidget:plot_data_add('cache',a[1]+a[2])
+	memgraphwidget:add_value(a[1] / 100)
+--	memgraphwidget:plot_data_add('cache',a[1]+a[2])
 
 	cputempwidget.text 	= widgettext('CPU', get_cputemp() .. '°C')
 	fanwidget.text		= widgettext('FAN', string.format("%-4s",get_fan()))
@@ -1547,14 +1545,10 @@ end
 
 --}}}
 
---{{{ panels 
+--{{{ top panel
 
 --{{{ panels / widget
-widgetbar = {}
-for s = LCD, screen.count() do
-  widgetbar[s] = awful.wibox({ position = "top", name = "widgetbar" .. s, screen = s,
-                               fg = beautiful.fg_normal, bg = beautiful.bg_normal, height = 16 })
-  widgetbar[s].widgets = {
+widgetz = {
 
     {
       sep_l,
@@ -1581,17 +1575,6 @@ for s = LCD, screen.count() do
     layout = awful.widget.layout.horizontal.rightleft,
 
   }
-
-  awful.doc.set(widgetbar[s], { name = "widgetbar", class = "panels", description = "Panel with widgets" })
-end
---}}}
-
---{{{ panels / separator
-separatorbar = {}
-for s = 1, screen.count() do
-  separatorbar[s] = awful.wibox({ position = "top", name = "separatorbar" .. s,
-                                  bg = beautiful.bg_normal, height = 3, screen = s })
-end
 --}}}
 
 --{{{ panels / taglist+tasklist
@@ -1657,8 +1640,12 @@ shifty.taglist = mytaglist
 tabbar = {}
 for s = 1, screen.count() do
   tabbar[s] = awful.wibox({ position = "top", name = "tabbar" .. s, screen = s,
-                            fg = beautiful.fg_normal, bg = beautiful.bg_normal })
+                            fg = beautiful.fg_normal, bg = beautiful.bg_normal, height = 34 })
   tabbar[s].widgets = {
+    layout = awful.widget.layout.vertical.flex,
+    widgetz,
+
+  {
     mytaglist[s],
     mytagprompt[s],
     sep_l,
@@ -1667,6 +1654,8 @@ for s = 1, screen.count() do
     mytasklist[s],
     layout = awful.widget.layout.horizontal.leftright
   }
+
+}
   awful.doc.set(tabbar[s], { name = "tabbar", class = "panels", description  = "Panel with tag/task-list" })
 end
 -- }}}
@@ -1741,8 +1730,8 @@ globalkeys = join(
   awful.key({                 }, "XF86AudioPlay",  function () mpc:toggle_play() end),
   awful.key({                 }, "XF86AudioNext",  function () mpc:next() end),
   awful.key({                 }, "XF86AudioPrev",  function () mpc:previous() end),
-  awful.key({ "Control"       }, "XF86AudioPrev",  function () awful.util.spawn("mpc --no-status seek -10", false) end),
-  awful.key({ "Control"       }, "XF86AudioNext",  function () awful.util.spawn("mpc --no-status seek +10", false) end),
+  awful.key({ "Control"       }, "XF86AudioPrev",  function () awful.util.spawn("mpc --no-status seek -5", false) end),
+  awful.key({ "Control"       }, "XF86AudioNext",  function () awful.util.spawn("mpc --no-status seek +5", false) end),
   awful.key({                 }, "XF86AudioMute",  function () awful.util.spawn("amixer set Master toggle", false) end),
   awful.key({                 }, "XF86AudioRaiseVolume",  function () mpc:volume_up(5) end),
   awful.key({                 }, "XF86AudioLowerVolume",  function () mpc:volume_down(5) end),
@@ -1780,6 +1769,7 @@ globalkeys = join(
   awful.key({ modkey, "Mod1"  }, "c",   function () prompt.presets.calc.args.text = val and tostring(val); prompt.exec(prompt.presets.calc) end, nil, "calc"),
   awful.key({ modkey, "Mod1"  }, "d",   function () prompt.presets.dict.args.text = awful.util.pread("xsel -o"); prompt.exec(prompt.presets.dict) end, nil, "dict"),
   awful.key({ modkey, "Mod1"  }, "k",   function () prompt.exec(prompt.presets.kill) end, nil, "kill"),
+  awful.key({ "Mod1"          }, "Tab", function () prompt.presets.search.args.text = awful.util.pread("xsel -o"); prompt.exec(prompt.presets.search) end, nil, "search"),
 -- }}}
 
 -- {{{ bindings / global / prompts / tagjump
@@ -1851,12 +1841,12 @@ clientkeys = join(
 
 -- {{{ bindings / set keys and buttons
 awful.doc.set_default({})
-root.buttons = join(
+root.buttons(join(
   awful.button({ }, 3, function () mymainmenu:toggle() end),
   awful.button({ }, 4, awful.tag.viewnext),
   awful.button({ }, 5, awful.tag.viewprev)
-)
-root.keys = globalkeys
+))
+root.keys(globalkeys)
 shifty.config.clientkeys = clientkeys
 shifty.config.globalkeys = globalkeys
 -- }}}
@@ -1866,85 +1856,62 @@ shifty.config.globalkeys = globalkeys
 -- {{{ hooks 
 
 -- {{{ hooks / focus
-awful.hooks.focus.register(function (c)
+client.add_signal("focus", function (c)
   -- see if the client needs scrolling
-  local ws = awful.wibox.get_workarea(c.screen)
+  local ws = screen[c.screen].workarea
   local geom = c:geometry()
   if (geom.width > ws.width or geom.height > ws.height)
     and not (awful.client.dockable.get(c) or c.fullscreen) then
-      awful.hooks.timer.register(0.01, scrollclient)
+    dbg{c.name}
+      scrolltimer = timer({ timeout = 0.01 })
+      scrolltimer:add_signal("timeout", scrollclient)
+      scrolltimer:start()
   end
   -- change border color
   if awful.client.floating.get(c) and not awful.client.dockable.get(c) then
     c.border_color = '#26241E'
-  elseif not awful.client.ismarked(c) then 
+  else
     c.border_color = beautiful.border_focus
   end
 end)
 -- }}}
 
 -- {{{ hooks / unfocus
-awful.hooks.unfocus.register(function (c)
+client.add_signal("unfocus", function (c)
   -- kill scrolling timer
-  awful.hooks.timer.unregister(scrollclient)
+  if scrolltimer and scrolltimer.started then scrolltimer:stop() end
   -- change border color
-  if not awful.client.ismarked(c) then
-    if not awful.client.dockable.get(c) then 
-      c.border_color = beautiful.border_normal
-    end
+  if not awful.client.dockable.get(c) then 
+    c.border_color = beautiful.border_normal
   end
 end)
 -- }}}
 
--- {{{ hooks / marked
-awful.hooks.marked.register(function (c)
-    c.border_color = beautiful.border_marked
-end)
--- }}}
-
--- {{{ hooks / unmarked 
-awful.hooks.unmarked.register(function (c)
-    c.border_color = beautiful.border_focus
-end)
--- }}}
-
--- {{{ hooks / unmanage
-awful.hooks.unmanage.register(function (c)
-  restore_focus(c.screen)
-end)
--- }}}
-
--- {{{ hooks / property
-awful.hooks.property.register(function (c, prop)
-  if type(c) == "client" and (prop == "minimized" or prop == "hide") then
-    restore_focus(c.screen, c)
-end
-end)
--- }}}
-
--- {{{ hooks / tags
-awful.hooks.tags.register(function (scr)
-  restore_focus(scr)
-  if #screen[scr]:tags() == 0 then mylayoutbox[scr].image = nil end
-end)
--- }}}
-
 -- {{{ hooks / mouse_enter
-awful.hooks.mouse_enter.register(function (c)
+client.add_signal("manage", function (c, startup)
     -- Sloppy focus, but disabled for magnifier layout
+    c:add_signal("mouse::enter", function(c)
     if awful.layout.get(c.screen) ~= awful.layout.suit.magnifier
         and awful.client.focus.filter(c) then
         client.focus = c
-    end
+    end end)
 end)
 -- }}}
 
 --{{{ hooks / timers
-awful.hooks.timer.register(1, hook_1s)
-awful.hooks.timer.register(30, hook_1m)
-awful.hooks.timer.register(3, hook_3s)
-awful.hooks.timer.register(5, hook_5s)
-awful.hooks.timer.register(600, hook_10m)
+timers = {
+  { t = 1,    f = hook_1s   },
+  { t = 30,   f = hook_1m   },
+  { t = 3,    f = hook_3s   },
+  { t = 5,    f = hook_5s   },
+  { t = 600,  f = hook_10m  },
+}
+
+for _, tmr in ipairs(timers) do
+  timers.timer = timer({ timeout = tmr.t })
+  timers.timer:add_signal("timeout", tmr.f)
+  timers.timer:start()
+end
 -- }}}
 
 -- }}}
