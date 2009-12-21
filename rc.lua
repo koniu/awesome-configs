@@ -1399,7 +1399,7 @@ mytaglist.buttons = join(
 )
 
 for s = 1, screen.count() do
-  mytaglist[s] = awful.widget.taglist(s, awful.widget.taglist.filter.all, mytaglist.buttons, nil, {{item = "title", margin={left=6}}, layout = awful.widget.layout.horizontal.leftright})
+  mytaglist[s] = awful.widget.taglist(s, awful.widget.taglist.filter.all, mytaglist.buttons, nil, {{item = "icon" }, {item = "title", margin={left=6}}, layout = awful.widget.layout.horizontal.leftright})
   awful.doc.set(mytaglist[s], { name = "mytaglist", class = "widgets", description = "Taglist widget" })
 end
 
