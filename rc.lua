@@ -18,8 +18,8 @@ require("jackmix")
 
 --{{{ remap function
 function remap(from_mod, from_key, to, desc)
-  return awful.util.table.join(awful.key(from_mod, from_key, 
-    function(c) 
+  return awful.util.table.join(awful.key(from_mod, from_key,
+    function(c)
       for i,j in ipairs(to) do
         sendkey(j)
       end
@@ -118,8 +118,8 @@ shifty.config.tags = {
 shifty.config.apps = {
 
     -- tag matches
-    { match = { "tail", "^top", "fping", "mtr", "htop", "iwconfig", "Wicd", "apt" 
-                                                    },  tag = "sys",	                                },
+    { match = { "tail", "^top", "fping", "mtr", "htop", "iwconfig", "Wicd", "apt"
+                                                    },  tag = "sys",                                  },
     { match = { "urxvt"                             },  tag = "term", slave = true                    },
     { match = { "^mc$"                              },  tag = "dir", opacity = 0.8                    },
     { match = { "Wine"                              },  tag = "wine",                                 },
@@ -158,7 +158,7 @@ shifty.config.apps = {
     },
 
     -- ableton live
-    { match = { "^Live$",                           }, 	tag = "live", nopopup = true,
+    { match = { "^Live$",                           },   tag = "live", nopopup = true,
                                                         geometry = { 0, 34, 1400, 1000 },             },
     -- firefox
     { match = { "Iceweasel.*", "Firefox.*", "^Chrome$" },  tag = "www",
@@ -181,7 +181,7 @@ shifty.config.apps = {
                                                end, nil, "Toggle toolbox"),
         awful.key({ "Mod1" }, "v", function(c) local a = getclient("role", "gimp-dock")
                                                if a then a.hidden = not a.hidden end
-                                               end, nil, "Toggle dock"))                              }, 
+                                               end, nil, "Toggle dock"))                              },
     { match = { "^gimp.toolbox$",                   },  struts = { right=172}, skip_taskbar = true,
                                                         geometry = {852,34,172,734}, slave = true,
                                                         border_width = 0                              },
@@ -216,8 +216,8 @@ shifty.config.apps = {
     -- floats
     { match = { "recordMyDesktop", "Skype", "QQQjackctl", "MPlayer", "xmag", "gcolor2", "javax.swing"
                                                     },  float = true,                                 },
-    -- nopopup 
-    { match = { "^Downloads$", 
+    -- nopopup
+    { match = { "^Downloads$",
                                                     },  nofocus = true,                             },
 
     -- intruders
@@ -225,7 +225,7 @@ shifty.config.apps = {
                                                     },  intrusive = true,                             },
 
     -- all
-    { match = { "",                                 },  honorsizehints = false,  
+    { match = { "",                                 },  honorsizehints = false,
                                                         buttons = join(
                                                             awful.button({ }, 1, function (c) client.focus = c; c:raise() end, nil, "Focus client"),
                                                             awful.button({ "Mod1" }, 1, awful.mouse.client.move, nil, "Move client"),
@@ -235,18 +235,18 @@ shifty.config.apps = {
 }
 --}}}
 
---{{{ vars / shifty / ardour 
+--{{{ vars / shifty / ardour
 
-shifty.config.tags["ard"] = { 
+shifty.config.tags["ard"] = {
   layout = "tilebottom", mwfact = 0.8, exclusive = true,
   keys = join(
-    awful.key({ "Mod1" }, "m", 
+    awful.key({ "Mod1" }, "m",
       function(c) local m = getclient("instance", "ardour_mixer")
         local e = getclient("instance", "ardour_editor")
         if m then
           if m.hide then m.hide = false; e.hide = true
           else m.hide = true; e.hide = false end
-        end 
+        end
       end)
   )
 }
@@ -254,15 +254,15 @@ shifty.config.tags["ard"] = {
 local ardour_clients = {
   { match = { "Ardour"                }, tag = "ard" },
   { match = { "ardour_mixer"          }, hide = true },
-  { match = { "Ardour...Log"          }, 
-      struts = { bottom = 102 }, 
+  { match = { "Ardour...Log"          },
+      struts = { bottom = 102 },
       geometry = { 0, 666, 1024, 102 }
   },
   { match = { "ardour_plugin_editor", "Ardour...Log"  }, slave = true, skip_taskbar = true,
     keys = join(
       awful.key({}, "Escape", function(c) c:kill() end)
     )
-  } 
+  }
 }
 
 for i, m in ipairs(ardour_clients) do table.insert(shifty.config.apps, m) end
@@ -302,7 +302,7 @@ for n, v in pairs(gittags) do
     push = function()
                 local br=awful.util.pread("cd "..v.dir.."; git branch --no-color 2> /dev/null | grep \\*")
                 br = br:sub(3, #br-1)
-                terminal("-name "..n.."pop -hold -title '"..n.." git push "..br.."' -cd "..v.dir.." -e git "..v.push..br) 
+                terminal("-name "..n.."pop -hold -title '"..n.." git push "..br.."' -cd "..v.dir.." -e git "..v.push..br)
            end,
     branch = function()
                 prompt.exec({
@@ -321,7 +321,7 @@ for n, v in pairs(gittags) do
                     clr = "green"
                   end
                   naughty.notify{ text="<span color='"..clr.."'>"..txt:sub(1,#txt-1).."</span>" }
-	              end,
+                end,
 
                 completion_function = function (cmd, cur_pos, ncomp)
                   local branches = {}
@@ -390,7 +390,7 @@ for n, v in pairs(gittags) do
 end
 --}}}
 
-shifty.config.defaults = { 
+shifty.config.defaults = {
     layout = "max",
     leave_kills = false,
 }
@@ -416,7 +416,7 @@ config.widgets = {}
 config.widgets.watchmount = { "/dev/sda2", "/media/", "/mnt/" }
 config.widgets.autostart = {
   default = "urxvtc -name mc -geometry 169x55 -e mc %f",
-  movies = "urxvtc -name mc -geometry 169x55 -e mc %f ~/data/tmp", 
+  movies = "urxvtc -name mc -geometry 169x55 -e mc %f ~/data/tmp",
   photo = "gq %f",
   p6000 = "gq %f/dcim",
 }
@@ -680,7 +680,7 @@ function splitbywhitespace(str)
     values = {}
     start = 1
     splitstart, splitend = string.find(str, ' ', start)
-    
+
     while splitstart do
         m = string.sub(str, start, splitstart-1)
         if m:gsub(' ','') ~= '' then
@@ -717,7 +717,7 @@ function ti()
     i = i + 1
   end
 
-	naughty.notify{ text = v:sub(1,#v-1), timeout = 0, margin = 10 }
+  naughty.notify{ text = v:sub(1,#v-1), timeout = 0, margin = 10 }
 end
 --}}}
 
@@ -753,23 +753,23 @@ end
 --{{{ functions / widgettext
 -- format widget output
 function widgettext(label, value, labelcolor, valuecolor)
-	local lc = labelcolor or beautiful.widget_label
-	local vc = valuecolor or beautiful.widget_value
-	return 	'<span color="' .. lc .. '">' .. label .. ' </span><span color="' .. vc .. '">'  .. value .. '</span>' .. config.widgets.space
+  local lc = labelcolor or beautiful.widget_label
+  local vc = valuecolor or beautiful.widget_value
+  return   '<span color="' .. lc .. '">' .. label .. ' </span><span color="' .. vc .. '">'  .. value .. '</span>' .. config.widgets.space
 end
 --}}}
 
 --{{{ functions / islidclosed
 function islidclosed()
   if true then return false end
-	local f = io.open("/proc/acpi/button/lid/LID/state")
-	local state = f:read()
-	f:close()
-	if state:find("closed") then
-		return true
-	else
-		return false
-	end
+  local f = io.open("/proc/acpi/button/lid/LID/state")
+  local state = f:read()
+  f:close()
+  if state:find("closed") then
+    return true
+  else
+    return false
+  end
 end
 lidclosed = islidclosed()
 --}}}
@@ -790,7 +790,7 @@ end
 
 --{{{ functions / utficon
 function utficon(code)
-	return 	'<span font_desc="DejaVu Sans 8">&#' .. code .. ';</span>'
+  return   '<span font_desc="DejaVu Sans 8">&#' .. code .. ';</span>'
 end
 --}}}
 
@@ -842,13 +842,13 @@ function log_changed(logname)
       if log.subst then
         for from, to in pairs(log.subst) do l = l:gsub(from, to) end
       end
-     
+
       -- wrap lines if too long
       l = awful.util.linewrap(l, 80, l:find(" "))
 
       -- colorize
       if log.color then
-        for match, color in pairs(log.color) do 
+        for match, color in pairs(log.color) do
           l = l:gsub(match, "<span color='"..color.."'>%1</span>")
         end
       end
@@ -1143,7 +1143,7 @@ jackwidget:buttons(join(
 
 --{{{ widgets / wifi
 function dump_autoap()
-	--awful.util.spawn_with_shell('curl -s http://10.6.6.1/user/autoap.htm  > /tmp/.awesome.autoap')
+  --awful.util.spawn_with_shell('curl -s http://10.6.6.1/user/autoap.htm  > /tmp/.awesome.autoap')
 end
 
 function show_netpopup()
@@ -1193,44 +1193,44 @@ function get_autoap()
 
    local aar, beg = line:find('<title>')
    if not aar or not beg then return end
-   if line:sub(beg+32, beg+32) == 'S' then ap = "<span color=\"#FF602E\">searching...</span>" 
-   elseif line:sub(beg+32,beg+32) == 'C' then 
-	   endd = line:find('</title>', beg) 
-	   ap = line:sub(beg+47,endd-2)
+   if line:sub(beg+32, beg+32) == 'S' then ap = "<span color=\"#FF602E\">searching...</span>"
+   elseif line:sub(beg+32,beg+32) == 'C' then
+     endd = line:find('</title>', beg)
+     ap = line:sub(beg+47,endd-2)
    end
 
    local start, endd = line:find("rescanning%. %d+%% packet loss")
    if not start or not endd then return end
    local loss = line:sub(start+12,endd-12)
-   
+
    if last_ap and ap ~= last_ap then naughty.notify({title = "AutoAP network", text = ap, timeout = 10})
    last_ap = ap end
    return { ap = ap, loss = loss, gw = gw}
 end
 
 local function get_wifi()
-	local v = ''
-	local a = io.open('/sys/class/net/'..config.widgets.wifi..'/wireless/link')
+  local v = ''
+  local a = io.open('/sys/class/net/'..config.widgets.wifi..'/wireless/link')
 
   if not a then
     netup = nil
     return '<span color="#D9544C">off</span>'
   end
   v = math.floor(a:read() / 0.7)
-	a:close()
-	if v == 0 then 
-		  v = '<span color="#D9544C">down</span>'
-		  netup = nil 
-	else 
-		  v = string.format("%-4s", v .. "%")
-	 	  netup = 1 
-	end
-	return v 
+  a:close()
+  if v == 0 then
+      v = '<span color="#D9544C">down</span>'
+      netup = nil
+  else
+      v = string.format("%-4s", v .. "%")
+       netup = 1
+  end
+  return v
 end
 
 wifiwidget = widget({
-	type = 'textbox',
-	name = 'wifiwdget',
+  type = 'textbox',
+  name = 'wifiwdget',
 })
 
 wifiwidget:buttons(join(
@@ -1248,8 +1248,8 @@ awful.doc.set(wifiwidget, { class = "widgets", description = "This widget shows 
 
 --{{{ widgets / net
 netwidget = widget({
-	type = 'textbox',
-	name = 'netwidget',
+  type = 'textbox',
+  name = 'netwidget',
 
 })
 netwidget:buttons(join(
@@ -1259,7 +1259,7 @@ netwidget:buttons(join(
 netwidget.width = 100
 
 function get_net()
-	return wicked.widgets.net()
+  return wicked.widgets.net()
 end
 --}}}
 
@@ -1282,7 +1282,7 @@ awful.widget.layout.margins[netgraphwidget_down.widget] = { left = 2, top = 1 }
 
 awful.doc.set(netgraphwidget_down, "netgraph")
 --}}}
- 
+
 --{{{ widgets / netgraph / up
 netgraphwidget_up = awful.widget.graph({ layout = awful.widget.layout.horizontal.leftright })
 netgraphwidget_up.widget:buttons(join(
@@ -1303,7 +1303,7 @@ awful.doc.set(netgraphwidget_up, "netgraph")
 
 --}}}]]
 
---{{{ widgets / cpugraph 
+--{{{ widgets / cpugraph
 cpugraphwidget = awful.widget.graph({ layout = awful.widget.layout.horizontal.leftright })
 cpugraphwidget.widget:buttons(join(
   awful.button({}, 3, function () terminal("-name top -e top") end),
@@ -1321,48 +1321,48 @@ awful.widget.layout.margins[cpugraphwidget.widget] = { top = 1 }
 awful.doc.set(cpugraphwidget, "cpugraph")
 --}}}
 
---{{{ widgets / battery 
+--{{{ widgets / battery
 batterywidget = widget({
-	type = 'textbox',
-	name = 'batterywidget',
-	align = 'right'
+  type = 'textbox',
+  name = 'batterywidget',
+  align = 'right'
 })
 
 
 local function get_bat()
-	local color = 'orange'
-	local v = ''
-	local a = io.open('/sys/class/power_supply/BAT0/status')
+  local color = 'orange'
+  local v = ''
+  local a = io.open('/sys/class/power_supply/BAT0/status')
   if not a then return end
-	local status = a:read()
-	a:close()
-	local b = io.open('/sys/class/power_supply/BAT0/current_now')
-	local current = b:read()
-	b:close()
-	if status == "Full" or tonumber(current) == 0 then 
+  local status = a:read()
+  a:close()
+  local b = io.open('/sys/class/power_supply/BAT0/current_now')
+  local current = b:read()
+  b:close()
+  if status == "Full" or tonumber(current) == 0 then
     v = ''
-	else
-		local a = io.open('/sys/class/power_supply/BAT0/energy_full')
-		local full = a:read()
-		a:close()
-		local a = io.open('/sys/class/power_supply/BAT0/energy_now')
-		local now = a:read()
-		a:close() 
+  else
+    local a = io.open('/sys/class/power_supply/BAT0/energy_full')
+    local full = a:read()
+    a:close()
+    local a = io.open('/sys/class/power_supply/BAT0/energy_now')
+    local now = a:read()
+    a:close()
 
-		bat = math.floor(now*100/full)
-		
-		if status == "Discharging" then 
-			if 	bat < 11 then color="#D9544C"
-			elseif 	bat < 31 then color="#D9A24C"
-			else 		      color="#D9CD4C"
-			end
-		elseif status == "Charging" then color="#ABD94C"
-		end
-		
-		v = widgettext('BAT', bat .. '%',nil,color)
-	end
+    bat = math.floor(now*100/full)
 
-	return v 
+    if status == "Discharging" then
+      if   bat < 11 then color="#D9544C"
+      elseif   bat < 31 then color="#D9A24C"
+      else           color="#D9CD4C"
+      end
+    elseif status == "Charging" then color="#ABD94C"
+    end
+
+    v = widgettext('BAT', bat .. '%',nil,color)
+  end
+
+  return v
 end
 --}}}
 
@@ -1421,10 +1421,10 @@ cputempwidget = widget({
 awful.widget.layout.margins[cputempwidget] = { left = 5 }
 --cputempwidget.text = 'cpu'
 local function get_cputemp()
-	local f = io.open('/sys/class/hwmon/hwmon1/device/temp1_input')
-	local v = f:read() / 1000
-	f:close()
-	return v
+  local f = io.open('/sys/class/hwmon/hwmon1/device/temp1_input')
+  local v = f:read() / 1000
+  f:close()
+  return v
 end
 --}}}
 
@@ -1437,10 +1437,10 @@ fanwidget = widget({
 
 
 local function get_fan()
-	local f = io.open('/sys/class/hwmon/hwmon1/device/fan1_input')
-	local v = f:read()
-	f:close()
-	return v
+  local f = io.open('/sys/class/hwmon/hwmon1/device/fan1_input')
+  local v = f:read()
+  f:close()
+  return v
 end
 --}}}
 
@@ -1449,16 +1449,16 @@ function get_mounts()
    local v = {}
    local f = io.open('/tmp/.awesome.df')
    if not f then return end
-   local l = f:lines() 
+   local l = f:lines()
    for line in l do
-   	for p,q in pairs(config.widgets.watchmount) do
-		if line:find(q) ~= nil then 
-			local tmp = {}
-   	         	for id in line:gmatch("%S+") do table.insert(tmp,id) end
-			if #tmp > 6 then tmp[6]=tmp[6]..' '..tmp[7] end -- hack: space in mountpoint
-			table.insert(v,{tmp[6], tmp[4], q})
-		end
-	end
+     for p,q in pairs(config.widgets.watchmount) do
+    if line:find(q) ~= nil then
+      local tmp = {}
+                for id in line:gmatch("%S+") do table.insert(tmp,id) end
+      if #tmp > 6 then tmp[6]=tmp[6]..' '..tmp[7] end -- hack: space in mountpoint
+      table.insert(v,{tmp[6], tmp[4], q})
+    end
+  end
 
    end
    f:close()
@@ -1466,7 +1466,7 @@ function get_mounts()
 end
 
 function dump_mounts()
-	os.execute('df -h > /tmp/.awesome.df &')
+  os.execute('df -h > /tmp/.awesome.df &')
 end
 
 function mountlist()
@@ -1495,7 +1495,7 @@ function mountlist()
             w[i].text = mnt[1]:gsub(mnt[3],''):upper() ..
                        '<span color="' .. beautiful.widget_value .. '">' .. mnt[2] .. '</span>' ..
                         config.widgets.space
-			
+
             w[i]:buttons(join(
 
               awful.button({}, 1,
@@ -1525,7 +1525,7 @@ function mountlist()
                 local t = "Volume in use:"
                 for i,c in ipairs(cli) do
                   if c.name:find(esc) then
-                    
+
                   end
                 end
                 awful.util.spawn("eject " .. esc, false)
@@ -1570,7 +1570,7 @@ function get_mail()
 end
 
 function dump_mail()
---	os.execute('python ~/bin/gmail.py > /tmp/.awesome.mail &')
+--  os.execute('python ~/bin/gmail.py > /tmp/.awesome.mail &')
 end
 --}}}
 
@@ -1589,13 +1589,13 @@ function get_apt()
   if not apt then return end
   if tonumber(apt) > 0 then
     aptwidget.text  = widgettext('APT', apt  , nil, '#99C399' )
-  else 
+  else
     aptwidget.text = ''
   end
 end
 
 function dump_apt()
-	os.execute("sudo apt-get upgrade -s | grep upgraded | tail -n1 | awk '{ print $1 }' > /tmp/.awesome.apt &")
+  os.execute("sudo apt-get upgrade -s | grep upgraded | tail -n1 | awk '{ print $1 }' > /tmp/.awesome.apt &")
 end
 --}}}
 
@@ -1604,7 +1604,7 @@ clockwidget = widget({ type = "textbox", })
 awful.doc.set(clockwidget, { description = "System time", class = "widgets", name = "clockwidget" })
 
 calendar = nil
-local offset = 0 
+local offset = 0
 
 function remove_calendar()
         if calendar ~= nil then
@@ -1614,12 +1614,12 @@ function remove_calendar()
         end
 end
 
-function showcalendar(inc_offset) 
+function showcalendar(inc_offset)
         local save_offset = offset
         remove_calendar()
         if inc_offset == 666 then
                 offset = 0
-        else 
+        else
                 offset = save_offset + inc_offset
         end
         local datespec = os.date("*t")
@@ -1630,8 +1630,8 @@ function showcalendar(inc_offset)
         cal = string.gsub(cal, "Mo Tu We Th Fr Sa Su", "<span color='#333028'>Mo Tu We Th Fr Sa Su</span>")
         local day = pad(datespec.day, 2, " ")
         if offset == 0 then cal = string.gsub(cal, "([\n ])(" .. day .. ")", "%1<span color='orange'>%2</span>") end
-        calendar = naughty.notify({ 
-                    text = os.date("<b><span color=\"white\">%a, %d %B %Y</span></b>\n\n") .. cal, 
+        calendar = naughty.notify({
+                    text = os.date("<b><span color=\"white\">%a, %d %B %Y</span></b>\n\n") .. cal,
                     timeout = 0, hover_timeout = 0.5, --height=130
         })
 end
@@ -1673,61 +1673,61 @@ end
 --{{{ widgets / hook functions
 function hook_1s()
 --  log_watch()
-	local color,color2=''
-	if lidclosed then return end
+  local color,color2=''
+  if lidclosed then return end
 
   cpugraphwidget:add_value(wicked.widgets.cpu()[1]/100)
-	local a = get_mem()
-	memgraphwidget:add_value(a[1] / 100)
---	memgraphwidget:plot_data_add('cache',a[1]+a[2])
+  local a = get_mem()
+  memgraphwidget:add_value(a[1] / 100)
+--  memgraphwidget:plot_data_add('cache',a[1]+a[2])
 
-	cputempwidget.text 	= widgettext('CPU', get_cputemp() .. '°C')
-	fanwidget.text		= widgettext('FAN', string.format("%-4s",get_fan()))
-	wifiwidget.text		= widgettext('WIFI', get_wifi())
+  cputempwidget.text   = widgettext('CPU', get_cputemp() .. '°C')
+  fanwidget.text    = widgettext('FAN', string.format("%-4s",get_fan()))
+  wifiwidget.text    = widgettext('WIFI', get_wifi())
 
   local stat,vol = jack_status()
   if stat == "fw" or stat == "alsa" then stat = "<span color='#333333'>"..stat.." </span>" end
   jackwidget.text   = widgettext('JCK', (stat or "off") ..  (vol or ""))
 
-	if netup then
-	local b = wicked.widgets.net()
+  if netup then
+  local b = wicked.widgets.net()
   --netgraphwidget_down:add_value(b['{'..config.widgets.wifi..' down_kb}'])
   --netgraphwidget_up:add_value(b['{'..config.widgets.wifi..' up_kb}'])
-	if b['{'..config.widgets.wifi.. ' down_kb}'] > 0 then color = beautiful.widget_value; color = beautiful.widget_value else color = '#333333' end
-	if b['{'..config.widgets.wifi.. ' up_kb}'] > 0 then color2 = beautiful.widget_value else color2 = '#333333' end
-		netwidget.text = widgettext('NET', string.format('%3s <span color="#333333">/</span> %-3s', b['{'..config.widgets.wifi..' down_kb}'], b['{'..config.widgets.wifi.. ' up_kb}']), nil, color2)
-	else 
-		netwidget.text = ''
-	end
-	clockwidget.text = (rec or "") .. "<span font_desc='' color='#cccccc'>" .. os.date("%H<span color='#999999'>:</span>%M<span color='#999999'>:</span>%S") .. "</span> "
+  if b['{'..config.widgets.wifi.. ' down_kb}'] > 0 then color = beautiful.widget_value; color = beautiful.widget_value else color = '#333333' end
+  if b['{'..config.widgets.wifi.. ' up_kb}'] > 0 then color2 = beautiful.widget_value else color2 = '#333333' end
+    netwidget.text = widgettext('NET', string.format('%3s <span color="#333333">/</span> %-3s', b['{'..config.widgets.wifi..' down_kb}'], b['{'..config.widgets.wifi.. ' up_kb}']), nil, color2)
+  else
+    netwidget.text = ''
+  end
+  clockwidget.text = (rec or "") .. "<span font_desc='' color='#cccccc'>" .. os.date("%H<span color='#999999'>:</span>%M<span color='#999999'>:</span>%S") .. "</span> "
 end
 hook_1s()
 
 function hook_3s ()
---	if lidclosed then return end
-	dump_mounts()
-	get_mounts()
+--  if lidclosed then return end
+  dump_mounts()
+  get_mounts()
 end
 hook_3s()
 
 function hook_5s ()
-	if lidclosed then return end
-	batterywidget.text = get_bat()
---	get_mail()
-	get_apt()
-	dump_autoap()
-	get_autoap()
+  if lidclosed then return end
+  batterywidget.text = get_bat()
+--  get_mail()
+  get_apt()
+  dump_autoap()
+  get_autoap()
 end
 hook_5s()
 
 function hook_1m ()
-	lidclosed = islidclosed()
-	if lidclosed then return end
---	dump_mail()
+  lidclosed = islidclosed()
+  if lidclosed then return end
+--  dump_mail()
 end
 
 function hook_10m ()
-	dump_apt()
+  dump_apt()
 end
 --}}}
 
@@ -1794,7 +1794,7 @@ end
 --{{{ widgets / tagprompt
 mytagprompt = {}
 for s = 1, screen.count() do
-  mytagprompt[s] = widget({	type = 'textbox', })
+  mytagprompt[s] = widget({  type = 'textbox', })
 end
 --}}}
 
@@ -1846,7 +1846,7 @@ for s = 1, screen.count() do
 end
 --}}}
 
--- {{{ bindings 
+-- {{{ bindings
 
 -- {{{ bindings / global
 globalkeys = join(
@@ -1855,7 +1855,7 @@ globalkeys = join(
   awful.key({ "Mod5" }, "BackSpace",         function() config.logs_quiet = not config.logs_quiet naughty.notify{ text = "Logger: "..tostring(not config.logs_quiet) } end),
 
 -- {{{ bindings / global / spawns
-  
+
   awful.doc.set_default({ group = "1. global actions" }),
 
   awful.key({ }, "KP_Insert",         function() sendkey({23}) end),
@@ -1868,11 +1868,11 @@ globalkeys = join(
   awful.key({ "Mod1"            }, "Print",       function () awful.util.spawn_with_shell("sleep 5s; ~/bin/shot") end, nil, "delayed screenshot"),
   awful.key({ "Control", "Mod1" }, "Delete",      function () terminal("-name htop -e htop --sort-key PERCENT_CPU") end),
   awful.key({ modkey, "Shift"   }, "r",           function ()
-    if not rec or rec == "" then 
+    if not rec or rec == "" then
       rec = "<span color='red'>REC</span>"
-      awful.util.spawn("recordmydesktop --no-sound") 
-    else 
-      rec = "<span color='yellow'>REC</span>"; 
+      awful.util.spawn("recordmydesktop --no-sound")
+    else
+      rec = "<span color='yellow'>REC</span>";
       awful.util.spawn("pkill -USR1 recordmydesktop") end end, nil, "recordmydesktop"),
 -- }}}
 
@@ -1964,7 +1964,7 @@ globalkeys = join(
     wi = mytagprompt[mouse.screen]
     wi.bg_image = image("/home/koniu/.config/awesome/icons/arrow.png")
 
-	  awful.prompt.run({
+    awful.prompt.run({
         fg_cursor = "#DDFF00", bg_cursor=beautiful.bg_normal, ul_cursor = "single",
         prompt = "   ", text = " ", selectall = true, autoexec = 1
       },
@@ -2041,7 +2041,7 @@ shifty.config.globalkeys = globalkeys
 
 -- }}}
 
--- {{{ signals 
+-- {{{ signals
 
 -- {{{ signals / focus
 client.add_signal("focus", function (c)
@@ -2061,14 +2061,14 @@ client.add_signal("focus", function (c)
     c.border_color = beautiful.border_focus
   end
 end)
--- }}} 
+-- }}}
 
 -- {{{ signals / unfocus
 client.add_signal("unfocus", function (c)
   -- kill scrolling timer
   if scrolltimer and scrolltimer.started then scrolltimer:stop() end
   -- change border color
-  if not awful.client.dockable.get(c) then 
+  if not awful.client.dockable.get(c) then
     c.border_color = beautiful.border_normal
   end
 end)
