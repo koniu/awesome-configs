@@ -26,7 +26,7 @@ theme.border_marked = "#91231c"
 theme.widget_label = "#333333"
 theme.widget_value = "#555555"
 
-theme.help_font = "Monospace 6.5"
+theme.font_mono = "Monospace 6.5"
 theme.help_highlight = theme.fg_urgent
 
 theme.tasklist_floating_icon = "~/.config/awesome/icons/floating.png"
@@ -36,7 +36,7 @@ theme.menu_height   = 15
 theme.menu_width    = 100
 
 
-theme.wallpaper_cmd = { "hsetroot -solid '#3D3A30'" }
+theme.wallpaper_cmd = { "hsetroot -solid '#3D3A30'"  }
 
 local layout_icons = "/home/koniu/.config/awesome/icons/layouts/"
 theme.layout_fairh = layout_icons .. "fairh.png"
