@@ -1519,7 +1519,7 @@ globalkeys = join(
   awful.key({                   }, "Print",       function () awful.util.spawn_with_shell("~/bin/shot") end, nil, "screenshot"),
   awful.key({ "Control"         }, "Print",       function () awful.util.spawn_with_shell("sleep 1s; ~/bin/shot -s") end, nil, "selective screenshot"),
   awful.key({ "Mod1"            }, "Print",       function () awful.util.spawn_with_shell("sleep 5s; ~/bin/shot") end, nil, "delayed screenshot"),
-  awful.key({ "Control", "Mod1" }, "Delete",      function () terminal("-name htop -e htop --sort-key PERCENT_CPU") end),
+  awful.key({ "Control", "Mod1" }, "Delete",      function () run_or_raise("urxvtc -name htop -e htop --sort-key PERCENT_CPU", "instance","htop") end),
 -- }}}
 
 -- {{{ bindings / global / tag manipulation
