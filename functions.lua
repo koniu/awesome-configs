@@ -1,4 +1,15 @@
---{{{ functions / psgrep
+--{{{ tag+client+process manipulation
+--{{{ myfocus
+function myfocus(idx)
+  awful.client.focus.byidx(idx)
+  if awful.client.property.get(client.focus, "skip_focus") then
+    myfocus(idx)
+  else
+    client.focus:raise()
+  end
+end
+--}}}
+--{{{ psgrep
 function psgrep(args)
   local ret = {}
   local f = io.popen("ps ax")
@@ -19,49 +30,16 @@ function psgrep(args)
   if #ret > 0 then return ret end
 end
 --}}}
-
---{{{ functions / pad
-function pad(var, len, char)
-  local slen = #tostring(var)
-  if not char then
-    if type(var) == "number" then char = "0" else char = " " end
-  end
-  if slen < len then
-    return string.rep(char, len - slen) .. var
-  else
-    return var
+--{{{ getclient
+function getclient(prop, val)
+  for i, c in ipairs(client.get()) do
+    if c[prop] == val then
+      return c
+    end
   end
 end
-
 --}}}
-
---{{{ functions / splitbywhitespace
-function splitbywhitespace(str,cols)
-    values = {}
-    start = 1
-    splitstart, splitend = string.find(str, ' ', start)
-
-
-    while splitstart and (not cols or #values < cols - 1) do
-        m = string.sub(str, start, splitstart-1)
-        if m:gsub(' ','') ~= '' then
-            table.insert(values, m)
-        end
-
-        start = splitend+1
-        splitstart, splitend = string.find(str, ' ', start)
-    end
-
-    m = string.sub(str, start)
-    if m:gsub(' ','') ~= '' then
-        table.insert(values, m)
-    end
-
-    return values
-end
---}}}
-
---{{{ functions / run_or_raise
+--{{{ run_or_raise
 function run_or_raise(cmd, prop, val)
   local c = getclient(prop, val)
   if c then
@@ -73,8 +51,7 @@ function run_or_raise(cmd, prop, val)
   end
 end
 --}}}
-
---{{{ functions / scrollclient
+--{{{ scrollclient
 -- scrolling clients bigger than workspace
 function scrollclient()
   local c = client.focus
@@ -111,8 +88,107 @@ function scrollclient()
   end
 end
 --}}}
+--{{{ terminal
+-- runs terminal
+function terminal(args)
+  local args = args or ' -title "ba:~"'
+  awful.util.spawn(config.terminal .. ' ' .. args, false)
+end
+--}}}
+--{{{ popterm
+function popterm()
+  local c = getclient("instance", "popterm")
+  if not c then
+    terminal("-name popterm -font 6x10")
+  elseif c.hidden then
+    c.hidden =  false
+    client.focus = c
+    c:raise()
+  else
+    c.hidden = true
+  end
+end
+--}}}
+--{{{ taginfo
+function ti()
+  local t = awful.tag.selected()
+  local v = ""
 
---{{{ functions / lua completion
+  v = v .. "<span font_desc=\"Verdana Bold 20\">" .. t.name .. "</span>\n"
+  v = v .. tostring(t) .. "\n\n"
+  v = v .. "clients: " .. #t:clients() .. "\n\n"
+
+  local i = 1
+  for op, val in pairs(awful.tag.getdata(t)) do
+    if op == "layout" then val = awful.layout.getname(val) end
+    if op == "keys" then val = '#' .. #val end
+    v =  v .. string.format("%2s: %-12s = %s\n", i, op, tostring(val))
+    i = i + 1
+  end
+
+  naughty.notify{ text = v:sub(1,#v-1), timeout = 0, margin = 10 }
+end
+--}}}
+--{{{ clientinfo
+function ci()
+  local v = ""
+
+  -- object
+  local c = client.focus
+  v = v .. tostring(c)
+
+  -- geometry
+  local cc = c:geometry()
+  local signx = cc.x >= 0 and "+"
+  local signy = cc.y >= 0 and "+"
+  v = v .. " @ " .. cc.width .. 'x' .. cc.height .. signx .. cc.x .. signy .. cc.y .. "\n\n"
+
+  local inf = {
+    "name", "icon_name", "type", "class", "role", "instance", "pid",
+    "icon_name", "skip_taskbar", "id", "group_id", "leader_id", "machine",
+    "screen", "hide", "minimize", "size_hints_honor", "titlebar", "urgent",
+    "focus", "opacity", "ontop", "above", "below", "fullscreen", "transient_for"
+   }
+
+  for i = 1, #inf do
+    v =  v .. string.format("%2s: %-16s = %s\n", i, inf[i], tostring(c[inf[i]]))
+  end
+
+  naughty.notify{ text = v:sub(1,#v-1), timeout = 0, margin = 10 }
+end
+--}}}
+--}}}
+
+--{{{ prompt related
+
+--{{{ prompt
+prompt = obvious.popup_run_prompt
+function prompt.exec(preset)
+  prompt.settings = awful.util.table.join(prompt.defaults, prompt.presets.default, preset)
+  prompt.run_prompt()
+end
+--}}}
+--{{{ calculator
+function calculator(expr)
+  val = awful.util.eval("return " .. expr)
+  local calc = naughty.notify({
+    text = expr .. ' = <span color="white">' .. val .. "</span>",
+    timeout = 0,
+    run = function(n)
+      n.die()
+      awful.util.spawn_with_shell("echo ".. n.val .. " | xsel -i")
+    end,
+  })
+  calc.val = val
+end
+--}}}
+--{{{ dictionary
+function dictionary(word)
+  local fr = awful.util.pread("dict -d wn " .. word .. " 2>&1")
+  naughty.notify({ text = '<span font_desc="Sans 7">'..fr..'</span>', timeout = 0 })
+end
+--}}}
+--{{{ lua completion
 function lua_completion (line, cur_pos, ncomp)
    -- Only complete at the end of the line, for now
    if cur_pos ~= #line + 1 then
@@ -174,65 +250,50 @@ function lua_completion (line, cur_pos, ncomp)
 end
 --}}}
 
---{{{ functions / terminal
--- runs terminal
-function terminal(args)
-  local args = args or ' -title "ba:~"'
-  awful.util.spawn(config.terminal .. ' ' .. args, false)
-end
 --}}}
 
---{{{ functions / taginfo
-function ti()
-  local t = awful.tag.selected()
-  local v = ""
+--{{{ text manipulation
 
-  v = v .. "<span font_desc=\"Verdana Bold 20\">" .. t.name .. "</span>\n"
-  v = v .. tostring(t) .. "\n\n"
-  v = v .. "clients: " .. #t:clients() .. "\n\n"
-
-  local i = 1
-  for op, val in pairs(awful.tag.getdata(t)) do
-    if op == "layout" then val = awful.layout.getname(val) end
-    if op == "keys" then val = '#' .. #val end
-    v =  v .. string.format("%2s: %-12s = %s\n", i, op, tostring(val))
-    i = i + 1
+--{{{ pad
+function pad(var, len, char)
+  local slen = #tostring(var)
+  if not char then
+    if type(var) == "number" then char = "0" else char = " " end
   end
-
-  naughty.notify{ text = v:sub(1,#v-1), timeout = 0, margin = 10 }
-end
---}}}
-
---{{{ functions / clientinfo
-function ci()
-  local v = ""
-
-  -- object
-  local c = client.focus
-  v = v .. tostring(c)
-
-  -- geometry
-  local cc = c:geometry()
-  local signx = cc.x >= 0 and "+"
-  local signy = cc.y >= 0 and "+"
-  v = v .. " @ " .. cc.width .. 'x' .. cc.height .. signx .. cc.x .. signy .. cc.y .. "\n\n"
-
-  local inf = {
-    "name", "icon_name", "type", "class", "role", "instance", "pid",
-    "icon_name", "skip_taskbar", "id", "group_id", "leader_id", "machine",
-    "screen", "hide", "minimize", "size_hints_honor", "titlebar", "urgent",
-    "focus", "opacity", "ontop", "above", "below", "fullscreen", "transient_for"
-   }
-
-  for i = 1, #inf do
-    v =  v .. string.format("%2s: %-16s = %s\n", i, inf[i], tostring(c[inf[i]]))
+  if slen < len then
+    return string.rep(char, len - slen) .. var
+  else
+    return var
   end
+end
 
-  naughty.notify{ text = v:sub(1,#v-1), timeout = 0, margin = 10 }
+--}}}
+--{{{ splitbywhitespace
+function splitbywhitespace(str,cols)
+    values = {}
+    start = 1
+    splitstart, splitend = string.find(str, ' ', start)
+
+
+    while splitstart and (not cols or #values < cols - 1) do
+        m = string.sub(str, start, splitstart-1)
+        if m:gsub(' ','') ~= '' then
+            table.insert(values, m)
+        end
+
+        start = splitend+1
+        splitstart, splitend = string.find(str, ' ', start)
+    end
+
+    m = string.sub(str, start)
+    if m:gsub(' ','') ~= '' then
+        table.insert(values, m)
+    end
+
+    return values
 end
 --}}}
-
---{{{ functions / widgettext
+--{{{ widgettext
 function widgettext(label, value, labelcolor, valuecolor)
   local lc = labelcolor or beautiful.widget_label
   local vc = valuecolor or beautiful.widget_value
@@ -240,88 +301,6 @@ function widgettext(label, value, labelcolor, valuecolor)
 end
 --}}}
 
---{{{ functions / getclient
-function getclient(prop, val)
-  for i, c in ipairs(client.get()) do
-    if c[prop] == val then
-      return c
-    end
-  end
-end
---}}}
-
---{{{ functions / popterm
-function popterm()
-  local c = getclient("instance", "popterm")
-  if not c then
-    terminal("-name popterm -font 6x10")
-  elseif c.hidden then
-    c.hidden =  false
-    client.focus = c
-    c:raise()
-  else
-    c.hidden = true
-  end
-end
---}}}
-
---{{{ functions / prompt
-prompt = obvious.popup_run_prompt
-function prompt.exec(preset)
-  prompt.settings = awful.util.table.join(prompt.defaults, prompt.presets.default, preset)
-  prompt.run_prompt()
-end
---}}}
-
---{{{ functions / kill
-function kill(line)
-  local pid,name,sig = line:match("(%d+) (%a+).-(.*)")
-  if not pid then naughty.notify{ text = "u fail" }; return end
-  awful.util.spawn("kill " .. (sig or "") .. " " .. pid, false)
-end
-
-function kill_completion(cmd, cur_pos, ncomp)
-  local matches = psgrep({ command = cmd:sub(1,cur_pos) })
-
-  if not matches then return cmd, cur_pos end
-  while ncomp > #matches do ncomp = ncomp - #matches end
-
-  -- return match and position
-  return matches[ncomp].pid..' '..matches[ncomp].command, cur_pos
-end
---}}}
-
---{{{ functions / calculator
-function calculator(expr)
-  val = awful.util.eval("return " .. expr)
-  local calc = naughty.notify({
-    text = expr .. ' = <span color="white">' .. val .. "</span>",
-    timeout = 0,
-    run = function(n)
-      n.die()
-      awful.util.spawn_with_shell("echo ".. n.val .. " | xsel -i")
-    end,
-  })
-  calc.val = val
-end
---}}}
-
---{{{ functions / dictionary
-function dictionary(word)
-  local fr = awful.util.pread("dict -d wn " .. word .. " 2>&1")
-  naughty.notify({ text = '<span font_desc="Sans 7">'..fr..'</span>', timeout = 0 })
-end
---}}}
-
---{{{ functions / myfocus
-function myfocus(idx)
-  awful.client.focus.byidx(idx)
-  if awful.client.property.get(client.focus, "skip_focus") then
-    myfocus(idx)
-  else
-    client.focus:raise()
-  end
-end
---}}}
+---}}}
 
 -- vim: foldmethod=marker:filetype=lua:expandtab:shiftwidth=2:tabstop=2:softtabstop=2:encoding=utf-8:textwidth=80
