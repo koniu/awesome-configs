@@ -120,6 +120,9 @@ shifty.config.apps = {
     { match = { "Deluge", "nicotine", "Tucan.py", "^jd.Main$"
                                                     },  tag = "dl"                                    },
 
+    -- bristol
+    { match = { "^BasicWin$",                       },  tag = "bristol",  float = 1                    },
+
     -- gajim
     { match = { "^Gajim",                           },  tag = "im",                                   },
     { match = { "^messages$",                       },  nopopup = true, slave = true, border_width = 0},
