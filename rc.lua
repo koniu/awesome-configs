@@ -10,8 +10,8 @@ require("handy")
 require("wicked")
 require("inotify")
 require("obvious.popup_run_prompt")
-require("jackmix")
 
+dofile("/home/koniu/.config/awesome/functions.lua")
 --}}}
 
 --{{{ vars
@@ -72,9 +72,11 @@ handy.combo_ignore_groups = {
   "default"
 }
 
-
+require("jackmix")
 mixer = jackmix.new({port = 1234, host = "localhost", step = 2, state_file = "/home/koniu/.cache/mixer"})
 
+require("recorder")
+rek = recorder.new({ backend = recorder.backends["jack.record"] })
 
 --}}}
 
@@ -382,58 +384,6 @@ config.widgets.wifi = "wlan1"
 
 --{{{ functions
 
---{{{ functions / pad
-function pad(var, len, char)
-  local slen = #tostring(var)
-  if not char then
-    if type(var) == "number" then char = "0" else char = " " end
-  end
-  if slen < len then
-    return string.rep(char, len - slen) .. var
-  else
-    return var
-  end
-end
---}}}
-
---{{{ functions / recording
-function rec_on()
-  local prefix = "<span color='red'>recording</span>\n"
-  awful.util.spawn_with_shell("cd ~/data/audio/samples/__rec; /usr/local/bin/jack.record `date '+%Y%m%d-%H%M%S'`.wav")
-  sndrecsign = naughty.notify({ text = prefix .. "00:00:00.0", timeout = 0, replaces_id = sndrecsign and sndrecsign.id})
-
-  rectime = { count = 0 }
-  rectimer = timer({ timeout = 0.1 })
-  rectimer:add_signal("timeout", function()
-    rectime.count = rectime.count + 1
-    rectime.h = pad(math.floor(rectime.count / 36000), 2)
-    rectime.m = pad(math.floor((rectime.count - rectime.h * 36000) / 600), 2)
-    rectime.s = pad(math.floor((rectime.count - rectime.h * 36000 - rectime.m * 600) / 10 ), 2)
-    rectime.t = math.floor(rectime.count - rectime.h * 36000 - rectime.m * 600 - rectime.s * 10)
-    local time = string.format("%s:%s:%s.%s", rectime.h, rectime.m, rectime.s, rectime.t)
-    sndrecsign.box.widgets[1].text = '<span font_desc="' .. beautiful.font_mono .. '">' .. prefix .. time .. '</span>'
-    sndrecsign.box.widgets[1].valign = "middle"
-  end)
-  rectimer:start()
-end
-
-function rec_off()
-  awful.util.spawn_with_shell("killall jack.record")
-  sndrecsign = naughty.notify({ text = 'recording stopped', timeout = 3, replaces_id = sndrecsign.id})
-
-  rectimer:stop()
-end
-
-function rec_toggle()
-  if sndrec then
-    rec_off()
-    sndrec = nil
-  else
-    rec_on()
-    sndrec = true
-  end
-end
---}}}
 
 --{{{ functions / run_or_raise
 function run_or_raise(cmd, prop, val)
@@ -556,31 +506,6 @@ function terminal(args)
 end
 --}}}
 
---{{{ functions / splitbywhitespace
-function splitbywhitespace(str)
-    values = {}
-    start = 1
-    splitstart, splitend = string.find(str, ' ', start)
-
-    while splitstart do
-        m = string.sub(str, start, splitstart-1)
-        if m:gsub(' ','') ~= '' then
-            table.insert(values, m)
-        end
-
-        start = splitend+1
-        splitstart, splitend = string.find(str, ' ', start)
-    end
-
-    m = string.sub(str, start)
-    if m:gsub(' ','') ~= '' then
-        table.insert(values, m)
-    end
-
-    return values
-end
---}}}
-
 --{{{ functions / taginfo
 function ti()
   local t = awful.tag.selected()
@@ -674,33 +599,19 @@ end
 
 --{{{ functions / kill
 function kill(line)
-  local name,pid,sig = line:match("(%a+) (%d+).-(.*)")
+  local pid,name,sig = line:match("(%d+) (%a+).-(.*)")
   if not pid then naughty.notify{ text = "u fail" }; return end
   awful.util.spawn("kill " .. (sig or "") .. " " .. pid, false)
 end
 
 function kill_completion(cmd, cur_pos, ncomp)
-  local ps = {}
-  local g = io.popen("ps hxuc")
-  for line in g:lines() do
-    local out = splitbywhitespace(line)
-    table.insert(ps, out[11] .. " " .. out[2])
-  end
-  g:close()
+  local matches = psgrep({ command = cmd:sub(1,cur_pos) })
 
-  if cur_pos ~= #cmd + 1 and cmd:sub(cur_pos, cur_pos) ~= " " then return cmd, cur_pos end
-
-  local matches = {}
-  for i, j in ipairs(ps) do
-    if ps[i]:find("^" .. cmd:sub(1, cur_pos)) then table.insert(matches, ps[i]) end
-  end
-
-  if #matches == 0 then return cmd, cur_pos end
-  table.sort(matches)
+  if not matches then return cmd, cur_pos end
   while ncomp > #matches do ncomp = ncomp - #matches end
 
   -- return match and position
-  return matches[ncomp], cur_pos
+  return matches[ncomp].pid..' '..matches[ncomp].command, cur_pos
 end
 --}}}
 
@@ -832,15 +743,15 @@ function jack_volume()
 end
 
 function jack_status()
-  local ps = awful.util.pread("ps hp `pgrep jackd` -o args")
+  local ps = psgrep({command = "^/usr/bin/jackd"})
   local stat, vol
-  if not ps or ps == "" then
+  if not ps then
     stat = "off"
     vol = ""
-  elseif ps:find("dfirewire") or ps:find("dfreebob") then
+  elseif ps[1].command:find("dfirewire") or ps[1].command:find("dfreebob") then
     stat = "fw"
     vol = jack_volume()
-  elseif ps:find("dalsa") then
+  elseif ps[1].command:find("dalsa") then
     stat = "alsa"
     vol = jack_volume()
   end
@@ -1548,7 +1459,9 @@ globalkeys = join(
 -- }}}
 
 -- {{{ bindings / global / mm keys
-  awful.key({ "Control"       }, "XF86Launch1",    rec_toggle),
+  awful.key({ "Mod4", "Mod1"  }, "r",             function() rek:display() end),
+  awful.key({ "Control"       }, "XF86Launch1",   function() rek:toggle() end),
+  awful.key({ "Control","Shift" }, "XF86Launch1",   function() rek:replay() end),
 
   awful.key({                 }, "XF86AudioNext",  function () awful.util.spawn('mm next') end),
   awful.key({                 }, "XF86AudioPrev",  function () awful.util.spawn('mm prev') end),
