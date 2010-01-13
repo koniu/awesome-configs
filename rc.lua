@@ -155,8 +155,9 @@ shifty.config.apps = {
     -- ableton live
     { match = { "^Live$",                           },   tag = "live", nopopup = true,
                                                         geometry = { 0, 34, 1400, 1000 },             },
-    -- firefox
-    { match = { "Iceweasel.*", "Firefox.*", "^Chrome$" },  tag = "www",                               },
+    -- www browsers
+    { match = { "Iceweasel.*", "Firefox.*", "^Chrome$", "^x.www.browser$", "^sensible.browser$", "^Minefield$" },
+      tag = "www",                                                                                    },
 
     -- qjackctl tweaks
     { match = { "Patchage"                          },  tag = "jack", props = { killhide = 1 },       },
@@ -202,7 +203,8 @@ shifty.config.apps = {
                                                     },  slave = true,                                 },
 
     -- floats
-    { match = { "recordMyDesktop", "Skype", "QQQjackctl", "MPlayer", "xmag", "gcolor2", "javax.swing"
+    { match = { "recordMyDesktop", "Skype", "QQQjackctl", "MPlayer", "xmag", "gcolor2", "javax.swing",
+                "^Install user style$"
                                                     },  float = true,                                 },
     -- nopopup
     { match = { "^Downloads$",
@@ -253,8 +255,8 @@ for n, v in pairs(gittags) do
     status = function() terminal("-name "..n.."pop -hold -title '"..n.." git status' -cd "..v.dir.." -e git status") end,
     prompt = function() terminal("-name "..n.."cmd -title '"..n.." git prompt' -cd "..v.dir.." -e zsh") end,
     commit = function() terminal("-name "..n.."cmd -hold -title '"..n.." git commit' -cd "..v.dir.." -e git commit "..v.commit) end,
-    gitweb = function() awful.util.spawn("firefox '"..v.url.."'"); see_www(); end,
-    apidoc = function() awful.util.spawn("firefox http://awesome.naquadah.org/doc/api/"); see_www(); end,
+    gitweb = function() awful.util.spawn(browser..v.url.."'"); see_www(); end,
+    apidoc = function() awful.util.spawn(browser .. "http://awesome.naquadah.org/doc/api/"); see_www(); end,
     push = function()
                 local br=awful.util.pread("cd "..v.dir.."; git branch --no-color 2> /dev/null | grep \\*")
                 br = br:sub(3, #br-1)
