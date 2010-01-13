@@ -267,7 +267,41 @@ function lua_completion (line, cur_pos, ncomp)
    return str, cur_pos
 end
 --}}}
+--{{{ kill
+function kill(line)
+  local cmd
+  local name,pid,sig = line:match("(.+) (%d+).-(.*)")
+  if not pid then naughty.notify{ text = "u fail" }; return end
+  local proc = psgrep{ pid = pid }
+  if proc and proc[1].uid ~= awful.util.pread("id -u") then
+    cmd = "gksudo kill "
+  else
+    cmd = "kill "
+  end
+  awful.util.spawn(cmd .. (sig or "") .. " " .. pid, false)
+end
 
+killp = ""
+function kill_completion(cmd, cur_pos, ncomp)
+  local matches = psgrep({ command = cmd:sub(1,cur_pos) })
+
+  if not matches then return cmd, cur_pos end
+  while ncomp > #matches do ncomp = ncomp - #matches end
+
+  if killp == "" or cmd:sub(cur_pos, cur_pos+#killp) ~= killp then
+    killp = cmd:sub(1, cur_pos)
+  end
+
+  if #matches == 1 then
+    cur_pos = #(matches[ncomp].command) + 1
+  else
+    cur_pos = matches[ncomp].command:find(killp) + #killp
+  end
+
+  -- return match and position
+  return matches[ncomp].command..' '..matches[ncomp].pid, cur_pos
+end
+--}}}
 --}}}
 
 --{{{ text manipulation
