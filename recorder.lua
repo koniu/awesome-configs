@@ -177,6 +177,25 @@ function REC:replay()
 end
 --}}}
 
+--{{{ methods / ab
+function REC:ab()
+    if self.stat == "stopped" then
+        self:start()
+    elseif self.stat == "recording" then
+        self:stop()
+        self:replay()
+        self.abtimer = timer({ timeout = self.recs[#self.recs].length * 0.1 - 0.3})
+        self.abtimer:add_signal("timeout", function () self:replay() end)
+        self.abtimer:start()
+    elseif self.stat == "playing" then
+        self.abtimer:stop()
+        self.stat = "stopped"
+        self.update()
+        self.abtimer = nil
+    end
+end
+--}}}
+
 --}}}
 
 -- vim: foldmethod=marker:filetype=lua:expandtab:shiftwidth=4:tabstop=4:softtabstop=4:encoding=utf-8:textwidth=80
