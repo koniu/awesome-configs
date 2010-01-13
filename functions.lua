@@ -176,9 +176,7 @@ function cli_toggle(cmd, prop, val)
 end
 --}}}
 --}}}
-
 --{{{ prompt related
-
 --{{{ prompt
 prompt = obvious.popup_run_prompt
 function prompt.exec(preset)
@@ -303,9 +301,7 @@ function kill_completion(cmd, cur_pos, ncomp)
 end
 --}}}
 --}}}
-
 --{{{ text manipulation
-
 --{{{ pad
 function pad(var, len, char)
   local slen = #tostring(var)
@@ -352,9 +348,7 @@ function widgettext(label, value, labelcolor, valuecolor)
   return   '<span color="' .. lc .. '">' .. label .. ' </span><span color="' .. vc .. '">'  .. value .. '</span>' .. config.widgets.space
 end
 --}}}
-
 ---}}}
-
 --{{{ fake input
 --{{{ sendkeys
 local fakekeys = {}
