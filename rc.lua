@@ -71,13 +71,6 @@ handy.combo_ignore_groups = {
   "1. global actions" ,
   "default"
 }
-
-require("jackmix")
-mixer = jackmix.new({port = 1234, host = "localhost", step = 2, state_file = "/home/koniu/.cache/mixer"})
-
-require("recorder")
-rek = recorder.new({ backend = recorder.backends["jack.record"] })
-
 --}}}
 
 --{{{ vars / shifty
@@ -378,6 +371,22 @@ config.widgets.autostart = {
 }
 config.widgets.space = "   "
 config.widgets.wifi = "wlan1"
+--}}}
+
+--{{{ vars / audio
+require("jackmix")
+mixer = jackmix.new{
+  port = 1234,
+  host = "localhost",
+  step = 2,
+  state_file = "/home/koniu/.cache/mixer",
+}
+
+require("recorder")
+rek = recorder.new{
+  backend = recorder.backends.rec,
+  style = recorder.styles.horizontal,
+}
 --}}}
 
 --}}}
