@@ -1190,9 +1190,10 @@ globalkeys = join(
 -- }}}
 
 -- {{{ bindings / global / mm keys
-  awful.key({ "Mod4", "Mod1"  }, "r",             function() rek:display() end),
-  awful.key({ "Control"       }, "XF86Launch1",   function() rek:toggle() end),
+  awful.key({ "Shift"           }, "XF86Launch1",   function() rek:display() end),
+  awful.key({                   }, "XF86Launch1",   function() rek:toggle() end),
   awful.key({ "Control","Shift" }, "XF86Launch1",   function() rek:replay() end),
+  awful.key({ "Mod5"            }, "XF86Launch1",   function() rek:ab() end),
 
   awful.key({                 }, "XF86AudioNext",  function () awful.util.spawn('mm next') end),
   awful.key({                 }, "XF86AudioPrev",  function () awful.util.spawn('mm prev') end),
