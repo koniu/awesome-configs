@@ -155,6 +155,24 @@ function ci()
   end
 
   naughty.notify{ text = v:sub(1,#v-1), timeout = 0, margin = 10 }
+
+end
+--}}}
+--{{{ cli_toggle
+function cli_toggle(cmd, prop, val)
+  local c = getclient(prop, val)
+  if c then
+    if not c:isvisible() then
+      c.hidden = false
+      shifty.match(c)
+      client.focus = c
+      c:raise()
+    else
+      c.hidden = true
+    end
+  else
+    awful.util.spawn_with_shell(cmd)
+  end
 end
 --}}}
 --}}}
