@@ -155,7 +155,11 @@ REC = {}
 
 --{{{ methods / display
 function REC:display(f)
-    self.wibox.visible = f or not self.wibox.visible
+    if f ~= nil then
+        self.wibox.visible = f
+    else
+        self.wibox.visible = not self.wibox.visible
+    end
 end
 --}}}
 
@@ -168,6 +172,7 @@ end
 --{{{ methods / start
 function REC:start()
     if self.playtimer then self.playtimer:stop(); self.playtimer = nil end
+    if self.timeouter then self.timeouter:stop(); self.timeouter = nil end
     self.stat = "recording"
     self.count = self.backend.prerec or 0
     self.total = self.total + (self.backend.prerec or 0)
@@ -192,7 +197,7 @@ function REC:stop()
     table.insert(self.recs, { file = self.file, length = self.count })
     self.update()
     if self.popup then
-        self.timeouter = timer({ timeout = 3 })
+        self.timeouter = timer({ timeout = 1 })
         self.timeouter:add_signal("timeout", function() self:display(false); self.timeouter:stop(); self.timeouter=nil; self.popup=nil end)
         self.timeouter:start()
     end
