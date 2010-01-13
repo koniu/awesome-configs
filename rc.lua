@@ -118,6 +118,13 @@ shifty.config.apps = {
     -- bristol
     { match = { "^BasicWin$",                       },  tag = "bristol",  float = 1                    },
 
+    -- htop
+    { match = { "^htop$",                           },
+      keys = join(remap({}, "Delete", {75,36}),
+                  remap({}, "period", {{50,60},116,36}),
+                  remap({}, "comma", {{50,59},111,36}))
+    },
+
     -- gajim
     { match = { "^Gajim",                           },  tag = "im",                                   },
     { match = { "^messages$",                       },  nopopup = true, slave = true, border_width = 0},
