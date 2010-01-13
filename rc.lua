@@ -1309,8 +1309,13 @@ clientkeys = join(
   awful.key({ modkey, "Shift"   }, "r",       function (c) c:redraw() end, nil, "redraw"),
   awful.key({ modkey,           }, "q",       function (c) if not awful.client.property.get(c, "killhide") then c:kill() else c.hidden = true end end, nil, "kill client"),
   awful.key({ "Mod1", "Mod4"    }, "i",       ci),
-  awful.key({ "Mod1", "Mod4"    }, "a",       function(c) c.ontop = not c.ontop end, nil, "toggle on top")
-)
+  awful.key({ "Mod1", "Mod4"    }, "a",       function(c) c.ontop = not c.ontop end, nil, "toggle on top"),
+
+  awful.key({ modkey            }, "Up",      function (c) awful.client.swap.bydirection("up", c) end),
+  awful.key({ modkey            }, "Down",    function (c) awful.client.swap.bydirection("down", c) end),
+  awful.key({ modkey            }, "Left",    function (c) awful.client.swap.bydirection("left", c) end),
+  awful.key({ modkey            }, "Right",   function (c) awful.client.swap.bydirection("right", c) end)
+),
 --}}}
 
 -- {{{ bindings / set keys and buttons
