@@ -17,14 +17,17 @@ local awful = require("awful")
 module("recorder")
 --}}}
 
---{{{ configuration
+--{{{ backends
+prerec = 400
 backends = {
-    ["jack.record"] = {
+    ["rec"] = {
+        name = 'rec',
         f_start = function (s) awful.util.spawn_with_shell("/usr/local/bin/jack.record " .. s.file) end,
         f_stop = function (s) awful.util.spawn_with_shell("killall jack.record") end,
     },
-    ["timemachine"] = {
-        prerec = 150,
+    ["tm"] = {
+        name = 'tm',
+        prerec = prerec,
         f_start = function (s)
             s.outfile = "/home/koniu/tm-" .. os.date("%Y-%m-%dT%H:%M:%S", os.date("%s") - (s.backend.prerec or 0)*0.1) .. ".wav"
             awful.util.spawn_with_shell("oscsend localhost 7133 /start") 
@@ -35,7 +38,7 @@ backends = {
         end,
         f_new = function (s)
             if not psgrep({command = 'timemachine'}) then
-                awful.util.spawn_with_shell("screen -dm timemachine -i -f wav -t 15 -c2 mix:out_left mix:out_right")
+                awful.util.spawn_with_shell("screen -dm timemachine -i -f wav -t " .. prerec * 0.1 .. " -c2 mix:out_left mix:out_right")
             end
         end,
     },
@@ -43,6 +46,7 @@ backends = {
         -- TODO 
     }
 }
+--}}}
 
 style = {
         { color = { recording = '#ff3333', stopped = '#cccccc', playing = "#33ff33" }, font = 'Monospace 7',
