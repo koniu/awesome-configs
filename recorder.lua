@@ -48,15 +48,52 @@ backends = {
 }
 --}}}
 
-style = {
-        { color = { recording = '#ff3333', stopped = '#cccccc', playing = "#33ff33" }, font = 'Monospace 7',
+--{{{ styles
+styles = {
+    vertical = {
+        { color = { recording = '#ff3333', stopped = '#cccccc', playing = "#33ff33" },
             f = function(self) return self.stat end, format = "%s" },
-        { color = { recording = '#555555', stopped = '#444444', playing = "#444444" }, font = 'Monospace 7',
+        { color = { recording = '#555555', stopped = '#444444', playing = "#444444" },
             f = function(self) return self.file:gsub(".*/","") end, format = "%s" },
-        { color = { recording = '#704444', stopped = '#444444', playing = "#447044" }, font = 'Terminus 20',
-            f = function(self) return count2time(self.count) end, format = "<b>%s:%s:%s.%s</b>" },
-        { color = { recording = '#222222', stopped = '#222222', playing = "#222222" }, font = 'Monospace 7',
+        { color = { recording = '#704444', stopped = '#444444', playing = "#447044" },
+            f = function(self) return count2time(self.count) end, format = "<b>%s:%s:%s.%s</b>", font = "Monospace 12", },
+        { color = { recording = '#222222', stopped = '#222222', playing = "#222222" },
             f = function(self) return #self.recs, count2time(self.total) end, format = "total %s / <b>%s:%s:%s.%s</b>" },
+        align = "center",
+        font = 'Monospace 7',
+        layout = awful.widget.layout.vertical.topdown,
+        margins = { top = 1 },
+        wibox = function()
+            local w = wibox({ ontop = true, height = 14 })
+            w.visible = false
+            w.screen = 1
+            w:geometry({ x = 860, y = 38, height = 200, width = 300 })
+            w.opacity = 0.8
+            return w
+        end
+    },
+    horizontal = {
+        { color = { recording = '#ffffff', stopped = '#ffffff', playing = "#ffffff" },
+            f = function(self) return self.backend.name end, format = "%s" },
+        { color = { recording = '#ff3333', stopped = '#cccccc', playing = "#33ff33" },
+            f = function(self) return self.stat end, format = "%s" },
+        { color = { recording = '#555555', stopped = '#444444', playing = "#444444" },
+            f = function(self) return self.file:gsub(".*/","") end, format = "%s" },
+        { color = { recording = '#704444', stopped = '#444444', playing = "#447044" },
+            f = function(self) return count2time(self.count) end, format = "<b>%s:%s:%s.%s</b>" },
+        { color = { recording = '#222222', stopped = '#222222', playing = "#222222" },
+            f = function(self) return #self.recs, count2time(self.total) end, format = "total %s / <b>%s:%s:%s.%s</b>" },
+        font = 'Monospace 7',
+        align = "left",
+        layout = awful.widget.layout.horizontal.flex,
+        margins = { top = 1, bottom = 1, left = 3 },
+        wibox = function()
+            local w = awful.wibox({ ontop = true, height = 14, position = "bottom", screen = 1, bg = "#000000" })
+            w.visible = false
+            w.opacity = 0.8
+            return w
+        end
+    },
 }
 --}}}
 
@@ -74,30 +111,24 @@ end
 --{{{ constructor
 function new(args)
     local rec = setmetatable({}, { __index = REC })
-    
+    rec.style = args.style or styles.horizontal
+
     rec.backend = args.backend
     rec.recs = {}
+    rec.stat = "stopped"
+    rec.file = " "
 
     if rec.backend.f_new then rec.backend.f_new(rec) end
 
-    -- wibox
-    rec.wibox = wibox({ ontop = true, width = 160, height = 70})
-    rec.wibox.visible = false
-    rec.wibox.screen = 1
+    rec.wibox = rec.style.wibox()
     rec.wibox.widgets = {}
-    rec.wibox:geometry({ x = 860, y = 38 })
-    
-    -- widgets
 
-    for i = 1, #style do
-        rec.wibox.widgets[i] = { widget({ type = "textbox" }), layout = awful.widget.layout.horizontal.flex }
-        rec.wibox.widgets[i][1].align = "center"
-        awful.widget.layout.margins[rec.wibox.widgets[i][1]] = { top = 1, bottom = 0 }
-        rec.wibox.widgets[i][1].border_color = "red"
-        rec.wibox.widgets[i][1].border_width = 0
-
+    for i = 1, #rec.style do
+        rec.wibox.widgets[i] = { widget{ type = "textbox" }, layout = rec.style.layout }
+        rec.wibox.widgets[i][1].align = rec.style.align
+        awful.widget.layout.margins[rec.wibox.widgets[i][1]] = rec.style.margins
     end
-    rec.wibox.widgets.layout = awful.widget.layout.vertical.topdown
+    rec.wibox.widgets.layout = rec.style.layout
 
     rec.count = 0
     rec.total = 0
@@ -106,11 +137,12 @@ function new(args)
     rec.update = function()
         rec.count = rec.count + 1
         if rec.stat == "recording" then rec.total = rec.total + 1 end
-        for i, s in ipairs(style) do
-            rec.wibox.widgets[i][1].text = string.format("<span color='%s' font_desc='%s'>"..s.format.."</span>", s.color[rec.stat], s.font, s.f(rec))
+        for i, s in ipairs(rec.style) do
+            local font = s.font or rec.style.font
+            rec.wibox.widgets[i][1].text = string.format("<span color='%s' font_desc='%s'>"..s.format.."</span>", s.color[rec.stat], font, s.f(rec))
         end
     end
-
+    rec.update()
     rec.timer:add_signal("timeout", rec.update)
 
     return rec
