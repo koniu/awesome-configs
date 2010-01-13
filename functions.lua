@@ -12,7 +12,7 @@ end
 --{{{ psgrep
 function psgrep(args)
   local ret = {}
-  local f = io.popen("ps ax")
+  local f = io.popen("ps -eo pid,uid,tname,nice,start_time,command")
   ret.header = splitbywhitespace(f:read("*l"))
   
   for line in f:lines() do
