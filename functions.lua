@@ -303,4 +303,33 @@ end
 
 ---}}}
 
+--{{{ fake input
+--{{{ sendkeys
+local fakekeys = {}
+function sendkey(codes)
+    if type(codes) ~= "table" then codes = { codes } end
+    local f = function()
+      for i = 1, #codes do root.fake_input("key_press", codes[i]) end
+      for i = #codes, 1, -1 do root.fake_input("key_release", codes[i]) end
+      fakekeys[1]:stop()
+      table.remove(fakekeys, 1)
+    end
+    local t = timer({ timeout = 0.2 })
+    t:add_signal("timeout", f)
+    t:start()
+    table.insert(fakekeys, t)
+end
+--}}}
+--{{{ remap function
+function remap(from_mod, from_key, to, desc)
+  return awful.util.table.join(awful.key(from_mod, from_key,
+    function(c)
+      for i,j in ipairs(to) do
+        sendkey(j)
+      end
+    end, nil, desc))
+end
+--}}}
+--}}}
+
 -- vim: foldmethod=marker:filetype=lua:expandtab:shiftwidth=2:tabstop=2:softtabstop=2:encoding=utf-8:textwidth=80
