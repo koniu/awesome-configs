@@ -63,6 +63,8 @@ function dbg_get(var, depth, indent)
     text = text .. vstring .. " [<span color='"..colors.name.."'>" .. var.name:sub(1,10) .. "</span>]"  
   elseif vtype == "widget" and var.text then 
     text = text .. vstring .. " [<span color='"..colors.name.."'>" .. var.text:sub(1,10) .. "</span>]"  
+  elseif vtype == "string" then
+    text = text .. '<i>' .. vstring .. '</i>'
   else
     text = text .. vstring
   end
