@@ -512,25 +512,7 @@ end
 jackwidget = widget({ type = 'textbox' })
 jackwidget:buttons(join(
   awful.button({}, 3, jack_toggle),
-  awful.button({}, 1, function()
-    local c = getclient("class", "Patchage")
-    if c then
-      local t = shifty.name2tag("jack")
-      if not c:isvisible() then
-        c.hidden = false
-        awful.tag.setproperty(t, "hide", false)
-        awful.tag.viewonly(t)
-        client.focus = c
-        c:raise()
-      else
-        c.hidden = true
-        awful.tag.setproperty(t, "hide", true)
-        awful.tag.history.restore(t.screen)
-      end
-    else
-      awful.util.spawn("patchage")
-    end
- end)
+  awful.button({}, 1, function() cli_toggle("patchage", "class", "Patchage") end)
 ))
 
 --}}}
@@ -628,7 +610,7 @@ wifiwidget = widget({
 })
 
 wifiwidget:buttons(join(
-  awful.button({}, 1, function () run_or_raise("wicd-client -n >& /dev/null", "class", "Wicd-client.py")  end, nil, "show networks"),
+  awful.button({}, 1, function () cli_toggle("wicd-gtk -n >& /dev/null", "class", "Wicd-client.py")  end, nil, "show networks"),
   awful.button({}, 2, show_netpopup, nil, "show autoap status"),
   awful.button({}, 3, function () terminal("-name iwconfig -e watch -n1 /sbin/iwconfig "..config.widgets.wifi) end, nil, "show iwconfig")
 ))
@@ -1171,7 +1153,8 @@ globalkeys = join(
   awful.key({                   }, "Print",       function () awful.util.spawn_with_shell("~/bin/shot") end, nil, "screenshot"),
   awful.key({ "Control"         }, "Print",       function () awful.util.spawn_with_shell("sleep 1s; ~/bin/shot -s") end, nil, "selective screenshot"),
   awful.key({ "Mod1"            }, "Print",       function () awful.util.spawn_with_shell("sleep 5s; ~/bin/shot") end, nil, "delayed screenshot"),
-  awful.key({ "Control", "Mod1" }, "Delete",      function () run_or_raise("urxvtc -name htop -e htop --sort-key PERCENT_CPU", "instance","htop") end),
+  awful.key({ "Control", "Mod1" }, "Delete",      function () cli_toggle("urxvtc -name htop -e htop --sort-key PERCENT_CPU", "instance","htop") end),
+
 -- }}}
 
 -- {{{ bindings / global / tag manipulation
