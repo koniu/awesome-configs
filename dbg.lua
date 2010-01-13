@@ -78,7 +78,7 @@ function dbg(vars)
   if quiet then return end
   local num = table.maxn(vars)
   local text = "<span color='"..colors.header.."'>dbg</span> <span color='"..colors.count.."'>#"..num.."</span>"
-  local depth = vars.d or 0
+  local depth = vars.d or 1
 
   for i = 1, num do
     local desc = dbg_get(vars[i], depth, 3)
