@@ -1155,9 +1155,11 @@ globalkeys = join(
 
   awful.doc.set_default({ group = "1. global actions" }),
 
-  awful.key({ modkey            }, "grave",       function () terminal() end, nil, "terminal"),
+  awful.key({ modkey            }, "Return",      function () terminal() end, nil, "terminal"),
   awful.key({ modkey            }, "x",           function () awful.util.spawn("xkill", false) end, nil, "xkill"),
-  awful.key({                   }, "XF86Launch1", popterm, nil, "popup terminal"),
+  awful.key({ modkey            }, "grave",       popterm, nil, "popup terminal"),
+  awful.key({                   }, "Pause",       popterm, nil, "popup terminal"),
+
   awful.key({ modkey, "Control" }, "grave",       function () terminal("-name tail -title log/awesome -e tail -fn0 /home/koniu/log/awesome") end, nil, "awesome log"),
   awful.key({                   }, "Print",       function () awful.util.spawn_with_shell("~/bin/shot") end, nil, "screenshot"),
   awful.key({ "Control"         }, "Print",       function () awful.util.spawn_with_shell("sleep 1s; ~/bin/shot -s") end, nil, "selective screenshot"),
