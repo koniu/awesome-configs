@@ -278,7 +278,8 @@ function kill(line)
   local name,pid,sig = line:match("(.+) (%d+).-(.*)")
   if not pid then naughty.notify{ text = "u fail" }; return end
   local proc = psgrep{ pid = pid }
-  if proc and proc[1].uid ~= awful.util.pread("id -u") then
+  local uid = awful.util.pread("id -u")
+  if proc and tonumber(proc[1].uid) ~= tonumber(uid) then
     cmd = "gksudo kill "
   else
     cmd = "kill "
