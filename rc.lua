@@ -17,32 +17,29 @@ dofile("/home/koniu/.config/awesome/functions.lua")
 --{{{ vars
 
 --{{{ vars / common
+modkey = "Mod4"
+browser = 'x-www-browser '
 theme_path = "/home/koniu/.config/awesome/theme.dark.master.lua"
 icon_path = "/home/koniu/.config/awesome/icons/"
 beautiful.init(theme_path)
-modkey = "Mod4"
+
 if screen.count() == 2 then LCD = 2 else LCD = 1 end
 
--- Table of layouts to cover with awful.layout.inc, order matters.
 layouts =
 {
     awful.layout.suit.max,
     awful.layout.suit.tile,
---    awful.layout.suit.tile.left,
     awful.layout.suit.tile.bottom,
---    awful.layout.suit.tile.top,
     awful.layout.suit.fair,
+    awful.layout.suit.fair.horizontal,
     awful.layout.suit.floating,
---    awful.layout.suit.fair.horizontal,
     awful.layout.suit.max.fullscreen,
---    awful.layout.suit.magnifier,
 }
 
 --custom
 config = {}
 config.terminal = "urxvtc"
 
-config.tasklist_noicons = true
 -- step for scrolling
 config.step = 15
 
