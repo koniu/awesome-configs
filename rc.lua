@@ -1301,9 +1301,9 @@ end
 --{{{ bindings / client
 clientkeys = join(
   awful.doc.set_default({ group = "3. client manipulation" }),
-  awful.key({ modkey            }, "Up",       function (c) c.maximized_horizontal = not c.maximized_horizontal
+  awful.key({ modkey            }, "m",       function (c) c.maximized_horizontal = not c.maximized_horizontal
                                                      c.maximized_vertical = not c.maximized_vertical end, nil, "maximize"),
-  awful.key({ modkey            }, "Down",    function (c) c.minimized = true end, nil, "minimize"),
+  awful.key({ modkey            }, "n",       function (c) c.minimized = true end, nil, "minimize"),
   awful.key({ modkey            }, "f",       function (c) c.fullscreen = not c.fullscreen end, nil, "fullscreen"),
   awful.key({ modkey, "Control" }, "space",   awful.client.floating.toggle, nil, "set floating"),
   awful.key({ modkey, "Control" }, "Return",  function (c) c:swap(awful.client.getmaster()) end, nil, "swap with master"),
