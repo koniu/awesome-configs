@@ -92,7 +92,14 @@ end
 -- runs terminal
 function terminal(args)
   local args = args or ' -title "ba:~"'
-  awful.util.spawn(config.terminal .. ' ' .. args, false)
+  local a, b, ins = args:find('-name (.*)')
+  ins = ins or 'urxvt'
+
+  if client.focus and client.focus.instance == ins then
+    awful.util.spawn(config.terminal .. ' ' .. args, false)
+  else
+    run_or_raise(config.terminal .. ' ' .. args, "instance", ins)
+  end
 end
 --}}}
 --{{{ popterm
