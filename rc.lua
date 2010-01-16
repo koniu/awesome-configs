@@ -829,10 +829,14 @@ function mountlist()
         end
         -- Update widgets text
         for i,mnt in ipairs(mnts) do
+            local color
+            if tonumber(mnt[2]:sub(1,#mnt[2]-1)) < 200 and mnt[2]:sub(#mnt[2],#mnt[2]) == 'M' then
+              color = "#D9544C" else color = beautiful.widget_value
+            end
             local tmp = {}
             local esc=string.gsub(mnt[1],' ','\\ ')
             w[i].text = mnt[1]:gsub(mnt[3],''):upper() ..
-                       '<span color="' .. beautiful.widget_value .. '">' .. mnt[2] .. '</span>' ..
+                       '<span color="' .. color .. '">' .. mnt[2] .. '</span>' ..
                         config.widgets.space
 
             w[i]:buttons(join(
