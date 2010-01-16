@@ -16,7 +16,6 @@ local awful = require("awful")
 
 module("recorder")
 --}}}
-
 --{{{ backends
 prerec = 400
 backends = {
@@ -47,7 +46,6 @@ backends = {
     }
 }
 --}}}
-
 --{{{ styles
 styles = {
     vertical = {
@@ -96,7 +94,6 @@ styles = {
     },
 }
 --}}}
-
 --{{{ count2time
 function count2time(count)
     local h, m, s, t
@@ -107,7 +104,6 @@ function count2time(count)
     return h, m, s, t
 end
 --}}}
-
 --{{{ constructor
 function new(args)
     local rec = setmetatable({}, { __index = REC })
@@ -148,11 +144,8 @@ function new(args)
     return rec
 end
 --}}}
-
 --{{{ methods
-
 REC = {}
-
 --{{{ methods / display
 function REC:display(f)
     if f ~= nil then
@@ -162,13 +155,11 @@ function REC:display(f)
     end
 end
 --}}}
-
 --{{{ methods / toggle
 function REC:toggle()
     if self.timer.started then self:stop() else self:start() end
 end
 --}}}
-
 --{{{ methods / start
 function REC:start()
     if self.playtimer then self.playtimer:stop(); self.playtimer = nil end
@@ -187,7 +178,6 @@ function REC:start()
     end
 end
 --}}}
-
 --{{{ methods / stop
 function REC:stop()
     self.stat = "stopped"
@@ -204,7 +194,6 @@ function REC:stop()
 
 end
 --}}}
-
 --{{{ methods / replay
 function REC:replay()
     self.stat = "playing"
@@ -217,7 +206,6 @@ function REC:replay()
     awful.util.spawn_with_shell("/usr/local/bin/jack.play " .. self.file)
 end
 --}}}
-
 --{{{ methods / ab
 function REC:ab()
     if self.stat == "stopped" then
@@ -236,7 +224,6 @@ function REC:ab()
     end
 end
 --}}}
-
 --}}}
 
 -- vim: foldmethod=marker:filetype=lua:expandtab:shiftwidth=4:tabstop=4:softtabstop=4:encoding=utf-8:textwidth=80

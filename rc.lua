@@ -1,5 +1,4 @@
 --{{{ requires
-
 require("dbg")
 require("awful")
 require("awful.autofocus")
@@ -13,9 +12,7 @@ require("obvious.popup_run_prompt")
 
 dofile("/home/koniu/.config/awesome/functions.lua")
 --}}}
-
 --{{{ vars
-
 --{{{ vars / common
 modkey = "Mod4"
 browser = 'x-www-browser '
@@ -49,10 +46,7 @@ config.scroll_offset = 2
 -- some shortcuts
 join = awful.util.table.join
 doc = awful.doc
-
-
 --}}}
-
 --{{{ vars / handy
 handy.combo_subst = {
 ["(%u)"] = function(m) return string.lower(m) end,
@@ -69,12 +63,9 @@ handy.combo_ignore_groups = {
   "default"
 }
 --}}}
-
 --{{{ vars / shifty
-
 --{{{ vars / shifty / config.tags
 shifty.config.tags = {
-
 ["sys"]     = { position = 0, exclusive = true, mwfact = 0.75307, screen = LCD, layout = "tilebottom"               },
 ["jack"]    = { position = 0, exclusive = true, mwfact = 0.85, nmaster = 1, screen = LCD, layout = "tilebottom"     },
 ["term"]    = { position = 2, exclusive = true, screen = LCD, layout = 'tilebottom'                                 },
@@ -91,10 +82,8 @@ shifty.config.tags = {
 ["im"]      = { position = 1, spawn = "urxvtc -title IRC -name irc -e screen -t irc -S irc -R irssi"                },
 ["tetris"]  = { rel_index = 0, spawn = "urxvtc -font '-*-*-*-*-*-*-*-240-*-*-*-*-*-2' -name tetris -e tetris"       },
 ["X"]       = { rel_index = 1, spawn = "awtester", layout = awful.layout.suit.tile.top, mwfact = 0.75               },
-
 }
 --}}}
-
 --{{{ vars / shifty / config.apps
 shifty.config.apps = {
 
@@ -223,9 +212,8 @@ shifty.config.apps = {
 
 }
 --}}}
-
 --{{{ vars / shifty / gittags(tm)
-
+--{{{ vars / shifty / gittags(tm) / config
 local gittags = {
   [ "d:awsm" ] = { push = "push mg +", main = "zsh", dir = "/home/koniu/awesome", commit = "-a -s",
                    url = "http://git.naquadah.org/?p=awesome.git;a=shortlog;h=refs/heads/master" },
@@ -238,11 +226,9 @@ local gittags = {
   [ "d:vali" ] = { push = "", main = "zsh", dir = "/home/koniu/data/kit/git/validichro", commit = "-a",
                    url = "" },
 }
-
-
+--}}}
 for n, v in pairs(gittags) do
-
-  --{{{ vars / shifty / gittags(tm) / commands
+--{{{ vars / shifty / gittags(tm) / commands
   local spawn = "urxvtc -name "..n.."main -title '"..v.main.."' -cd "..v.dir.." -e "..v.main
   local see_www = function() awful.tag.viewonly(shifty.name2tag("www")) end
   local cmds = {
@@ -297,9 +283,8 @@ for n, v in pairs(gittags) do
                 end})
             end
   }
-  --}}}
-
-  --{{{ vars / shifty / gittags(tm) / tag settings + bindings
+--}}}
+--{{{ vars / shifty / gittags(tm) / tag settings + bindings
   awful.doc.set_default({ group = "gittags(tm)" })
   shifty.config.tags[n] = {
     position = 9, exclusive = true,  screen = LCD, layout = awful.layout.suit.tile.bottom, spawn = spawn, mwfact = 0.7,
@@ -317,9 +302,8 @@ for n, v in pairs(gittags) do
             ),
   }
   awful.doc.set_default({ })
-  --}}}
-
-  --{{{ vars / shifty / gittags(tm) / client settings + bindings
+--}}}
+--{{{ vars / shifty / gittags(tm) / client settings + bindings
   awful.doc.set_default({ group = "gittags(tm) / client" })
   -- match to tags
   table.insert(shifty.config.apps,
@@ -340,11 +324,10 @@ for n, v in pairs(gittags) do
                  keys = join(awful.key({"Mod1", modkey}, "l", function(c) c:kill(); f() end, nil, "reload client")), })
   end
   awful.doc.set_default({ })
-  --}}}
-
+--}}}
 end
 --}}}
-
+--{{{ vars / shifty / initialize
 shifty.config.defaults = {
     layout = "max",
     leave_kills = false,
@@ -354,7 +337,7 @@ shifty.config.default_name = "?"
 shifty.config.layouts = layouts
 shifty.init()
 --}}}
-
+--}}}
 --{{{ vars / naughty
 naughty.config.spacing = 1
 naughty.config.default_preset = {
@@ -365,7 +348,6 @@ naughty.config.default_preset = {
   opacity = 0.95,
 }
 --}}}
-
 --{{{ vars / widgets
 config.widgets = {}
 config.widgets.watchmount = { "/dev/sda2", "/media/", "/mnt/" }
@@ -378,7 +360,6 @@ config.widgets.autostart = {
 config.widgets.space = "   "
 config.widgets.wifi = "wlan1"
 --}}}
-
 --{{{ vars / audio
 require("jackmix")
 mixer = jackmix.new{
@@ -394,21 +375,17 @@ rek = recorder.new{
   style = recorder.styles.horizontal,
 }
 --}}}
-
 --}}}
-
 --{{{ prompts
 prompt.presets = {
-
-  --{{{ prompts / defaults
+--{{{ prompts / defaults
   default = {
     position = "top",
     width = 1, height = 34, border_width = 0, opacity = 0.9, margin = { top = 12, left = 12 },
     slide = true, move_speed = 0.003, move_amount = 1, autoexec = 1
   },
-  --}}}
-
-  --{{{ prompts / run
+--}}}
+--{{{ prompts / run
   run =  {
     completion_function = awful.completion.shell,
     run_function = function(s)
@@ -419,9 +396,8 @@ prompt.presets = {
     args = { prompt = "<span color='#CC8400'>Run</span>: ", fg_cursor = "#FFA500",
              bg_cursor = beautiful.bg_normal, ul_cursor = "single", autoexec = 1},
   },
-  --}}}
-
-  --{{{ prompts / lua
+--}}}
+--{{{ prompts / lua
   lua = {
     completion_function = lua_completion,
     run_function = function(s)
@@ -432,9 +408,8 @@ prompt.presets = {
     args = { prompt = "<span color = '#A7CC00'>Lua</span>: ", fg_cursor = "#D1FF00",
              bg_cursor = beautiful.bg_normal, ul_cursor = "single", },
   },
-  --}}}
-
-  --{{{ prompts / calc
+--}}}
+--{{{ prompts / calc
   calc = {
     completion_function = lua_completion,
     run_function = calculator,
@@ -442,9 +417,8 @@ prompt.presets = {
     args = { prompt = "<span color='#007478'>Calc</span>: ", fg_cursor = "#00A5AB",
              bg_cursor = beautiful.bg_normal, ul_cursor = "single", selectall = true, },
   },
-  --}}}
-
-  --{{{ prompts / dict
+--}}}
+--{{{ prompts / dict
   dict = {
     completion_function = function() return false end,
     run_function = dictionary,
@@ -452,9 +426,8 @@ prompt.presets = {
     args = { prompt = "<span color='#0073CC'>Dict</span>: ", fg_cursor = "#008DFA",
              bg_cursor = beautiful.bg_normal, ul_cursor = "single", selectall = true, },
   },
-  --}}}
-
-  --{{{ prompts / kill
+--}}}
+--{{{ prompts / kill
   kill = {
     completion_function = kill_completion,
     run_function = kill,
@@ -462,9 +435,8 @@ prompt.presets = {
     args = { prompt = "<span color='#CC3F3F'>Kill</span>: ", fg_cursor = "#FF4F4F",
              bg_cursor = beautiful.bg_normal, ul_cursor= "single", },
   },
-  --}}}
-
-  --{{{ prompts / api
+--}}}
+--{{{ prompts / api
   api = {
     completion_function = lua_completion,
     run_function =  function(n) handy.get(loadstring("return " .. n)()) end,
@@ -472,14 +444,11 @@ prompt.presets = {
     args = { prompt = "<span color='#CC3F7D'>Help</span>: ", fg_cursor = "#FF4F9B",
              bg_cursor = beautiful.bg_normal, ul_cursor= "single", },
   },
-  --}}}
+--}}}
 }
 --}}}
-
 --{{{ widgets
-
 --{{{ widgets / jack
-
 --{{{ widgets / jack / functions
 function jack_volume()
   if type(mixer.state) == "number" then
@@ -514,15 +483,12 @@ function jack_toggle(pre)
   end
 end
 --}}}
-
 jackwidget = widget({ type = 'textbox' })
 jackwidget:buttons(join(
   awful.button({}, 3, jack_toggle),
   awful.button({}, 1, function() cli_toggle("patchage", "class", "Patchage") end)
 ))
-
 --}}}
-
 --{{{ widgets / wifi
 function dump_autoap()
   --awful.util.spawn_with_shell('curl -s http://10.6.6.1/user/autoap.htm  > /tmp/.awesome.autoap')
@@ -625,9 +591,7 @@ wifiwidget:add_signal("mouse::enter", function() show_netpopup() end)
 wifiwidget:add_signal("mouse::leave", function() naughty.destroy(netpopup) end)
 
 awful.doc.set(wifiwidget, { class = "widgets", description = "This widget shows WIFI range", name = "wifiwidget" })
-
 --}}}
-
 --{{{ widgets / net
 netwidget = widget({
   type = 'textbox',
@@ -639,9 +603,7 @@ netwidget:buttons(join(
   awful.button({}, 1, function () terminal("-name mtr -e mtr google.com") end)
 ))
 netwidget.width = 100
-
 --}}}
-
 --{{{ widgets / cpugraph
 cpugraphwidget = awful.widget.graph({ layout = awful.widget.layout.horizontal.leftright })
 cpugraphwidget.widget:buttons(join(
@@ -659,7 +621,6 @@ awful.widget.layout.margins[cpugraphwidget.widget] = { top = 1 }
 
 awful.doc.set(cpugraphwidget, "cpugraph")
 --}}}
-
 --{{{ widgets / battery
 batterywidget = widget({
   type = 'textbox',
@@ -704,7 +665,6 @@ local function get_bat()
   return v
 end
 --}}}
-
 --{{{ widgets / memgraph
 memgraphwidget = awful.widget.graph({ })
 memgraphwidget.widget:buttons(join(
@@ -750,7 +710,6 @@ function get_mem()
     return {mem_usepercent, mem_cache_percent, mem_total, mem_free}
 end
 --}}}
-
 --{{{ widgets / cputemp
 cputempwidget = widget({
     type = 'textbox',
@@ -766,7 +725,6 @@ local function get_cputemp()
   return v
 end
 --}}}
-
 --{{{ widgets / fan
 fanwidget = widget({
     type = 'textbox',
@@ -782,7 +740,6 @@ local function get_fan()
   return v
 end
 --}}}
-
 --{{{ widgets / mounts
 function get_mounts()
    local v = {}
@@ -887,7 +844,6 @@ function mountlist()
 end
 mountwidget = mountlist()
 --}}}
-
 --{{{ widgets / apt
 aptwidget = widget({ type = "textbox", name = "aptwidget", align="right"})
 
@@ -912,7 +868,6 @@ function dump_apt()
   os.execute("sudo apt-get upgrade -s | grep upgraded | tail -n1 | awk '{ print $1 }' > /tmp/.awesome.apt &")
 end
 --}}}
-
 --{{{ widgets / clock
 clockwidget = widget({ type = "textbox", })
 awful.doc.set(clockwidget, { description = "System time", class = "widgets", name = "clockwidget" })
@@ -961,11 +916,9 @@ clockwidget:buttons(join(
 clockwidget:add_signal("mouse::enter", function() showcalendar(0) end)
 clockwidget:add_signal("mouse::leave", function() remove_calendar() end)
 --}}}
-
 --{{{ widgets / systray
 mysystray = widget({ type = "systray", name = "mysystray", align = "right" })
 --}}}
-
 --{{{ widgets / layoutbox
 mylayoutbox = {}
 for s = 1, screen.count() do
@@ -981,8 +934,8 @@ for s = 1, screen.count() do
   awful.widget.layout.margins[mylayoutbox[s]] = { top = 4, left = 2, right = 2 }
 end
 --}}}
-
 --{{{ widgets / hook functions
+--{{{ widgets / hook functions / 1s
 function hook_1s()
   local color,color2=''
 
@@ -1009,13 +962,15 @@ function hook_1s()
   clockwidget.text = (rec or "") .. "<span font_desc='' color='#cccccc'>" .. os.date("%H<span color='#999999'>:</span>%M<span color='#999999'>:</span>%S") .. "</span> "
 end
 hook_1s()
-
+--}}}
+--{{{ widgets / hook functions / 3s
 function hook_3s ()
   dump_mounts()
   get_mounts()
 end
 hook_3s()
-
+--}}}
+--{{{ widgets / hook functions / 5s
 function hook_5s ()
   batterywidget.text = get_bat()
 --  get_mail()
@@ -1024,16 +979,18 @@ function hook_5s ()
   get_autoap()
 end
 hook_5s()
-
+--}}}
+--{{{ widgets / hook functions / 1m
 function hook_1m ()
---  dump_mail()
+  --dump_mail()
 end
-
+--}}}
+--{{{ widgets / hook functions / 10m
 function hook_10m ()
   dump_apt()
 end
 --}}}
-
+--}}}
 --{{{ widgets / taglist
 mytaglist = {}
 mytaglist.buttons = join(
@@ -1052,7 +1009,6 @@ end
 
 shifty.taglist = mytaglist
 --}}}
-
 --{{{ widgets / tasklist
 mytasklist = {}
 mytasklist.buttons = join(
@@ -1093,18 +1049,14 @@ for s = 1, screen.count() do
   awful.doc.set(mytasklist[s], { name = "mytasklist", class = "widgets", description = "Tasklist widget" })
 end
 --}}}
-
 --{{{ widgets / tagprompt
 mytagprompt = {}
 for s = 1, screen.count() do
   mytagprompt[s] = widget({  type = 'textbox', })
 end
 --}}}
-
--- }}}
-
+--}}}
 --{{{ panel
-
 widgetz = {
 
     memgraphwidget,
@@ -1146,14 +1098,10 @@ for s = 1, screen.count() do
   awful.doc.set(tabbar[s], { name = "tabbar", class = "panels", description  = "Panel with tag/task-list" })
 end
 --}}}
-
--- {{{ bindings
-
--- {{{ bindings / global
+--{{{ bindings
+--{{{ bindings / global
 globalkeys = join(
-
--- {{{ bindings / global / spawns
-
+--{{{ bindings / global / spawns
   awful.doc.set_default({ group = "1. global actions" }),
 
   awful.key({ modkey            }, "Return",      function () terminal() end, nil, "terminal"),
@@ -1166,10 +1114,8 @@ globalkeys = join(
   awful.key({ "Control"         }, "Print",       function () awful.util.spawn_with_shell("sleep 1s; ~/bin/shot -s") end, nil, "selective screenshot"),
   awful.key({ "Mod1"            }, "Print",       function () awful.util.spawn_with_shell("sleep 5s; ~/bin/shot") end, nil, "delayed screenshot"),
   awful.key({ "Control", "Mod1" }, "Delete",      function () cli_toggle("urxvtc -name htop -e htop --sort-key PERCENT_CPU", "instance","htop") end),
-
--- }}}
-
--- {{{ bindings / global / tag manipulation
+--}}}
+--{{{ bindings / global / tag manipulation
   awful.doc.set_default({ group = "2. tag manipulation" }),
   awful.key({                   }, "XF86Back",    awful.tag.viewprev, nil, "previous tag"),
   awful.key({                   }, "XF86Forward", awful.tag.viewnext, nil, "next tag"),
@@ -1182,9 +1128,8 @@ globalkeys = join(
   awful.key({ modkey            }, "w",           shifty.del, nil, "tag delete"),
 
   awful.key({ modkey            }, 'i',           ti, nil, "tag info"),
--- }}}
-
--- {{{ bindings / global / client manipulation
+--}}}
+--{{{ bindings / global / client manipulation
   awful.doc.set_default({ group = "3. client manipulation" }),
   awful.key({ "Shift"           }, "XF86Back",    shifty.send_prev, nil, "move to prev tag"),
   awful.key({ "Shift"           }, "XF86Forward", shifty.send_next, nil, "move to next tag"),
@@ -1192,9 +1137,8 @@ globalkeys = join(
   awful.key({ "Control"         }, "XF86Forward", function () myfocus(1)  end, nil, "focus next"),
   awful.key({ modkey, "Shift"   }, "XF86Back",    function () awful.client.swap.byidx(-1) end, nil, "swap with prev"),
   awful.key({ modkey, "Shift"   }, "XF86Forward", function () awful.client.swap.byidx(1) end, nil, "swap with next"),
--- }}}
-
--- {{{ bindings / global / mm keys
+--}}}
+--{{{ bindings / global / mm keys
   awful.key({ "Shift"           }, "XF86Launch1",   function() rek:display() end),
   awful.key({                   }, "XF86Launch1",   function() rek:toggle() end),
   awful.key({ "Control","Shift" }, "XF86Launch1",   function() rek:replay() end),
@@ -1210,10 +1154,8 @@ globalkeys = join(
   awful.key({                 }, "XF86AudioMute",         function() mixer:mute()         end),
   awful.key({                 }, "XF86AudioRaiseVolume",  function() mixer:volume_up()    end),
   awful.key({                 }, "XF86AudioLowerVolume",  function() mixer:volume_down()  end),
--- }}}
-
--- {{{ bindings / global / default rc.lua keys
-
+--}}}
+--{{{ bindings / global / default rc.lua keys
   awful.doc.set_default({ group = "default" }),
   awful.key({ modkey            }, "Escape",      awful.tag.history.restore, nil, "prev selected tags"),
   awful.key({ modkey, "Control" }, "Escape",      function () awful.tag.history.restore(mouse.screen, 1) end, nil, "prev selected tags"),
@@ -1237,8 +1179,7 @@ globalkeys = join(
   awful.key({ modkey            }, "space",       function () awful.layout.inc(layouts, 1) end),
   awful.key({ modkey, "Shift"   }, "space",       function () awful.layout.inc(layouts, -1) end),
 --}}}
-
--- {{{ bindings / global / prompts
+--{{{ bindings / global / prompts
   awful.doc.set_default({ group = "9. prompts" }),
   awful.key({ "Mod1"            }, "F2",  function () prompt.exec(prompt.presets.run) end, nil, "run"),
   awful.key({ "Mod1"            }, "F1",  function () prompt.exec(prompt.presets.lua) end, nil, "lua"),
@@ -1248,9 +1189,8 @@ globalkeys = join(
   awful.key({ modkey            }, "slash",       function () prompt.exec(prompt.presets.api) end, "help prompt"),
   awful.key({ modkey            }, "F1",          handy.run, nil, "help mode"),
   awful.key({ modkey, "Control" }, "F1",          handy.whatsthis, nil, "what's this"),
--- }}}
-
--- {{{ bindings / global / prompts / tagjump
+--}}}
+--{{{ bindings / global / prompts / tagjump
   awful.key({ "Mod5" }, "/", function ()
     wi = mytagprompt[mouse.screen]
     wi.bg_image = image("/home/koniu/.config/awesome/icons/arrow.png")
@@ -1266,13 +1206,10 @@ globalkeys = join(
       nil,
       function() wi.bg_image = nil; wi.text = "" end)
   end, nil, "jump to tag")
--- }}}
-
--- }}}
-
+--}}}
 )
-
--- {{{ bindings / global / shifty.getpos
+--}}}
+--{{{ bindings / global / shifty.getpos
 for i=0, ( shifty.config.maxtags or 9 ) do
   globalkeys = join(globalkeys, awful.key({ modkey }, i,
   function ()
@@ -1299,8 +1236,7 @@ for i=0, ( shifty.config.maxtags or 9 ) do
       end
     end))
 end
--- }}}
-
+--}}}
 --{{{ bindings / client
 clientkeys = join(
   awful.doc.set_default({ group = "3. client manipulation" }),
@@ -1322,8 +1258,7 @@ clientkeys = join(
   awful.key({ modkey            }, "Right",   function (c) awful.client.swap.bydirection("right", c) end)
 ),
 --}}}
-
--- {{{ bindings / set keys and buttons
+--{{{ bindings / set keys and buttons
 awful.doc.set_default({})
 root.buttons(join(
   awful.button({ }, 3, function () mymainmenu:toggle() end),
@@ -1333,13 +1268,10 @@ root.buttons(join(
 root.keys(globalkeys)
 shifty.config.clientkeys = clientkeys
 shifty.config.globalkeys = globalkeys
--- }}}
-
--- }}}
-
--- {{{ signals
-
--- {{{ signals / focus
+--}}}
+--}}}
+--{{{ signals
+--{{{ signals / focus
 client.add_signal("focus", function (c)
   -- see if the client needs scrolling
   local ws = screen[c.screen].workarea
@@ -1357,9 +1289,8 @@ client.add_signal("focus", function (c)
     c.border_color = beautiful.border_focus
   end
 end)
--- }}}
-
--- {{{ signals / unfocus
+--}}}
+--{{{ signals / unfocus
 client.add_signal("unfocus", function (c)
   -- kill scrolling timer
   if scrolltimer and scrolltimer.started then scrolltimer:stop() end
@@ -1368,9 +1299,8 @@ client.add_signal("unfocus", function (c)
     c.border_color = beautiful.border_normal
   end
 end)
--- }}}
-
--- {{{ signals / mouse_enter
+--}}}
+--{{{ signals / mouse_enter
 client.add_signal("manage", function (c, startup)
     -- Sloppy focus, but disabled for magnifier layout
     c:add_signal("mouse::enter", function(c)
@@ -1379,8 +1309,7 @@ client.add_signal("manage", function (c, startup)
         client.focus = c
     end end)
 end)
--- }}}
-
+--}}}
 --{{{ signals / timers
 timers = {
   { t = 1,    f = hook_1s   },
@@ -1395,8 +1324,7 @@ for i, tmr in ipairs(timers) do
   timers[i].timer:add_signal("timeout", tmr.f)
   timers[i].timer:start()
 end
--- }}}
-
--- }}}
+--}}}
+--}}}
 
 -- vim: foldmethod=marker:filetype=lua:expandtab:shiftwidth=2:tabstop=2:softtabstop=2:encoding=utf-8:textwidth=80

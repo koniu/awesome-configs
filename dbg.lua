@@ -22,8 +22,7 @@ colors = {
   name = "#8F8870",
 }
 --- }}}
-
---{{{ function / dbg_get
+--{{{ dbg_get
 function dbg_get(var, depth, indent)
   local a = ""
   local text = ""
@@ -72,8 +71,7 @@ function dbg_get(var, depth, indent)
   return text
 end
 -- }}}
-
- --{{{ function / dbg
+--{{{ dbg
 function dbg(vars)
   if quiet then return end
   local num = table.maxn(vars)

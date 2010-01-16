@@ -322,7 +322,6 @@ function pad(var, len, char)
     return var
   end
 end
-
 --}}}
 --{{{ splitbywhitespace
 function splitbywhitespace(str,cols)
