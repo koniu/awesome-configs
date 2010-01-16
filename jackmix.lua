@@ -1,3 +1,4 @@
+--{{{ environment
 local osc = require("osc.client")
 local os = os
 local io = io
@@ -5,7 +6,8 @@ local setmetatable = setmetatable
 local math = math
 
 module("jackmix")
-
+--}}}
+--{{{ local functions
 local function gain2vol(gain, min_gain)
     return 100 + (gain / -min_gain) * 100
 end
@@ -13,7 +15,8 @@ end
 local function vol2gain(vol, min_gain)
     return ((vol / 100) * -min_gain) + min_gain 
 end
-
+--}}}
+--{{{ constructor
 function new(settings)
     local mixer = setmetatable({}, { __index = JM })
 
@@ -27,15 +30,17 @@ function new(settings)
 
     return mixer
 end
-
+--}}}
+--{{{ methods
 JM = {}
-
+--{{{ methods / get_gain
 function JM:get_gain(ch)
     local channel = ch or self.default_channel
     local gain = self.osc:send{ '#bundle', os.time(), {'/mixer/channel/get_gain', 'i', channel} }
     if gain then return gain[4] end
 end
-
+--}}}
+--{{{ methods / set_gain
 function JM:set_gain(gain, ch)
     local channel = ch or self.default_channel
     local gain = math.max(self.min_gain, math.min(self.max_gain, gain))
@@ -44,7 +49,8 @@ function JM:set_gain(gain, ch)
     self.state = gain2vol(gain, self.min_gain)
     return gain
 end
-
+--}}}
+--{{{ methods / volume
 function JM:volume(vol, ch)
     local channel = ch or self.default_channel
     local gain
@@ -61,7 +67,8 @@ end
 
 function JM:volume_up()     return self:volume(self:volume() + self.step) end
 function JM:volume_down()   return self:volume(self:volume() - self.step) end
-
+--}}}
+--{{{ methods / mute
 function JM:mute(ch)
     local channel = ch or self.default_channel
     local gain = self:get_gain(channel)
@@ -79,4 +86,7 @@ function JM:mute(ch)
         self.state = "m"
     end
 end
+--}}}
+--}}}
+
 -- vim: foldmethod=marker:filetype=lua:expandtab:shiftwidth=4:tabstop=4:softtabstop=4:encoding=utf-8:textwidth=80
