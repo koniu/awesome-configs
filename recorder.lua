@@ -131,7 +131,9 @@ function new(args)
     rec.timer = timer({ timeout = 0.1 })
 
     rec.update = function()
-        rec.count = rec.count + 1
+        if rec.timer.started then
+            rec.count = rec.count + 1
+        end
         if rec.stat == "recording" then rec.total = rec.total + 1 end
         for i, s in ipairs(rec.style) do
             local font = s.font or rec.style.font
@@ -208,6 +210,7 @@ end
 --}}}
 --{{{ methods / ab
 function REC:ab()
+    self.backend = backends.rec
     if self.stat == "stopped" then
         self:start()
     elseif self.stat == "recording" then
@@ -224,6 +227,22 @@ function REC:ab()
     end
 end
 --}}}
+--{{{ methods / set_backend FIXME
+function REC:set_backend(backend)
+    self:display(true)
+    if not backend then
+        if self.backend.name == "tm" then
+            self.backend = backends.rec
+        else
+            self.backend = backends.tm
+        end
+    else
+        self.backend = backend
+    end
+    self.update()
+end
+--}}}
+
 --}}}
 
 -- vim: foldmethod=marker:filetype=lua:expandtab:shiftwidth=4:tabstop=4:softtabstop=4:encoding=utf-8:textwidth=80
